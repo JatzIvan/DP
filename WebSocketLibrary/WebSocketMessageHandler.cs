@@ -1,0 +1,54 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using WebSocketLibrary.Models;
+
+namespace WebSocketLibrary
+{
+    public class WebSocketMessageHandler<T> : IObserver<CarUpdateInfoWrapper> where T: CollisionDetector 
+    {
+
+        private string Name;
+        private IDisposable Unsubscriber;
+        private T CollisionDetector;
+
+        // TODO: add calculation templates
+        public WebSocketMessageHandler(string name, T collisionDetector)
+        {
+            if (String.IsNullOrEmpty(name))
+            {
+                throw new ArgumentNullException("Handler is missing a name");
+            }
+
+            this.CollisionDetector = collisionDetector;
+            this.Name = name;
+        }
+
+        public virtual void OnCompleted()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void OnError(Exception error)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void OnNext(CarUpdateInfoWrapper value)
+        {
+
+            //Console.WriteLine("Latitude: " + value.RecievedData[0].Lat + " ,Longitude:" + value.RecievedData[0].Lon + " ,Velocity:" + value.RecievedData[0].Vel + " ,Orientation:" + value.RecievedData[0].Orientation);
+            CollisionDetector.PerformCalculations(value.RecievedData);
+        }
+        public virtual void Subscribe(WebSocketImplementation provider)
+        {
+            Unsubscriber = provider.Subscribe(this);
+        }
+
+        public virtual void Unsubscribe()
+        {
+            Unsubscriber.Dispose();
+        }
+
+    }
+}

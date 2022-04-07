@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "RaMjAILjj8CS5Ygi5avTagj5Ho30kGDlrI35+gSShcuLM9lCOIVlIHCdL3s8Hw8cb7mwVafzONZWEY9az3hJig==",
+  "success": true,
+  "projectFilePath": "F:\\C_sharp_projekty\\ConsoleApp1\\RoadSectionHandler\\RoadSectionHandler.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Ivan\\.nuget\\packages\\npgsql\\6.0.3\\npgsql.6.0.3.nupkg.sha512",
+    "C:\\Users\\Ivan\\.nuget\\packages\\system.diagnostics.diagnosticsource\\6.0.0\\system.diagnostics.diagnosticsource.6.0.0.nupkg.sha512",
+    "C:\\Users\\Ivan\\.nuget\\packages\\system.memory\\4.5.4\\system.memory.4.5.4.nupkg.sha512",
+    "C:\\Users\\Ivan\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

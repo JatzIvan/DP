@@ -1,0 +1,13 @@
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\bin\Debug\net5.0\WebSocketLibrary.dll.config
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\bin\Debug\net5.0\WebSocketLibrary.deps.json
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\bin\Debug\net5.0\WebSocketLibrary.dll
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\bin\Debug\net5.0\ref\WebSocketLibrary.dll
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\bin\Debug\net5.0\WebSocketLibrary.pdb
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\obj\Debug\net5.0\WebSocketLibrary.csproj.AssemblyReference.cache
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\obj\Debug\net5.0\WebSocketLibrary.GeneratedMSBuildEditorConfig.editorconfig
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\obj\Debug\net5.0\WebSocketLibrary.AssemblyInfoInputs.cache
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\obj\Debug\net5.0\WebSocketLibrary.AssemblyInfo.cs
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\obj\Debug\net5.0\WebSocketLibrary.csproj.CoreCompileInputs.cache
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\obj\Debug\net5.0\WebSocketLibrary.dll
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\obj\Debug\net5.0\ref\WebSocketLibrary.dll
+F:\C_sharp_projekty\ConsoleApp1\WebSocketLibrary\obj\Debug\net5.0\WebSocketLibrary.pdb
