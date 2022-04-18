@@ -8,7 +8,7 @@ using System.Text;
 
 namespace ConsoleApp2.RoadSectionHandling.Model
 {
-    public class RoadPointModel : DatabaseModel<RoadPointModel>
+    public class RoadPointModel : IDatabaseModel<RoadPointModel>
     {
         public int Id { get; set; }
 
@@ -48,9 +48,9 @@ namespace ConsoleApp2.RoadSectionHandling.Model
                 OsmId = osmId.Value,
                 Type = type,
                 Name = name,
-                Tunnel = tunnel.HasValue && tunnel.Value == 1 ? true : false,
-                Bridge = bridge.HasValue && bridge.Value == 1 ? true : false,
-                Oneway = oneway.HasValue && oneway.Value == 1 ? true : false,
+                Tunnel = tunnel.HasValue && tunnel.Value == 1,
+                Bridge = bridge.HasValue && bridge.Value == 1,
+                Oneway = oneway.HasValue && oneway.Value == 1,
                 Ref = _ref,
                 ZOrder = zorder.Value,
                 Access = access,

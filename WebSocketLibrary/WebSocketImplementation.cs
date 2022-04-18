@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using WebSocketLibrary.Models;
@@ -8,34 +10,96 @@ using WebSocketSharp.NetCore;
 
 namespace WebSocketLibrary
 {
-    public class WebSocketImplementation : IObservable<CarUpdateInfoWrapper>
+    public class UdpSocketClientImplementation : IObservable<CarUpdateInfoWrapper>
     {
 
-        private WebSocket ws;
+        public struct UdpState
+        {
+            public UdpClient client;
+            public IPEndPoint endpoint;
+        }
+
+        private UdpClient ws;
+
+        private IPEndPoint ep;
+        
         public string Name { get; set; }
 
         private List<IObserver<CarUpdateInfoWrapper>> registeredMessageHandlers = new List<IObserver<CarUpdateInfoWrapper>>();
 
-        public WebSocketImplementation(Uri uri, string name)
+        public UdpSocketClientImplementation(string host, string port, string name)
         {
+            if (host is null)
+            {
+                throw new ArgumentNullException(nameof(host));
+            }
+
+            if (port is null)
+            {
+                throw new ArgumentNullException(nameof(port));
+            }
+
             this.Name = name;
             // Handle connection
-            this.ws = new WebSocket(uri.ToString());
-            ws.OnMessage += Ws_HandleMessage;
-            ws.Connect();
+            ep = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); // endpoint where server is listening
+            this.ws = new UdpClient();
+
+            UdpState state = new UdpState();
+            state.client = ws;
+            state.endpoint = ep;
+
+            Console.WriteLine(ws.Client.Connected);
+            Console.WriteLine(ws.Client);
+
+            HandleHandShake();
+
+            ws.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
+
+            //ws.OnMessage += Ws_HandleMessage;
+            //ws.Connect();
+        }
+
+        private Byte[] ConvertMesssageToBytes(object objectToConvert)
+        {
+            return Encoding.ASCII.GetBytes(GetStringFromObject(objectToConvert));
         }
         
+        private void HandleHandShake()
+        {
+
+            SubscribeMessage firstMsg = new SubscribeMessage();
+            firstMsg.Interval = 200;
+            firstMsg.Content = SubscribeContent.vehicles;
+
+            Byte[] sendBytes = ConvertMesssageToBytes(firstMsg);
+
+            SendMessage(sendBytes);
+        }
+
+        private string GetStringFromObject(object objectToSerialize)
+        {
+            return JsonConvert.SerializeObject(objectToSerialize);
+        }
+
         /**
          * Function handles incomming messages
          */
-        private void Ws_HandleMessage(object sender, MessageEventArgs args)
+        private void Ws_HandleMessage(IAsyncResult ar)
         {
-            if (args.Data != null)
+            Console.WriteLine("HELLO");
+            UdpClient client = ((UdpState)(ar.AsyncState)).client;
+            IPEndPoint endpoint = ((UdpState)(ar.AsyncState)).endpoint;
+
+
+            byte[] receiveBytes = client.EndReceive(ar, ref endpoint);
+
+            if (receiveBytes.Length >= 4)
             {
+                string receiveString = Encoding.ASCII.GetString(receiveBytes);
                 CarUpdateInfoWrapper parsedObject = null;
                 try
                 {
-                    parsedObject = JsonConvert.DeserializeObject<CarUpdateInfoWrapper>(args.Data);
+                    parsedObject = JsonConvert.DeserializeObject<CarUpdateInfoWrapper>(receiveString);
                 }catch(Exception e)
                 {
                     Console.WriteLine("Error occured while parsing Incomming message");
@@ -52,9 +116,15 @@ namespace WebSocketLibrary
                 }
 
             }
+
+
+            UdpState state = new UdpState();
+            state.client = ws;
+            state.endpoint = ep;
+            ws.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
         }
 
-        private bool IsAlive(int attempt)
+       /* private bool IsAlive(int attempt)
         {
             if (!ws.IsAlive)
             {
@@ -68,31 +138,35 @@ namespace WebSocketLibrary
 
             return ws.IsAlive;
 
-        }
+        }*/
 
-        public void SendMessage()
+        public void SendMessage(Byte[] msg)
         {
 
-            if (IsAlive(0))
+            ws.Connect(ep.Address, ep.Port);
+            ws.Send(msg, msg.Length);
+            //ws.Close();
+
+            /*if (IsAlive(0))
             {
                 //ws.SendAsync();
-            }
+            }*/
 
         }
 
         public void CloseConnection()
         {
 
-            if (ws.IsAlive)
+            //if (ws.IsAlive)
+            //{
+            registeredMessageHandlers.ForEach(handler =>
             {
-                registeredMessageHandlers.ForEach(handler =>
-                {
-                    handler.OnCompleted();
+                handler.OnCompleted();
                 });
-                registeredMessageHandlers.Clear();
-                ws.CloseAsync();
-            }
-        }
+            registeredMessageHandlers.Clear();
+            ws.Close();
+            //}
+        }                                                      
 
         public IDisposable Subscribe(IObserver<CarUpdateInfoWrapper> observer)
         {

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ConsoleApp2.RoadSectionHandling
 {
-    class RoadDataHandler
+    public class RoadDataHandler
     {
         private bool Initialized { get; set; } = false;
         private string SectionName { get; set; }
@@ -32,11 +32,10 @@ namespace ConsoleApp2.RoadSectionHandling
             this.SectionName = sectionName;
             this.SectionRef = sectionRef;
             this.Initialized = false;
-            getParsedRoadData();
  
         }
 
-        public List<RoadPointModel> getRawRoadData()
+        public List<RoadPointModel> GetRawRoadData()
         {
             if (this.RoadInfoRaw == null || this.RoadInfoRaw.Count == 0)
             {
@@ -52,7 +51,12 @@ namespace ConsoleApp2.RoadSectionHandling
             return RoadInfoRaw;
         }
 
-        public Dictionary<LocationPoint, RoadCurvitureModel> getParsedRoadData()
+        public Dictionary<LocationPoint, RoadCurvitureModel> GetParsedRoadData()
+        {
+            return this.GetParsedRoadData(ApplicationConfigurationHandler.DPTolerance);
+        }
+
+        public Dictionary<LocationPoint, RoadCurvitureModel> GetParsedRoadData(float tolerance)
         {
             if(this.RoadInfoTransformed == null || this.RoadInfoTransformed.Count == 0)
             {
@@ -60,12 +64,16 @@ namespace ConsoleApp2.RoadSectionHandling
 
                 // Then fetch from API
 
-                List<RoadPointModel> fetchedModel = getRawRoadData();
+                List<RoadPointModel> fetchedModel = GetRawRoadData();
                 RoadDataParser parser = new RoadDataParser(fetchedModel);
 
                 // Get connected road points for easier manipulation
                 Dictionary<LocationPoint, RoadCurvitureModel> connectedWays = parser.GetConnectedWays();
-                CurvesResolver curvesResolver = new CurvesResolver(connectedWays);
+
+                RoadSectionSimplification simplificator = new RoadSectionSimplification(tolerance, connectedWays);
+                Dictionary<LocationPoint, RoadCurvitureModel>  simplifiedModel = simplificator.GetSimplifiedModel();
+
+                CurvesResolver curvesResolver = new CurvesResolver(simplifiedModel);
                 this.RoadInfoTransformed = curvesResolver.CalculateCurvesForWays();
             }
 
@@ -75,5 +83,10 @@ namespace ConsoleApp2.RoadSectionHandling
 
         }
 
+       
+
     }
 }
+
+
+

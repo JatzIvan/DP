@@ -5,7 +5,7 @@ using WebSocketLibrary.Models;
 
 namespace WebSocketLibrary
 {
-    public class WebSocketMessageHandler<T> : IObserver<CarUpdateInfoWrapper> where T: CollisionDetector 
+    public class WebSocketMessageHandler<T> : IObserver<CarUpdateInfoWrapper> where T: ICollisionDetector 
     {
 
         private string Name;
@@ -40,7 +40,7 @@ namespace WebSocketLibrary
             //Console.WriteLine("Latitude: " + value.RecievedData[0].Lat + " ,Longitude:" + value.RecievedData[0].Lon + " ,Velocity:" + value.RecievedData[0].Vel + " ,Orientation:" + value.RecievedData[0].Orientation);
             CollisionDetector.PerformCalculations(value.RecievedData);
         }
-        public virtual void Subscribe(WebSocketImplementation provider)
+        public virtual void Subscribe(UdpSocketClientImplementation provider)
         {
             Unsubscriber = provider.Subscribe(this);
         }

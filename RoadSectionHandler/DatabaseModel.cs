@@ -5,7 +5,7 @@ using System.Text;
 
 namespace RoadSectionHandler
 {
-    public interface DatabaseModel<T>
+    public interface IDatabaseModel<T>
     {
         public T MapReaderToObject(NpgsqlDataReader reader);
 

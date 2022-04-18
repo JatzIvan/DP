@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ConsoleApp2.RoadSectionHandling.Model
 {
-    public class RoadCurvitureModel : DatabaseModel<RoadCurvitureModel>
+    public class RoadCurvitureModel : IDatabaseModel<RoadCurvitureModel>
     {
 
         public LocationPoint CurrentLocation { get; set; }

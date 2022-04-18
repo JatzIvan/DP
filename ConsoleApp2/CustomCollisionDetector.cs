@@ -6,7 +6,7 @@ using WebSocketLibrary.Models;
 
 namespace ConsoleApp2
 {
-    class CustomCollisionDetector : CollisionDetector
+    class CustomCollisionDetector : ICollisionDetector
     {
         public void PerformCalculations(List<CarUpdateInfo> data)
         {

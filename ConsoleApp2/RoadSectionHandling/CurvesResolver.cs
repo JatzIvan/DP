@@ -39,7 +39,7 @@ namespace ConsoleApp2.RoadSectionHandling
 
                 if(before != null)
                 {
-                    current.RadiusOfCircle = getCircleRadiusFromPoints(before.CurrentLocation, current.CurrentLocation, after.CurrentLocation);
+                    current.RadiusOfCircle = GetCircleRadiusFromPoints(before.CurrentLocation, current.CurrentLocation, after.CurrentLocation);
                 }
                 //double circleRadius = getCircleRadiusFromPoints(before.CurrentLocation, current.CurrentLocation, after.CurrentLocation);
                 current = current.Next.Point;
@@ -83,34 +83,6 @@ namespace ConsoleApp2.RoadSectionHandling
 
         }
 
-        private double ConvertToRadians(double val)
-        {
-            return (Math.PI / 180) * val;
-        }
-
-        // https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
-        private double CalculateDistanceBetweenPoints(LocationPoint a, LocationPoint b)
-        {
-
-            double rEarth = 6371; // Radius of earth
-            
-            double lat1 = ConvertToRadians(a.Latitude);
-            double long1 = ConvertToRadians(a.Longitude);
-            double lat2 = ConvertToRadians(b.Latitude);
-            double long2 = ConvertToRadians(b.Longitude);
-
-            double dlon = long2 - long1;
-            double dlat = lat2 - lat1;
-            double h1 = Math.Pow(Math.Sin(dlat / 2), 2) +
-                       Math.Cos(lat1) * Math.Cos(lat2) *
-                       Math.Pow(Math.Sin(dlon / 2), 2);
-
-            double h2 = 2 * Math.Asin(Math.Sqrt(h1));
-
-            return h2 * rEarth;
-
-        }
-
         private RoadCurvitureModel GetModel(bool first)
         {
 
@@ -137,12 +109,12 @@ namespace ConsoleApp2.RoadSectionHandling
 
 
         // Use https://roadcurvature.com/how-it-works/
-        private double getCircleRadiusFromPoints(LocationPoint point1, LocationPoint point2, LocationPoint point3)
+        private double GetCircleRadiusFromPoints(LocationPoint point1, LocationPoint point2, LocationPoint point3)
         {
 
-            double a = CalculateDistanceBetweenPoints(point2, point3);
-            double b = CalculateDistanceBetweenPoints(point1, point3);
-            double c = CalculateDistanceBetweenPoints(point1, point2);
+            double a = MapParserUtils.CalculateDistanceBetweenPoints(point2, point3);
+            double b = MapParserUtils.CalculateDistanceBetweenPoints(point1, point3);
+            double c = MapParserUtils.CalculateDistanceBetweenPoints(point1, point2);
 
             return ((a * b * c) / Math.Sqrt((a + b + c) * (b + c - a) * (c + a - b) * (a + b - c)));
 

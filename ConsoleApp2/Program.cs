@@ -15,13 +15,14 @@ namespace ConsoleApp2
 
             ApiHelper.InitializeClient(ApplicationConfigurationHandler.DigitalMapConnection);
 
-            WebSocketImplementation ws = WebSocketManagerFactory.GetInstance().CreateConnection(ApplicationConfigurationHandler.DataServer, "LocalServer");
+            UdpSocketClientImplementation ws = WebSocketManagerFactory.GetInstance().CreateConnection(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, "LocalServer");
 
-            WebSocketMessageHandler<CollisionDetector> observer = new WebSocketMessageHandler<CollisionDetector>("handler1", new CustomCollisionDetector());
+            WebSocketMessageHandler<ICollisionDetector> observer = new WebSocketMessageHandler<ICollisionDetector>("handler1", new CustomCollisionDetector());
 
             observer.Subscribe(ws);
 
-            new RoadDataHandler("a", "a");
+            //new RoadDataHandler("a", "a");
+            //RoadVisualisation.OpenWindow();
 
             while (true)
             {

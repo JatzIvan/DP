@@ -6,7 +6,7 @@ namespace WebSocketLibrary
     public class WebSocketManagerFactory
     {
 
-        private static Dictionary<string, WebSocketImplementation> ActiveConnections { get; set; } = new Dictionary<string, WebSocketImplementation>();
+        private static Dictionary<string, UdpSocketClientImplementation> ActiveConnections { get; set; } = new Dictionary<string, UdpSocketClientImplementation>();
         private static WebSocketManagerFactory Instance;
 
         public static WebSocketManagerFactory GetInstance()
@@ -20,17 +20,17 @@ namespace WebSocketLibrary
             return Instance;
         }
 
-        public void CreateConnection(string url)
+        public void CreateConnection(string url, string port)
         {
-            this.CreateConnection(url, url);
+            this.CreateConnection(url, port, url);
 
         }
 
-        public WebSocketImplementation CreateConnection(string url, string name)
+        public UdpSocketClientImplementation CreateConnection(string host, string port, string name)
         {
-            string trimmed = ReshapeWebSocketUrl(url);
+            //string trimmed = ReshapeWebSocketUrl(url);
 
-            WebSocketImplementation ws = new WebSocketImplementation(new Uri(trimmed), name);
+            UdpSocketClientImplementation ws = new UdpSocketClientImplementation(host, port, name);
 
             ActiveConnections.Add(name, ws);
 
@@ -38,7 +38,7 @@ namespace WebSocketLibrary
 
         }
 
-        public void CloseConnection(WebSocketImplementation ws)
+        public void CloseConnection(UdpSocketClientImplementation ws)
         {
             if(ws != null)
             {
@@ -50,10 +50,10 @@ namespace WebSocketLibrary
 
         public void CloseConnection(string name)
         {
-            this.CloseConnection(getConnection(name));
+            this.CloseConnection(GetConnection(name));
         }
 
-        public WebSocketImplementation getConnection(string name)
+        public UdpSocketClientImplementation GetConnection(string name)
         {
             if (ActiveConnections.ContainsKey(name))
             {
@@ -63,6 +63,7 @@ namespace WebSocketLibrary
             return null;
         }
 
+        // Deprecated
         private string ReshapeWebSocketUrl(string url)
         {
             UriBuilder uri = new UriBuilder(url);

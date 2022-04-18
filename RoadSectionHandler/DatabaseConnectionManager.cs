@@ -43,12 +43,12 @@ namespace RoadSectionHandler
             return await GetConnection(this.ConnectionString);
         }
 
-        public async Task<List<T>> RetrieveData<T>(string tableName) where T : DatabaseModel<T>
+        public async Task<List<T>> RetrieveData<T>(string tableName) where T : IDatabaseModel<T>
         {
             return await RetrieveData<T>(tableName, await GetConnection());
         }
 
-        public async Task<List<T>> RetrieveData<T>(string tableName, NpgsqlConnection connection) where T : DatabaseModel<T>
+        public async Task<List<T>> RetrieveData<T>(string tableName, NpgsqlConnection connection) where T : IDatabaseModel<T>
         {
             await connection.OpenAsync();
 
@@ -68,7 +68,7 @@ namespace RoadSectionHandler
             return default;
         }
 
-        public async Task<List<T>> RetrieveData<T>(NpgsqlCommand strCommand, NpgsqlConnection connection) where T : DatabaseModel<T>
+        public async Task<List<T>> RetrieveData<T>(NpgsqlCommand strCommand, NpgsqlConnection connection) where T : IDatabaseModel<T>
         {
             await connection.OpenAsync();
 
@@ -92,12 +92,12 @@ namespace RoadSectionHandler
             return (T)obj.GetType().GetProperty(propName).GetValue(obj, null); 
         }
 
-        public async void InsertData<T>(List<T> values, string tableName) where T : DatabaseModel<T>
+        public async void InsertData<T>(List<T> values, string tableName) where T : IDatabaseModel<T>
         {
             InsertData<T>(values, tableName, await GetConnection());
         }
 
-        public async void InsertData<T>(List<T> values, string tableName ,NpgsqlConnection connection) where T : DatabaseModel<T>
+        public async void InsertData<T>(List<T> values, string tableName ,NpgsqlConnection connection) where T : IDatabaseModel<T>
         {
             await connection.OpenAsync();
 

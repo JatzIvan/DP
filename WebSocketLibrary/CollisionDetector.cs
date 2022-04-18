@@ -5,7 +5,7 @@ using WebSocketLibrary.Models;
 
 namespace WebSocketLibrary
 {
-    public interface CollisionDetector
+    public interface ICollisionDetector
     {
 
         public void PerformCalculations(List<CarUpdateInfo> data);

@@ -11,16 +11,16 @@ namespace ApiLibrary.Api
     public class ApiCallsHandler
     {
 
-        private static ApiCallsHandler handler { get; set;}
+        private static ApiCallsHandler Handler { get; set;}
 
         public static ApiCallsHandler GetHandler()
         {
-            if(handler == null)
+            if(Handler == null)
             {
-                handler = new ApiCallsHandler();
+                Handler = new ApiCallsHandler();
             }
 
-            return handler;
+            return Handler;
         }
 
         private HttpClient currentClient = ApiHelper.ApiClient;
@@ -29,19 +29,19 @@ namespace ApiLibrary.Api
         {
             try
             {
-                using (var client = currentClient)
-                {
+                //using (var client = currentClient)
+                //{
 
                     var serialized = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
 
-                    using (HttpResponseMessage response = await client.PostAsync(endpoint, serialized))
+                    using (HttpResponseMessage response = await currentClient.PostAsync(endpoint, serialized))
                     {
                         response.EnsureSuccessStatusCode();
                         string responseBody = await response.Content.ReadAsStringAsync();
 
                         return JsonConvert.DeserializeObject<TOut>(responseBody);
                     }
-                }
+                //}
             }
             catch (Exception ex)
             {
@@ -68,19 +68,19 @@ namespace ApiLibrary.Api
         {
             try
             {
-                using (var client = currentClient)
-                {
+                //using (var client = currentClient)
+                //{
 
-                    Console.WriteLine(client.BaseAddress + endpoint);
+                    Console.WriteLine(currentClient.BaseAddress + endpoint);
 
-                    using (HttpResponseMessage response = await client.GetAsync(endpoint))
+                    using (HttpResponseMessage response = await currentClient.GetAsync(endpoint))
                     {
                         response.EnsureSuccessStatusCode();
                         string responseBody = await response.Content.ReadAsStringAsync();
 
                         return JsonConvert.DeserializeObject<T>(responseBody);
                     }
-                }
+                //}
             }
             catch (Exception ex)
             {

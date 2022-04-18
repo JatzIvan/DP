@@ -22,6 +22,14 @@ namespace ConsoleApp2.RoadSectionHandling
         {
 
             List<RoadPointModel> output = Handler.Get<List<RoadPointModel>>("roads/" + ApplicationConfigurationHandler.TestRoadQuery);
+
+            // When no road data could be fetched, repeat 3 times and then default with empty list
+            // TODO: Implement repeat
+            if(output == null)
+            {
+                return new List<RoadPointModel>();
+            }
+
             output.Sort((RoadPointModel model1, RoadPointModel model2) => model1.OsmId.CompareTo(model2.OsmId));
 
             return output;

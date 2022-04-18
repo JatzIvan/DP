@@ -16,6 +16,8 @@ namespace ConsoleApp2.RoadSectionHandling
             this.RawModel = rawData;
         }
 
+        // Key -- location of first and last point in said part of road
+        // Value -- road model with points
         private Dictionary<Tuple<LocationPoint, LocationPoint>, RoadPointModel> CreateModelDictionary()
         {
 
@@ -23,7 +25,9 @@ namespace ConsoleApp2.RoadSectionHandling
 
             foreach(RoadPointModel model in RawModel)
             {
-                Tuple<LocationPoint, LocationPoint> key = new Tuple<LocationPoint, LocationPoint>(model.Way.Points[0], model.Way.Points[model.Way.Points.Count - 1]);
+                //Tuple<LocationPoint, LocationPoint> key = new Tuple<LocationPoint, LocationPoint>(model.Way.Points[0], model.Way.Points[model.Way.Points.Count - 1]);
+                Tuple<LocationPoint, LocationPoint> key = new Tuple<LocationPoint, LocationPoint>(model.Way.Points.First(), model.Way.Points.Last());
+
                 modelDictionary.Add(key, model);
             }
 
@@ -31,6 +35,9 @@ namespace ConsoleApp2.RoadSectionHandling
 
         }
 
+        // Create a dictionary of connected points from sorted list
+        // Key -- GPS location of point
+        // Value -- point definition w/ curviture
         private Dictionary<LocationPoint, RoadCurvitureModel> CreateRoadCurvitureModelDictionary(List<RoadPointModel> sortedByRoads)
         {
 
@@ -47,8 +54,10 @@ namespace ConsoleApp2.RoadSectionHandling
                         continue;
                     }
 
-                    RoadCurvitureModel currentCurvitureModel = new RoadCurvitureModel(way);
-                    currentCurvitureModel.Previous = beforeCurvitureModel == null ? null : new SegmentCurvitureChain(beforeCurvitureModel);
+                    RoadCurvitureModel currentCurvitureModel = new RoadCurvitureModel(way)
+                    {
+                        Previous = beforeCurvitureModel == null ? null : new SegmentCurvitureChain(beforeCurvitureModel)
+                    };
 
                     if (beforeCurvitureModel != null)
                     {
@@ -65,13 +74,19 @@ namespace ConsoleApp2.RoadSectionHandling
             return roadCurvOut;
         }
 
+        // Function creates a dictionary of connected points
+        // Key -- GPS location of point
+        // Value -- point definition w/ curviture
         public Dictionary<LocationPoint, RoadCurvitureModel> GetConnectedWays()
         {
             Dictionary<Tuple<LocationPoint, LocationPoint>, RoadPointModel> modelDict = CreateModelDictionary();
 
-            List<RoadPointModel> sortedByRoads = new List<RoadPointModel>();
-            sortedByRoads.Add(RawModel[0]);
-            modelDict.Remove(new Tuple<LocationPoint, LocationPoint>(RawModel[0].Way.Points[0], RawModel[0].Way.Points[RawModel[0].Way.Points.Count - 1]));
+            List<RoadPointModel> sortedByRoads = new List<RoadPointModel>
+            {
+                RawModel[0]
+            };
+            //modelDict.Remove(new Tuple<LocationPoint, LocationPoint>(RawModel[0].Way.Points[0], RawModel[0].Way.Points[RawModel[0].Way.Points.Count - 1]));
+            modelDict.Remove(new Tuple<LocationPoint, LocationPoint>(RawModel.First().Way.Points.First(), RawModel.First().Way.Points.Last()));
 
 
             while (true)
@@ -93,7 +108,9 @@ namespace ConsoleApp2.RoadSectionHandling
                         break;
                     }
 
-                    LocationPoint currentFirst = sortedByRoads[0].Way.Points[0];
+                    //LocationPoint currentFirst = sortedByRoads[0].Way.Points[0];
+
+                    LocationPoint currentFirst = sortedByRoads.First().Way.Points.First();
 
                     Console.WriteLine(currentFirst.Longitude + ":" + currentFirst.Latitude);
 
@@ -119,7 +136,10 @@ namespace ConsoleApp2.RoadSectionHandling
                         break;
                     }
 
-                    LocationPoint currentLast = sortedByRoads[sortedByRoads.Count - 1].Way.Points[sortedByRoads[sortedByRoads.Count - 1].Way.Points.Count - 1];
+                    //LocationPoint currentLast = sortedByRoads[sortedByRoads.Count - 1].Way.Points[sortedByRoads[sortedByRoads.Count - 1].Way.Points.Count - 1];
+
+                    LocationPoint currentLast = sortedByRoads.Last().Way.Points.Last();
+
 
                     if (modelDict.Keys.Any(m => m.Item1.Equals(currentLast)))
                     {
