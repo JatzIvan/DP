@@ -38,12 +38,12 @@ namespace ConsoleApp2.RoadSectionHandling
         // Create a dictionary of connected points from sorted list
         // Key -- GPS location of point
         // Value -- point definition w/ curviture
-        private Dictionary<LocationPoint, RoadCurvitureModel> CreateRoadCurvitureModelDictionary(List<RoadPointModel> sortedByRoads)
+        private Dictionary<LocationPoint, AbstractRoadModel> CreateRoadCurvitureModelDictionary(List<RoadPointModel> sortedByRoads)
         {
 
-            Dictionary<LocationPoint, RoadCurvitureModel> roadCurvOut = new Dictionary<LocationPoint, RoadCurvitureModel>();
+            Dictionary<LocationPoint, AbstractRoadModel> roadCurvOut = new Dictionary<LocationPoint, AbstractRoadModel>();
 
-            RoadCurvitureModel beforeCurvitureModel = null;
+            AbstractRoadModel beforeCurvitureModel = null;
 
             foreach (RoadPointModel roadPart in sortedByRoads)
             {
@@ -54,10 +54,10 @@ namespace ConsoleApp2.RoadSectionHandling
                         continue;
                     }
 
-                    RoadCurvitureModel currentCurvitureModel = new RoadCurvitureModel(way)
-                    {
-                        Previous = beforeCurvitureModel == null ? null : new SegmentCurvitureChain(beforeCurvitureModel)
-                    };
+                    AbstractRoadModel currentCurvitureModel = (AbstractRoadModel)Activator.CreateInstance(typeof(AbstractRoadModel), new object[] { way });
+                    //{
+                    currentCurvitureModel.Previous = beforeCurvitureModel == null ? null : new SegmentCurvitureChain(beforeCurvitureModel);
+                    //};
 
                     if (beforeCurvitureModel != null)
                     {
@@ -77,7 +77,7 @@ namespace ConsoleApp2.RoadSectionHandling
         // Function creates a dictionary of connected points
         // Key -- GPS location of point
         // Value -- point definition w/ curviture
-        public Dictionary<LocationPoint, RoadCurvitureModel> GetConnectedWays()
+        public Dictionary<LocationPoint, AbstractRoadModel> GetConnectedWays()
         {
             Dictionary<Tuple<LocationPoint, LocationPoint>, RoadPointModel> modelDict = CreateModelDictionary();
 
@@ -157,7 +157,7 @@ namespace ConsoleApp2.RoadSectionHandling
 
             }
 
-            Dictionary<LocationPoint, RoadCurvitureModel> joinedDict = CreateRoadCurvitureModelDictionary(sortedByRoads);
+            Dictionary<LocationPoint, AbstractRoadModel> joinedDict = CreateRoadCurvitureModelDictionary(sortedByRoads);
            
             return joinedDict;
         }

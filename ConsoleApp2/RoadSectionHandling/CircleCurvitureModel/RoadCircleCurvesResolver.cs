@@ -1,22 +1,23 @@
-﻿using ConsoleApp2.RoadSectionHandling.Model;
+﻿using ConsoleApp2.RoadSectionHandling.Data;
+using ConsoleApp2.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ConsoleApp2.RoadSectionHandling
+namespace ConsoleApp2.RoadSectionHandling.CircleCurvitureModel
 {
-   /* public class CurvesResolver
+    class RoadCircleCurvesResolver : ICurvesResolver
     {
 
-        private Dictionary<LocationPoint, RoadCurvitureModel> ConnectedWays { get; set; }
+        private Dictionary<LocationPoint, AbstractRoadModel> ConnectedWays { get; set; }
 
-        public CurvesResolver(Dictionary<LocationPoint, RoadCurvitureModel> connectedWays)
+        public RoadCircleCurvesResolver(Dictionary<LocationPoint, AbstractRoadModel> connectedWays)
         {
             this.ConnectedWays = connectedWays;
         }
 
-        public Dictionary<LocationPoint, RoadCurvitureModel> CalculateCurvesForWays()
+        public Dictionary<LocationPoint, AbstractRoadModel> CalculateCurvesForWays()
         {
 
 
@@ -24,20 +25,20 @@ namespace ConsoleApp2.RoadSectionHandling
 
             // From first to last
 
-            RoadCurvitureModel current = GetModel(true);
-            
+            AbstractRoadModel current = GetModel(true);
+
             // Calculate Circle Radius
             while (true)
             {
-                RoadCurvitureModel before = current.Previous != null ? current.Previous.Point : null;
-                RoadCurvitureModel after = current.Next != null ? current.Next.Point : null;
+                AbstractRoadModel before = current.Previous != null ? current.Previous.Point : null;
+                AbstractRoadModel after = current.Next != null ? current.Next.Point : null;
 
-                if(after == null)
+                if (after == null)
                 {
                     break;
                 }
 
-                if(before != null)
+                if (before != null)
                 {
                     current.RadiusOfCircle = GetCircleRadiusFromPoints(before.CurrentLocation, current.CurrentLocation, after.CurrentLocation);
                 }
@@ -50,14 +51,16 @@ namespace ConsoleApp2.RoadSectionHandling
             current = GetModel(true);
             while (true)
             {
-                RoadCurvitureModel after = current.Next != null ? current.Next.Point : null;
+                AbstractRoadModel after = current.Next != null ? current.Next.Point : null;
 
                 if (after == null)
                 {
                     break;
                 }
 
-                current.Next.RadiusOfCurvature = current.RadiusOfCircle > 0 ? (current.RadiusOfCircle + current.Next.Point.RadiusOfCircle) / 2 : current.Next.Point.RadiusOfCircle;
+                current.Next.RadiusOfCurvature = current.RadiusOfCircle > 0 
+                    ? (current.RadiusOfCircle + current.Next.Point.RadiusOfCircle)/ 2 
+                    : current.Next.Point.RadiusOfCircle;
 
                 current = current.Next.Point;
 
@@ -66,14 +69,16 @@ namespace ConsoleApp2.RoadSectionHandling
             current = GetModel(false);
             while (true)
             {
-                RoadCurvitureModel before = current.Previous != null ? current.Previous.Point : null;
+                AbstractRoadModel before = current.Previous != null ? current.Previous.Point : null;
 
                 if (before == null)
                 {
                     break;
                 }
 
-                current.Previous.RadiusOfCurvature = current.RadiusOfCircle > 0  ? (current.RadiusOfCircle + current.Previous.Point.RadiusOfCircle) / 2 : current.Previous.Point.RadiusOfCircle;
+                current.Previous.RadiusOfCurvature = current.RadiusOfCircle > 0 
+                    ? (current.RadiusOfCircle + current.Previous.Point.RadiusOfCircle) / 2
+                    : current.Previous.Point.RadiusOfCircle;
 
                 current = current.Previous.Point;
 
@@ -83,15 +88,15 @@ namespace ConsoleApp2.RoadSectionHandling
 
         }
 
-        private RoadCurvitureModel GetModel(bool first)
+        private AbstractRoadModel GetModel(bool first)
         {
 
-            RoadCurvitureModel currentModel = ConnectedWays.First().Value;
+            AbstractRoadModel currentModel = ConnectedWays.First().Value;
 
             while (true)
             {
-            
-                if ((first && currentModel.Previous != null) || (!first && currentModel.Next !=null))
+
+                if ((first && currentModel.Previous != null) || (!first && currentModel.Next != null))
                 {
                     currentModel = first ? currentModel.Previous.Point : currentModel.Next.Point;
                 }
@@ -99,7 +104,7 @@ namespace ConsoleApp2.RoadSectionHandling
                 {
                     break;
                 }
-           
+
             }
 
             return currentModel;
@@ -119,7 +124,5 @@ namespace ConsoleApp2.RoadSectionHandling
             return ((a * b * c) / Math.Sqrt((a + b + c) * (b + c - a) * (c + a - b) * (a + b - c)));
 
         }
-
-
-    }*/
+    }
 }

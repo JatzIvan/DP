@@ -1,4 +1,5 @@
-﻿using ConsoleApp2.RoadSectionHandling.Model;
+﻿using ConsoleApp2.RoadSectionHandling.Data;
+using ConsoleApp2.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,16 +7,16 @@ using System.Text;
 
 namespace ConsoleApp2.RoadSectionHandling
 {
-    class RoadSectionSimplification
+   /* class RoadSectionSimplification : ISectionSimplificator
     {
 
         private float Tolerance { get; set; } = 0.05f;
 
-        private Dictionary<LocationPoint, RoadCurvitureModel> ConnectedWays { get; set; }
+        private Dictionary<LocationPoint, AbstractRoadModel> ConnectedWays { get; set; }
 
-        private Dictionary<LocationPoint, RoadCurvitureModel> SimplifiedModel { get; set; }
+        private Dictionary<LocationPoint, AbstractRoadModel> SimplifiedModel { get; set; }
 
-        public RoadSectionSimplification(float tolerance, Dictionary<LocationPoint, RoadCurvitureModel> connectedWays)
+        public RoadSectionSimplification(float tolerance, Dictionary<LocationPoint, AbstractRoadModel> connectedWays)
         {
             if (connectedWays is null)
             {
@@ -26,7 +27,7 @@ namespace ConsoleApp2.RoadSectionHandling
             this.ConnectedWays = connectedWays;
         }
 
-        public RoadSectionSimplification(Dictionary<LocationPoint, RoadCurvitureModel> connectedWays)
+        public RoadSectionSimplification(Dictionary<LocationPoint, AbstractRoadModel> connectedWays)
         {
             if (connectedWays is null)
             {
@@ -37,20 +38,20 @@ namespace ConsoleApp2.RoadSectionHandling
 
         }
 
-        public Dictionary<LocationPoint, RoadCurvitureModel> GetSimplifiedModel()
+        public Dictionary<LocationPoint, AbstractRoadModel> GetSimplifiedModel()
         {
             if (SimplifiedModel != null && SimplifiedModel.Count > 0)
             {
                 return SimplifiedModel;
             }
 
-            List<RoadCurvitureModel> simplifiedModelList = Simplify(CreateSortedListOfRoadPoints());
+            List<AbstractRoadModel> simplifiedModelList = Simplify(CreateSortedListOfRoadPoints());
 
-            SimplifiedModel = new Dictionary<LocationPoint, RoadCurvitureModel>();
+            SimplifiedModel = new Dictionary<LocationPoint, AbstractRoadModel>();
 
-            RoadCurvitureModel previous = null;
+            AbstractRoadModel previous = null;
 
-            foreach (RoadCurvitureModel model in simplifiedModelList)
+            foreach (AbstractRoadModel model in simplifiedModelList)
             {
 
                 if(previous != null)
@@ -67,10 +68,10 @@ namespace ConsoleApp2.RoadSectionHandling
 
         }
 
-        private List<RoadCurvitureModel> CreateSortedListOfRoadPoints()
+        private List<AbstractRoadModel> CreateSortedListOfRoadPoints()
         {
 
-            RoadCurvitureModel firstPoint = ConnectedWays.First().Value;
+            AbstractRoadModel firstPoint = ConnectedWays.First().Value;
 
             //Find first
             while (true)
@@ -89,7 +90,7 @@ namespace ConsoleApp2.RoadSectionHandling
 
             //Create sorted list for easier manipulation
 
-            List<RoadCurvitureModel> sortedModel = new List<RoadCurvitureModel>();
+            List<AbstractRoadModel> sortedModel = new List<AbstractRoadModel>();
 
             while (true)
             {
@@ -108,7 +109,7 @@ namespace ConsoleApp2.RoadSectionHandling
 
         }
 
-        private Tuple<double, int> FindPointWithMaximumDistance(List<RoadCurvitureModel> model)
+        private Tuple<double, int> FindPointWithMaximumDistance(List<AbstractRoadModel> model)
         {
 
             if(model.Count <= 2) 
@@ -138,7 +139,7 @@ namespace ConsoleApp2.RoadSectionHandling
             return new Tuple<double, int>(largestDistance, index);
         }
 
-        private List<RoadCurvitureModel> Simplify(List<RoadCurvitureModel> model)
+        private List<AbstractRoadModel> Simplify(List<AbstractRoadModel> model)
         {
 
             Tuple<double, int> maximumDistance = FindPointWithMaximumDistance(model);
@@ -152,12 +153,12 @@ namespace ConsoleApp2.RoadSectionHandling
             {
 
                 // Calculate for points from first point to the point with largest distance
-                List<RoadCurvitureModel> firstPartOutput = Simplify(new List<RoadCurvitureModel>(model.Take(maximumDistance.Item2 + 1)));
+                List<AbstractRoadModel> firstPartOutput = Simplify(new List<AbstractRoadModel>(model.Take(maximumDistance.Item2 + 1)));
 
                 // Calculate for points from the point with largest distance to the last point
-                List<RoadCurvitureModel> secondPartOutput = Simplify(new List<RoadCurvitureModel>(model.Skip(maximumDistance.Item2)));
+                List<AbstractRoadModel> secondPartOutput = Simplify(new List<AbstractRoadModel>(model.Skip(maximumDistance.Item2)));
 
-                List<RoadCurvitureModel>  outPutList = new List<RoadCurvitureModel>(firstPartOutput.SkipLast(1));
+                List<AbstractRoadModel>  outPutList = new List<AbstractRoadModel>(firstPartOutput.SkipLast(1));
                 outPutList.AddRange(secondPartOutput);
 
                 return outPutList;
@@ -166,7 +167,7 @@ namespace ConsoleApp2.RoadSectionHandling
             // We can remove all points, because they are not important for road definition
             else
             {
-                return new List<RoadCurvitureModel>
+                return new List<AbstractRoadModel>
                 {
                     model.First(), model.Last()
                 };
@@ -176,5 +177,5 @@ namespace ConsoleApp2.RoadSectionHandling
         }
 
 
-    }
+    }*/
 }

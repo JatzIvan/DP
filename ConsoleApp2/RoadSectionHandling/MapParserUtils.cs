@@ -43,6 +43,10 @@ namespace ConsoleApp2.RoadSectionHandling
 
         }
 
+        public static double CalculateLocationNorm(LocationPoint a)
+        {
+            return Math.Sqrt((a.Latitude * a.Latitude) + (a.Longitude * a.Longitude));
+        }
 
         /**
          *  Analyze deeper 

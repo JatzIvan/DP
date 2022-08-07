@@ -1,7 +1,10 @@
 ﻿using ConsoleApp1.Api;
 using ConsoleApp2;
 using ConsoleApp2.RoadSectionHandling;
+using ConsoleApp2.RoadSectionHandling.CircleCurvitureModel;
+using ConsoleApp2.RoadSectionHandling.Data;
 using ConsoleApp2.RoadSectionHandling.Model;
+using ConsoleApp2.RoadSectionHandling.RoadSimplificators;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,7 +29,7 @@ namespace RoadVisualisation
         static int x_cent, y_cent;
 
         static float tolerance;
-
+        static int regionSizeVal;
         private static LocationPoint topPoint = new LocationPoint(17.16, 48.38);
         private static LocationPoint bottomPoint = new LocationPoint(17.27, 48.31);
 
@@ -76,6 +79,8 @@ namespace RoadVisualisation
             ApiHelper.InitializeClient(ApplicationConfigurationHandler.DigitalMapConnection);
             topPointXY = latlngToGlobalXY(topPoint);
             bottomPointXY = latlngToGlobalXY(bottomPoint);
+            SimplificationMethod.DataSource = Enum.GetValues(typeof(SimplMethods));
+            CurvatureCalcMethod.DataSource = Enum.GetValues(typeof(CurvCalcMethods));
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -102,6 +107,7 @@ namespace RoadVisualisation
         private async void button1_Click(object sender, EventArgs e)
         {
             tolerance = float.Parse(ToleranceValue.Text, CultureInfo.InvariantCulture);
+            regionSizeVal = int.Parse(LangRange.Text, CultureInfo.InvariantCulture);
             x_cent = Canvas.Width / 2;
             y_cent = Canvas.Height / 2;
 
@@ -110,8 +116,20 @@ namespace RoadVisualisation
             ApiHelper.InitializeClient();
             RoadDataHandler roadHandler = new RoadDataHandler("a", "a");
 
+            AbstractSimplificationModel model;
+            CurvCalcMethods curv = (CurvCalcMethods)CurvatureCalcMethod.SelectedItem;
+
+            if (SimplificationMethod.SelectedItem.Equals(SimplMethods.LANG))
+            {
+                model = new LangConfig(tolerance, regionSizeVal);
+            }
+            else
+            {
+                model = new DouglasPeuckerConfig(tolerance);
+            }
+
             Task task = Task.Run(() => {
-                roadHandler.GetParsedRoadData(tolerance);
+                roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv));
                 }
             );
 
@@ -122,7 +140,7 @@ namespace RoadVisualisation
             //PointF point2 = PointF.Add(point1, new Size(20, 20));
             //g.DrawLine(Pens.Black, point1, point2);
 
-            foreach (KeyValuePair<LocationPoint, RoadCurvitureModel> entry in roadHandler.GetParsedRoadData(tolerance))
+            foreach (KeyValuePair<LocationPoint, AbstractRoadModel> entry in roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv)))
             {
                 AddPoint(entry.Key);
                 if(entry.Value.Next != null)
@@ -131,6 +149,30 @@ namespace RoadVisualisation
                 }
             }
             Console.WriteLine("HEREE");
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (SimplificationMethod.SelectedItem.Equals(SimplMethods.LANG))
+            {
+                LangRange.Visible = true;
+                LangRangeLabel.Visible = true;
+            }
+            else
+            {
+                LangRange.Visible = false;
+                LangRangeLabel.Visible = false;
+            }
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
 
         private void Canvas_Paint(object sender, PaintEventArgs e)

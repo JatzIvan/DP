@@ -33,6 +33,11 @@ namespace RoadVisualisation
             this.Redraw = new System.Windows.Forms.Button();
             this.ToleranceValue = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.LangRangeLabel = new System.Windows.Forms.Label();
+            this.LangRange = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.SimplificationMethod = new System.Windows.Forms.ComboBox();
+            this.CurvatureCalcMethod = new System.Windows.Forms.ComboBox();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -48,7 +53,7 @@ namespace RoadVisualisation
             // 
             // Redraw
             // 
-            this.Redraw.Location = new System.Drawing.Point(456, 13);
+            this.Redraw.Location = new System.Drawing.Point(713, 13);
             this.Redraw.Name = "Redraw";
             this.Redraw.Size = new System.Drawing.Size(75, 23);
             this.Redraw.TabIndex = 1;
@@ -58,7 +63,7 @@ namespace RoadVisualisation
             // 
             // ToleranceValue
             // 
-            this.ToleranceValue.Location = new System.Drawing.Point(215, 13);
+            this.ToleranceValue.Location = new System.Drawing.Point(77, 12);
             this.ToleranceValue.Name = "ToleranceValue";
             this.ToleranceValue.Size = new System.Drawing.Size(191, 23);
             this.ToleranceValue.TabIndex = 2;
@@ -66,6 +71,11 @@ namespace RoadVisualisation
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.CurvatureCalcMethod);
+            this.panel2.Controls.Add(this.LangRangeLabel);
+            this.panel2.Controls.Add(this.LangRange);
+            this.panel2.Controls.Add(this.label1);
+            this.panel2.Controls.Add(this.SimplificationMethod);
             this.panel2.Controls.Add(this.ToleranceValue);
             this.panel2.Controls.Add(this.Redraw);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
@@ -73,6 +83,53 @@ namespace RoadVisualisation
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(800, 48);
             this.panel2.TabIndex = 3;
+            // 
+            // LangRangeLabel
+            // 
+            this.LangRangeLabel.AutoSize = true;
+            this.LangRangeLabel.Location = new System.Drawing.Point(288, 15);
+            this.LangRangeLabel.Name = "LangRangeLabel";
+            this.LangRangeLabel.Size = new System.Drawing.Size(40, 15);
+            this.LangRangeLabel.TabIndex = 6;
+            this.LangRangeLabel.Text = "Range";
+            this.LangRangeLabel.Visible = false;
+            this.LangRangeLabel.Click += new System.EventHandler(this.label2_Click);
+            // 
+            // LangRange
+            // 
+            this.LangRange.Location = new System.Drawing.Point(339, 12);
+            this.LangRange.Name = "LangRange";
+            this.LangRange.Size = new System.Drawing.Size(135, 23);
+            this.LangRange.TabIndex = 5;
+            this.LangRange.Text = "4";
+            this.LangRange.Visible = false;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(7, 16);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(57, 15);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Tolerance";
+            this.label1.Click += new System.EventHandler(this.label1_Click);
+            // 
+            // SimplificationMethod
+            // 
+            this.SimplificationMethod.FormattingEnabled = true;
+            this.SimplificationMethod.Location = new System.Drawing.Point(611, 13);
+            this.SimplificationMethod.Name = "SimplificationMethod";
+            this.SimplificationMethod.Size = new System.Drawing.Size(96, 23);
+            this.SimplificationMethod.TabIndex = 3;
+            this.SimplificationMethod.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
+            // CurvatureCalcMethod
+            // 
+            this.CurvatureCalcMethod.FormattingEnabled = true;
+            this.CurvatureCalcMethod.Location = new System.Drawing.Point(505, 13);
+            this.CurvatureCalcMethod.Name = "CurvatureCalcMethod";
+            this.CurvatureCalcMethod.Size = new System.Drawing.Size(100, 23);
+            this.CurvatureCalcMethod.TabIndex = 7;
             // 
             // Form1
             // 
@@ -96,6 +153,11 @@ namespace RoadVisualisation
         private System.Windows.Forms.Button Redraw;
         private System.Windows.Forms.TextBox ToleranceValue;
         private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.ComboBox SimplificationMethod;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label LangRangeLabel;
+        private System.Windows.Forms.TextBox LangRange;
+        private System.Windows.Forms.ComboBox CurvatureCalcMethod;
     }
 }
 
