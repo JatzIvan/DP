@@ -101,7 +101,7 @@ namespace RoadVisualisation
             Tuple<double, double> pointLoc1 = latlngToScreenXY(point1, new Tuple<double, double>(Canvas.Width, Canvas.Height));
             Tuple<double, double> pointLoc2 = latlngToScreenXY(point2, new Tuple<double, double>(Canvas.Width, Canvas.Height));
 
-            g.DrawLine(radius < 2 ? Pens.Green : Pens.Red, new PointF((float)pointLoc1.Item1, (float)pointLoc1.Item2), new PointF((float)pointLoc2.Item1, (float)pointLoc2.Item2));
+            g.DrawLine(radius > float.Parse(CurveTolerance.Text, CultureInfo.InvariantCulture) ? Pens.Green : Pens.Red, new PointF((float)pointLoc1.Item1, (float)pointLoc1.Item2), new PointF((float)pointLoc2.Item1, (float)pointLoc2.Item2));
         }
 
         private async void button1_Click(object sender, EventArgs e)

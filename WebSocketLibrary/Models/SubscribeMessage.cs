@@ -21,6 +21,7 @@ namespace WebSocketLibrary.Models
 
         public float Interval { get; set; }
 
+        public int ClientPort { get; set; }
 
     }
     public enum SubscribeContent

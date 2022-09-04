@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using WebSocketLibrary.Models;
 using WebSocketSharp.NetCore;
 
@@ -19,7 +20,14 @@ namespace WebSocketLibrary
             public IPEndPoint endpoint;
         }
 
-        private UdpClient ws;
+/*        private static ManualResetEvent connectDone =
+    new ManualResetEvent(false);
+        private static ManualResetEvent sendDone =
+            new ManualResetEvent(false);
+        private static ManualResetEvent receiveDone =
+            new ManualResetEvent(false);*/
+
+        private UdpClient Client;
 
         private IPEndPoint ep;
         
@@ -40,23 +48,53 @@ namespace WebSocketLibrary
             }
 
             this.Name = name;
-            // Handle connection
-            ep = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); // endpoint where server is listening
-            this.ws = new UdpClient();
+            /*ep = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); */// endpoint where server is listening
+            ep = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port));
+            this.Client = CreateSocket(new IPEndPoint(IPAddress.Any, 1111));
+        }
 
+        /**
+         *  Figure out some type of configuration
+         */
+        public bool CreateConnectionWithDataSocket() 
+        {
+
+            try
+            {
+                //Create Subscribe Message (for now it is hardcoded)
+                SubscribeMessage firstMsg = new SubscribeMessage();
+                firstMsg.Interval = 200;
+                firstMsg.Content = SubscribeContent.vehicles;
+                firstMsg.ClientPort = 1111;
+
+
+                // Setup connection with data server
+                HandleHandShake(firstMsg);
+
+                // Start listening for data stream
+                StartListening();
+
+                return true;
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(e);
+                Console.WriteLine("Try again after 10 seconds");
+                return false;
+            }
+        }
+
+        public void StartListening()
+        {
             UdpState state = new UdpState();
-            state.client = ws;
+            state.client = Client;
             state.endpoint = ep;
+            /**
+             * Handle Errors
+             */
 
-            Console.WriteLine(ws.Client.Connected);
-            Console.WriteLine(ws.Client);
-
-            HandleHandShake();
-
-            ws.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
-
-            //ws.OnMessage += Ws_HandleMessage;
-            //ws.Connect();
+            Client.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
+            
         }
 
         private Byte[] ConvertMesssageToBytes(object objectToConvert)
@@ -64,14 +102,16 @@ namespace WebSocketLibrary
             return Encoding.ASCII.GetBytes(GetStringFromObject(objectToConvert));
         }
         
-        private void HandleHandShake()
+        private UdpClient CreateSocket(IPEndPoint socketEp)
         {
+            UdpClient localClient = new UdpClient(socketEp);
+            localClient.EnableBroadcast = true;
+            return localClient;
+        }
 
-            SubscribeMessage firstMsg = new SubscribeMessage();
-            firstMsg.Interval = 200;
-            firstMsg.Content = SubscribeContent.vehicles;
-
-            Byte[] sendBytes = ConvertMesssageToBytes(firstMsg);
+        private void HandleHandShake(SubscribeMessage msg)
+        {
+            Byte[] sendBytes = ConvertMesssageToBytes(msg);
 
             SendMessage(sendBytes);
         }
@@ -84,7 +124,7 @@ namespace WebSocketLibrary
         /**
          * Function handles incomming messages
          */
-        private void Ws_HandleMessage(IAsyncResult ar)
+        public void Ws_HandleMessage(IAsyncResult ar)
         {
             Console.WriteLine("HELLO");
             UdpClient client = ((UdpState)(ar.AsyncState)).client;
@@ -92,6 +132,8 @@ namespace WebSocketLibrary
 
 
             byte[] receiveBytes = client.EndReceive(ar, ref endpoint);
+
+
 
             if (receiveBytes.Length >= 4)
             {
@@ -119,9 +161,9 @@ namespace WebSocketLibrary
 
 
             UdpState state = new UdpState();
-            state.client = ws;
-            state.endpoint = ep;
-            ws.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
+            state.client = client;
+            state.endpoint = endpoint;
+            client.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
         }
 
        /* private bool IsAlive(int attempt)
@@ -142,16 +184,7 @@ namespace WebSocketLibrary
 
         public void SendMessage(Byte[] msg)
         {
-
-            ws.Connect(ep.Address, ep.Port);
-            ws.Send(msg, msg.Length);
-            //ws.Close();
-
-            /*if (IsAlive(0))
-            {
-                //ws.SendAsync();
-            }*/
-
+            Client.Send(msg, msg.Length, ep);
         }
 
         public void CloseConnection()
@@ -164,7 +197,7 @@ namespace WebSocketLibrary
                 handler.OnCompleted();
                 });
             registeredMessageHandlers.Clear();
-            ws.Close();
+            Client.Close();
             //}
         }                                                      
 

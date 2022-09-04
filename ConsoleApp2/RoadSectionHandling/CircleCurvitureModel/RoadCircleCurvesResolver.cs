@@ -59,8 +59,8 @@ namespace ConsoleApp2.RoadSectionHandling.CircleCurvitureModel
                 }
 
                 current.Next.RadiusOfCurvature = current.RadiusOfCircle > 0 
-                    ? (current.RadiusOfCircle + current.Next.Point.RadiusOfCircle)/ 2 
-                    : current.Next.Point.RadiusOfCircle;
+                    ? 1/(current.RadiusOfCircle + current.Next.Point.RadiusOfCircle)/ 2 
+                    : 1/current.Next.Point.RadiusOfCircle;
 
                 current = current.Next.Point;
 
@@ -77,8 +77,8 @@ namespace ConsoleApp2.RoadSectionHandling.CircleCurvitureModel
                 }
 
                 current.Previous.RadiusOfCurvature = current.RadiusOfCircle > 0 
-                    ? (current.RadiusOfCircle + current.Previous.Point.RadiusOfCircle) / 2
-                    : current.Previous.Point.RadiusOfCircle;
+                    ? 1/(current.RadiusOfCircle + current.Previous.Point.RadiusOfCircle) / 2
+                    : 1/current.Previous.Point.RadiusOfCircle;
 
                 current = current.Previous.Point;
 

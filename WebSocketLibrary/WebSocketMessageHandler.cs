@@ -24,11 +24,17 @@ namespace WebSocketLibrary
             this.Name = name;
         }
 
+        /**
+         * Handle socket finish without application crash
+         */
         public virtual void OnCompleted()
         {
             throw new NotImplementedException();
         }
 
+        /**
+         * Handle errors without application crash
+         */
         public virtual void OnError(Exception error)
         {
             throw new NotImplementedException();

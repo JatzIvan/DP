@@ -10,8 +10,14 @@ namespace ConsoleApp2
     {
         public void PerformCalculations(List<CarUpdateInfo> data)
         {
-            //Console.WriteLine("Latitude: " + data[0].Lat + " ,Longitude:" + data[0].Lon + " ,Velocity:" + data[0].Vel + " ,Orientation:" + data[0].Orientation);
+            foreach(CarUpdateInfo segment in data)
+            {
+                foreach(VehicleData car in segment.Vehicles)
+                {
+                    Console.WriteLine("Latitude: " + car.Position.Lat + " ,Longitude:" + car.Position.Lon + " ,Velocity:" + car.Speed+ " ,Orientation:" + car.Heading);
 
+                }
+            }
         }
     }
 }

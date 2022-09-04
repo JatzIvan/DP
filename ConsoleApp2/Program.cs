@@ -1,6 +1,7 @@
 ﻿using ConsoleApp1.Api;
 using ConsoleApp2.RoadSectionHandling;
 using System;
+using System.Threading;
 using WebSocketLibrary;
 
 namespace ConsoleApp2
@@ -20,6 +21,19 @@ namespace ConsoleApp2
             WebSocketMessageHandler<ICollisionDetector> observer = new WebSocketMessageHandler<ICollisionDetector>("handler1", new CustomCollisionDetector());
 
             observer.Subscribe(ws);
+
+            while (true)
+            {
+                if (ws.CreateConnectionWithDataSocket())
+                {
+                    break;
+                }
+                Console.WriteLine("Repeat");
+                Thread.Sleep(10000);
+            }
+
+            Console.WriteLine("Out");
+            /*ws.StartListening();*/
 
             //new RoadDataHandler("a", "a");
             //RoadVisualisation.OpenWindow();

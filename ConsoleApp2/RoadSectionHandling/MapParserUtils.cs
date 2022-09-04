@@ -37,7 +37,7 @@ namespace ConsoleApp2.RoadSectionHandling
                        Math.Cos(lat1) * Math.Cos(lat2) *
                        Math.Pow(Math.Sin(dlon / 2), 2);
 
-            double h2 = 2 * Math.Asin(Math.Sqrt(h1));
+            double h2 = 2 * Math.Atan2(Math.Sqrt(h1), Math.Sqrt(1 - h1));
 
             return h2 * rEarth;
 
