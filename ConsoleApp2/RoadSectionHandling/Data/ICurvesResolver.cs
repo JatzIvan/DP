@@ -7,7 +7,9 @@ namespace ConsoleApp2.RoadSectionHandling.Data
 {
     interface ICurvesResolver
     {
-
+        /**
+         * Method is used to calculate "curvature" between points on map
+         */
         public Dictionary<LocationPoint, AbstractRoadModel> CalculateCurvesForWays();
 
     }

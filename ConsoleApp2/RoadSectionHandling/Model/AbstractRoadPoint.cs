@@ -35,6 +35,8 @@ namespace ConsoleApp2.RoadSectionHandling.Model
 
         public double RadiusOfCurvature { get; set; }
 
+        public double Heading { get; set; }
+
         public AbstractRoadModel Point { get; set; }
 
         public SegmentCurvitureChain(AbstractRoadModel point)

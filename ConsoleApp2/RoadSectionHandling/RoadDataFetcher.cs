@@ -16,7 +16,7 @@ namespace ConsoleApp2.RoadSectionHandling
         }
 
         /**
-         * TODO Do more generic implementation
+         * TODO: Do more generic implementation
          */
         public List<RoadPointModel> GetRoadFromAPI()
         {

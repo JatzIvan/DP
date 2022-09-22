@@ -30,12 +30,14 @@ namespace RoadVisualisation
 
         static float tolerance;
         static int regionSizeVal;
-        private static LocationPoint topPoint = new LocationPoint(17.16, 48.38);
-        private static LocationPoint bottomPoint = new LocationPoint(17.27, 48.31);
+        //private static LocationPoint topPoint = new LocationPoint(17.16, 48.38);
+        //private static LocationPoint bottomPoint = new LocationPoint(17.27, 48.31);
+
+        private static LocationPoint topPoint;
+        private static LocationPoint bottomPoint;
 
         private static Tuple<double, double> topPointXY;
         private static Tuple<double, double> bottomPointXY;
-
         private readonly float EarthRadius = 6371;      //Earth Radius in Km
 
         //## Now I can calculate the global X and Y for each reference point ##\\
@@ -75,6 +77,9 @@ namespace RoadVisualisation
         {
             InitializeComponent();
             ApplicationConfigurationHandler.LoadConfiguration();
+
+            topPoint = new LocationPoint(ApplicationConfigurationHandler.Longitude1, ApplicationConfigurationHandler.Latitude1);
+            bottomPoint = new LocationPoint(ApplicationConfigurationHandler.Longitude2, ApplicationConfigurationHandler.Latitude2);
 
             ApiHelper.InitializeClient(ApplicationConfigurationHandler.DigitalMapConnection);
             topPointXY = latlngToGlobalXY(topPoint);
@@ -140,12 +145,24 @@ namespace RoadVisualisation
             //PointF point2 = PointF.Add(point1, new Size(20, 20));
             //g.DrawLine(Pens.Black, point1, point2);
 
+            Dictionary<LocationPoint, AbstractRoadModel> heckingDict = roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv));
+            List<LocationPoint> heckingList = roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv)).Keys.ToList();
+
+/*            foreach (KeyValuePair<LocationPoint, AbstractRoadModel> entry in roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv)).Reverse())
+            {
+                AddPoint(entry.Key);
+                if(entry.Value.Previous != null)
+                {
+                    DrawLine(entry.Value.CurrentLocation, entry.Value.Previous.Point.CurrentLocation, 1/entry.Value.Previous.RadiusOfCurvature);
+                }
+            }*/
+
             foreach (KeyValuePair<LocationPoint, AbstractRoadModel> entry in roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv)))
             {
                 AddPoint(entry.Key);
-                if(entry.Value.Next != null)
+                if (entry.Value.Next != null)
                 {
-                    DrawLine(entry.Value.CurrentLocation, entry.Value.Next.Point.CurrentLocation, 1/entry.Value.Next.RadiusOfCurvature);
+                    DrawLine(entry.Value.CurrentLocation, entry.Value.Next.Point.CurrentLocation, 1 / entry.Value.Next.RadiusOfCurvature);
                 }
             }
             Console.WriteLine("HEREE");
@@ -171,6 +188,16 @@ namespace RoadVisualisation
         }
 
         private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CurveTolerance_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ToleranceValue_TextChanged(object sender, EventArgs e)
         {
 
         }

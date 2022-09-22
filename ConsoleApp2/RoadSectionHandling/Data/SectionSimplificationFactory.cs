@@ -41,6 +41,9 @@ namespace ConsoleApp2.RoadSectionHandling.Data
 
         }
 
+        /**
+         *  Return simplification method based on config Type.
+         */
         public ISectionSimplificator GetSimplificatiorImplementation(Dictionary<LocationPoint, AbstractRoadModel> connectedWays, AbstractSimplificationModel config)
         {
             switch (resolveMethod(config))

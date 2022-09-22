@@ -29,7 +29,7 @@ namespace ConsoleApp2.RoadSectionHandling.Data
         }
 
         /**
-         * Try something like annotations later
+         * TODO: Try something like annotations later
          */
         public ICurvesResolver GetResolverImplementation(CurvCalcMethods type, Dictionary<LocationPoint, AbstractRoadModel> connectedWays)
         {

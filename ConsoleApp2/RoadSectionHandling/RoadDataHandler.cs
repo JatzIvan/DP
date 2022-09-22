@@ -56,6 +56,9 @@ namespace ConsoleApp2.RoadSectionHandling
             return RoadInfoRaw;
         }
 
+        /**
+         * Return parsed data. Default to DouglasPeucker simplification and simple circle curvature resolver
+         */
         public Dictionary<LocationPoint, AbstractRoadModel> GetParsedRoadData()
         {
             return this.GetParsedRoadData(new HandlerSetupConfig(
@@ -63,6 +66,9 @@ namespace ConsoleApp2.RoadSectionHandling
                 CurvCalcMethods.SIMPLE_CIRCLE));
         }
 
+        /**
+         * Return parsed data based on provided config
+         */
         public Dictionary<LocationPoint, AbstractRoadModel> GetParsedRoadData(HandlerSetupConfig config)
         {
             if(this.RoadInfoTransformed == null || this.RoadInfoTransformed.Count == 0)
@@ -72,17 +78,23 @@ namespace ConsoleApp2.RoadSectionHandling
                 // Then fetch from API
 
                 List<RoadPointModel> fetchedModel = GetRawRoadData();
+                
+                // Big oops, this means that we did not manage to fetch any data
+                if(fetchedModel == null || fetchedModel.Count == 0)
+                {
+                    Console.Write("Could not fetch any data, check if OSM road data link is valid");
+                }
                 RoadDataParser parser = new RoadDataParser(fetchedModel);
 
                 // Get connected road points for easier manipulation
                 Dictionary<LocationPoint, AbstractRoadModel> connectedWays = parser.GetConnectedWays();
+
 
                 ISectionSimplificator simplificator = SectionSimplificationFactory.getInstance().GetSimplificatiorImplementation(connectedWays, config.SimplificatorConfig);
                 Dictionary<LocationPoint, AbstractRoadModel>  simplifiedModel = simplificator.GetSimplifiedModel();
                 ICurvesResolver curvesResolver = RoadCurvitureCalculatorFactory.getInstance().GetResolverImplementation(config.CurvitureResolver, simplifiedModel);
                 RoadInfoTransformed = curvesResolver.CalculateCurvesForWays();
             }
-
 
 
             return this.RoadInfoTransformed;

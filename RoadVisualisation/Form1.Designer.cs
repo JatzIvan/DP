@@ -33,12 +33,12 @@ namespace RoadVisualisation
             this.Redraw = new System.Windows.Forms.Button();
             this.ToleranceValue = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.CurveTolerance = new System.Windows.Forms.TextBox();
             this.CurvatureCalcMethod = new System.Windows.Forms.ComboBox();
             this.LangRangeLabel = new System.Windows.Forms.Label();
             this.LangRange = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.SimplificationMethod = new System.Windows.Forms.ComboBox();
-            this.CurveTolerance = new System.Windows.Forms.TextBox();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -69,6 +69,7 @@ namespace RoadVisualisation
             this.ToleranceValue.Size = new System.Drawing.Size(94, 23);
             this.ToleranceValue.TabIndex = 2;
             this.ToleranceValue.Text = "0.05";
+            this.ToleranceValue.TextChanged += new System.EventHandler(this.ToleranceValue_TextChanged);
             // 
             // panel2
             // 
@@ -85,6 +86,15 @@ namespace RoadVisualisation
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(800, 48);
             this.panel2.TabIndex = 3;
+            // 
+            // CurveTolerance
+            // 
+            this.CurveTolerance.Location = new System.Drawing.Point(188, 13);
+            this.CurveTolerance.Name = "CurveTolerance";
+            this.CurveTolerance.Size = new System.Drawing.Size(94, 23);
+            this.CurveTolerance.TabIndex = 8;
+            this.CurveTolerance.Text = "2";
+            this.CurveTolerance.TextChanged += new System.EventHandler(this.CurveTolerance_TextChanged);
             // 
             // CurvatureCalcMethod
             // 
@@ -132,14 +142,6 @@ namespace RoadVisualisation
             this.SimplificationMethod.Size = new System.Drawing.Size(96, 23);
             this.SimplificationMethod.TabIndex = 3;
             this.SimplificationMethod.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
-            // 
-            // CurveTolerance
-            // 
-            this.CurveTolerance.Location = new System.Drawing.Point(188, 13);
-            this.CurveTolerance.Name = "CurveTolerance";
-            this.CurveTolerance.Size = new System.Drawing.Size(94, 23);
-            this.CurveTolerance.TabIndex = 8;
-            this.CurveTolerance.Text = "2";
             // 
             // Form1
             // 

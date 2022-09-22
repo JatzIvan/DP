@@ -19,5 +19,10 @@ namespace ConsoleApp2
                 }
             }
         }
+
+        public void ResolveCollisionCalculationBasedOnCurvature(VehicleData vehicle1, VehicleData vehicle2)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

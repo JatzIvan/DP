@@ -24,8 +24,6 @@ namespace ConsoleApp2.RoadSectionHandling
         public static double CalculateDistanceBetweenPoints(LocationPoint a, LocationPoint b)
         {
 
-
-
             double lat1 = ConvertDegreesToRadians(a.Latitude);
             double long1 = ConvertDegreesToRadians(a.Longitude);
             double lat2 = ConvertDegreesToRadians(b.Latitude);
@@ -130,6 +128,23 @@ namespace ConsoleApp2.RoadSectionHandling
             multY = vector.y * k;
             multZ = vector.z * k;
             return (multX, multY, multZ);
+        }
+
+        // http://www.movable-type.co.uk/scripts/latlong.html
+        public static double CalculateBearingBetweenPoints(LocationPoint a, LocationPoint b)
+        {
+
+            double lat1 = ConvertDegreesToRadians(a.Latitude);
+            double long1 = ConvertDegreesToRadians(a.Longitude);
+            double lat2 = ConvertDegreesToRadians(b.Latitude);
+            double long2 = ConvertDegreesToRadians(b.Longitude);
+
+            double y = Math.Sin(long2 - long1) * Math.Cos(lat2);
+            double x = Math.Cos(lat1) * Math.Sin(lat2) -
+                      Math.Sin(lat1) * Math.Cos(lat2) * Math.Cos(long2 - long1);
+            double θ = Math.Atan2(y, x);
+            return (θ * 180 / Math.PI + 360) % 360; // in degrees
+
         }
 
     }

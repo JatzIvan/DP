@@ -27,6 +27,9 @@ namespace ConsoleApp2.RoadSectionHandling.Data
             this.Config = config;
         }
 
+        /**
+         * This method should implement custom simplification logic
+         */
         protected abstract List<AbstractRoadModel> Simplify(List<AbstractRoadModel> model);
 
         private List<AbstractRoadModel> CreateSortedListOfRoadPoints(Dictionary<LocationPoint, AbstractRoadModel> connectedWays)
@@ -70,6 +73,10 @@ namespace ConsoleApp2.RoadSectionHandling.Data
 
         }
 
+        /**
+         * Generic implementation to get Simplified road model. 
+         * This function performs all necessary steps so implementing new "Algorithms" should be easy
+         */
         public Dictionary<LocationPoint, AbstractRoadModel> GetSimplifiedModel()
         {
             if (SimplifiedModel != null && SimplifiedModel.Count > 0)
@@ -88,8 +95,12 @@ namespace ConsoleApp2.RoadSectionHandling.Data
 
                 if (previous != null)
                 {
+                    // Link road points and calculate Heading between segments
                     previous.Next.Point = model;
+                    previous.Next.Heading = MapParserUtils.CalculateBearingBetweenPoints(previous.CurrentLocation, model.CurrentLocation);
+
                     model.Previous.Point = previous;
+                    model.Previous.Heading = MapParserUtils.CalculateBearingBetweenPoints(model.CurrentLocation, previous.CurrentLocation);
                 }
 
                 SimplifiedModel.Add(model.CurrentLocation, model);

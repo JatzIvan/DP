@@ -81,6 +81,11 @@ namespace ConsoleApp2.RoadSectionHandling
         {
             Dictionary<Tuple<LocationPoint, LocationPoint>, RoadPointModel> modelDict = CreateModelDictionary();
 
+            if (RawModel.Count == 0)
+            {
+                return null;
+            }
+
             List<RoadPointModel> sortedByRoads = new List<RoadPointModel>
             {
                 RawModel[0]
@@ -114,6 +119,8 @@ namespace ConsoleApp2.RoadSectionHandling
 
                     Console.WriteLine(currentFirst.Longitude + ":" + currentFirst.Latitude);
 
+                    // Check which record in dictionary has "Road segment end" same as start of current first segment
+                    // Found segment is places on front
                     if(modelDict.Keys.Any(m => m.Item2.Equals(currentFirst)))
                     {
                         Tuple<LocationPoint, LocationPoint> currKey = modelDict.Keys.First(m => m.Item2.Equals(currentFirst));
@@ -140,7 +147,8 @@ namespace ConsoleApp2.RoadSectionHandling
 
                     LocationPoint currentLast = sortedByRoads.Last().Way.Points.Last();
 
-
+                    // Check which record in dictionary has "Road segment start" same as end of current last segment
+                    // Found segment is places last
                     if (modelDict.Keys.Any(m => m.Item1.Equals(currentLast)))
                     {
                         Tuple<LocationPoint, LocationPoint> currKey = modelDict.Keys.First(m => m.Item1.Equals(currentLast));
