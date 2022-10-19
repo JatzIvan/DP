@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ConsoleApp2.RoadSectionHandling;
+using ConsoleApp2.RoadSectionHandling.Data;
+using ConsoleApp2.RoadSectionHandling.RoadSimplificators;
+using System;
 using System.Configuration;
-using System.Collections.Specialized;
 using System.Globalization;
 
 namespace ConsoleApp2
@@ -31,6 +31,10 @@ namespace ConsoleApp2
 
         public static float DPTolerance { get; set; }
 
+        public static SimplMethods SimplificationMethod { get; set; } = SimplMethods.DOUGLAS_PEUCKER;
+
+        public static CurvCalcMethods CurvetureCalcMethod { get; set; } = CurvCalcMethods.SIMPLE_CIRCLE;
+
         public static float CurvatureTreshold { get; set; }
 
         public static float CarDistanceSkipTreshold { get; set; }
@@ -39,26 +43,74 @@ namespace ConsoleApp2
 
         public static string StraightCollisionCalculator { get; set; }
 
+        public static AbstractSimplificationModel GetSimplificationModelFromConfiguration()
+        {
+
+            switch (SimplificationMethod)
+            {
+                case SimplMethods.DOUGLAS_PEUCKER:
+
+                    return new DouglasPeuckerConfig(DPTolerance);
+
+                case SimplMethods.LANG:
+                    int regionSize;
+                    try
+                    {
+                        regionSize = int.Parse(ConfigurationManager.AppSettings.Get("LangRegionSize"), CultureInfo.InvariantCulture);
+
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        Console.WriteLine("Missing or invalid config value for region size, defaulting 4");
+                        regionSize = 4;
+                    }
+                    return new LangConfig(DPTolerance, regionSize);
+
+                default:
+                    Console.WriteLine("Missing Simplification method type in config, default with DouglasPeuckerConfig with tolarance of 0.001");
+                    return new DouglasPeuckerConfig(0.001f);
+            }
+
+
+        }
+
+        public static HandlerSetupConfig GenerateHandlerSetupConfig()
+        {
+            return new HandlerSetupConfig(GetSimplificationModelFromConfiguration() , CurvetureCalcMethod);
+        }
+
         public static void LoadConfiguration()
         {
-            DataServerHost = ConfigurationManager.AppSettings.Get("DataServerHost");
-            DataServerPort = ConfigurationManager.AppSettings.Get("DataServerPort");
-            DatabaseConnection = ConfigurationManager.AppSettings.Get("DatabaseConnection");
-            DigitalMapConnection = ConfigurationManager.AppSettings.Get("DigiMap");
-            Longitude1 = float.Parse(ConfigurationManager.AppSettings.Get("RoadQueryLong1"), CultureInfo.InvariantCulture);
-            Latitude1 = float.Parse(ConfigurationManager.AppSettings.Get("RoadQueryLat1"), CultureInfo.InvariantCulture);
-            Longitude2 = float.Parse(ConfigurationManager.AppSettings.Get("RoadQueryLong2"), CultureInfo.InvariantCulture);
-            Latitude2 = float.Parse(ConfigurationManager.AppSettings.Get("RoadQueryLat2"), CultureInfo.InvariantCulture);
-            RoadRef = ConfigurationManager.AppSettings.Get("RoadQueryRef");
-            TestRoadQuery = $"?ref={RoadRef}&long1={ConfigurationManager.AppSettings.Get("RoadQueryLong1")}" +
-                $"&lat1={ConfigurationManager.AppSettings.Get("RoadQueryLat1")}" +
-                $"&long2={ConfigurationManager.AppSettings.Get("RoadQueryLong2")}" +
-                $"&lat2={ConfigurationManager.AppSettings.Get("RoadQueryLat2")}";
-            DPTolerance = float.Parse(ConfigurationManager.AppSettings.Get("LineSimplificationTolerance"), CultureInfo.InvariantCulture);
-            CurvatureTreshold = float.Parse(ConfigurationManager.AppSettings.Get("CurvatureTreshold"), CultureInfo.InvariantCulture);
-            CarDistanceSkipTreshold = float.Parse(ConfigurationManager.AppSettings.Get("CarDistanceSkipTreshold"), CultureInfo.InvariantCulture);
-            CurveCollisionCalculator = ConfigurationManager.AppSettings.Get("CurveCollisionCalculator");
-            StraightCollisionCalculator = ConfigurationManager.AppSettings.Get("StraightCollisionCalculator");
+            try
+            {
+                DataServerHost = ConfigurationManager.AppSettings.Get("DataServerHost");
+                DataServerPort = ConfigurationManager.AppSettings.Get("DataServerPort");
+                DatabaseConnection = ConfigurationManager.AppSettings.Get("DatabaseConnection");
+                DigitalMapConnection = ConfigurationManager.AppSettings.Get("DigiMap");
+                Longitude1 = float.Parse(ConfigurationManager.AppSettings.Get("RoadQueryLong1"), CultureInfo.InvariantCulture);
+                Latitude1 = float.Parse(ConfigurationManager.AppSettings.Get("RoadQueryLat1"), CultureInfo.InvariantCulture);
+                Longitude2 = float.Parse(ConfigurationManager.AppSettings.Get("RoadQueryLong2"), CultureInfo.InvariantCulture);
+                Latitude2 = float.Parse(ConfigurationManager.AppSettings.Get("RoadQueryLat2"), CultureInfo.InvariantCulture);
+                RoadRef = ConfigurationManager.AppSettings.Get("RoadQueryRef");
+                TestRoadQuery = $"?ref={RoadRef}&long1={ConfigurationManager.AppSettings.Get("RoadQueryLong1")}" +
+                    $"&lat1={ConfigurationManager.AppSettings.Get("RoadQueryLat1")}" +
+                    $"&long2={ConfigurationManager.AppSettings.Get("RoadQueryLong2")}" +
+                    $"&lat2={ConfigurationManager.AppSettings.Get("RoadQueryLat2")}";
+                DPTolerance = float.Parse(ConfigurationManager.AppSettings.Get("LineSimplificationTolerance"), CultureInfo.InvariantCulture);
+                CurvatureTreshold = float.Parse(ConfigurationManager.AppSettings.Get("CurvatureTreshold"), CultureInfo.InvariantCulture);
+                CarDistanceSkipTreshold = float.Parse(ConfigurationManager.AppSettings.Get("CarDistanceSkipTreshold"), CultureInfo.InvariantCulture);
+                CurveCollisionCalculator = ConfigurationManager.AppSettings.Get("CurveCollisionCalculator");
+                StraightCollisionCalculator = ConfigurationManager.AppSettings.Get("StraightCollisionCalculator");
+                SimplificationMethod = (SimplMethods)Enum.Parse(typeof(SimplMethods), ConfigurationManager.AppSettings.Get("SimplificationMethod"));
+                CurvetureCalcMethod = (CurvCalcMethods)Enum.Parse(typeof(CurvCalcMethods), ConfigurationManager.AppSettings.Get("CurvetureCalcMethod"));
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error occured during config parsing");
+                Console.WriteLine(e);
+            }
         }
 
     }

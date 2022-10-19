@@ -7,11 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiLibrary", "ApiLibrary\Ap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSocketLibrary", "WebSocketLibrary\WebSocketLibrary.csproj", "{1E4DDC2E-3C48-4614-999A-4BC342B80387}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp2", "ConsoleApp2\ConsoleApp2.csproj", "{DFE080E4-D050-4C81-8B7A-A4BC99917411}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreLibrary", "ConsoleApp2\CoreLibrary.csproj", "{DFE080E4-D050-4C81-8B7A-A4BC99917411}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoadSectionHandler", "RoadSectionHandler\RoadSectionHandler.csproj", "{3A2AD079-F70A-4890-8939-B5CA4D4D2BB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseHandlerLibrary", "RoadSectionHandler\DatabaseHandlerLibrary.csproj", "{3A2AD079-F70A-4890-8939-B5CA4D4D2BB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoadVisualisation", "RoadVisualisation\RoadVisualisation.csproj", "{DC0A6CE9-06D5-4728-96F7-0DBA7808C191}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoadVisualisation", "RoadVisualisation\RoadVisualisation.csproj", "{DC0A6CE9-06D5-4728-96F7-0DBA7808C191}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ApiLibrary\ApiLibrary.csproj" />
-    <ProjectReference Include="..\RoadSectionHandler\RoadSectionHandler.csproj" />
+    <ProjectReference Include="..\RoadSectionHandler\DatabaseHandlerLibrary.csproj" />
     <ProjectReference Include="..\WebSocketLibrary\WebSocketLibrary.csproj" />
   </ItemGroup>
 
