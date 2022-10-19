@@ -158,6 +158,29 @@ namespace WebSocketLibrary
         }
 
         /**
+         * Simple method pairs cars with eachother for later
+         */
+        public List<ValueTuple<VehicleData, VehicleData>> CreateVehiclePairs(List<VehicleData> vehicles)
+        {
+
+            List<ValueTuple<VehicleData, VehicleData>> pairs = new List<ValueTuple<VehicleData, VehicleData>>();
+
+            foreach (VehicleData vehicle1 in vehicles)
+            {
+                foreach(VehicleData vehicle2 in vehicles)
+                {
+                    if(vehicle1.Id != vehicle2.Id)
+                    {
+                        pairs.Add((vehicle1, vehicle2));
+                    }
+                }
+            }
+
+            return pairs;
+
+        }
+
+        /**
          * Method determines which type of calculator to use
          * Currectly we distinguish between straight and curve
          */

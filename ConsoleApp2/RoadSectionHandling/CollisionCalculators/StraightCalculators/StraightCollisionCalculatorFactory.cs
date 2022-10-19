@@ -15,10 +15,10 @@ namespace ConsoleApp2.RoadSectionHandling.CollisionCalculators.StraightCalculato
         // Initialize before anything to be ready to use
         static StraightCollisionCalculatorFactory()
         {
-            LoadImplementations();
+            LoadImplementationTypes();
         }
 
-        private static void LoadImplementations()
+        private static void LoadImplementationTypes()
         {
             Type calculatorType = typeof(ICollisionCalculatorImplementation);
 
@@ -57,6 +57,7 @@ namespace ConsoleApp2.RoadSectionHandling.CollisionCalculators.StraightCalculato
         }
 
         // Choose from list by config value or else return Dummy implementation
+        // Always create new implementation because we will work with multiple Threads
         public ICollisionCalculatorImplementation GetImplementation()
         {
 

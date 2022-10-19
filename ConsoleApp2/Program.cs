@@ -1,7 +1,10 @@
 ﻿using ConsoleApp1.Api;
 using ConsoleApp2.RoadSectionHandling;
+using ConsoleApp2.RoadSectionHandling.Model;
 using System;
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using WebSocketLibrary;
 
 namespace ConsoleApp2
@@ -14,11 +17,17 @@ namespace ConsoleApp2
 
             ApplicationConfigurationHandler.LoadConfiguration();
 
-            ApiHelper.InitializeClient(ApplicationConfigurationHandler.DigitalMapConnection);
+            ApiHelper.InitializeClient();
+
+            RoadDataHandler roadHandler = new RoadDataHandler("a", "a");
 
             UdpSocketClientImplementation ws = WebSocketManagerFactory.GetInstance().CreateConnection(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, "LocalServer");
 
-            WebSocketMessageHandler<ICollisionDetector> observer = new WebSocketMessageHandler<ICollisionDetector>("handler1", new CustomCollisionDetector());
+
+
+            Dictionary<LocationPoint, AbstractRoadModel>  data = roadHandler.GetParsedRoadData(ApplicationConfigurationHandler.GenerateHandlerSetupConfig());
+
+            WebSocketMessageHandler<ICollisionDetector> observer = new WebSocketMessageHandler<ICollisionDetector>("handler1", new CustomCollisionDetector(data));
 
             observer.Subscribe(ws);
 
