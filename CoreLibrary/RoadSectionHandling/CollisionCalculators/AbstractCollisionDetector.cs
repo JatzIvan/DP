@@ -196,6 +196,6 @@ namespace WebSocketLibrary
 
             return null;
         }
-        public abstract void PerformCalculations(List<CarUpdateInfo> data);
+        public abstract void PerformCalculations(List<VehicleData> data);
     }
 }

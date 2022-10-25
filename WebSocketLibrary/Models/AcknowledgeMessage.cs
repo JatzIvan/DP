@@ -1,18 +1,10 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace WebSocketLibrary.Models
 {
-    class AcknowledgeMessage
+    public class AcknowledgeMessage: AbstractMessage
     {
+        public new string Type { get; set; } = "acknowledge";
 
-        public int Index { get; set; }
-        public string Type { get; set; }
-        [JsonConverter(typeof(IsoDateTimeConverter))]
-        public DateTime Timestamp = DateTime.Now;
         public int AcknowledgingIndex { get; set; }
 
     }

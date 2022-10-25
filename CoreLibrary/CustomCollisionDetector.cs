@@ -15,15 +15,12 @@ namespace ConsoleApp2
 
         }
 
-        public override void PerformCalculations(List<CarUpdateInfo> data)
+        public override void PerformCalculations(List<VehicleData> data)
         {
-            foreach (CarUpdateInfo segment in data)
+            foreach (VehicleData car in data)
             {
-                foreach (VehicleData car in segment.Vehicles)
-                {
-                    Console.WriteLine("Latitude: " + car.Position.Lat + " ,Longitude:" + car.Position.Lon + " ,Velocity:" + car.Speed + " ,Orientation:" + car.Heading);
+                Console.WriteLine("Latitude: " + car.Position.Lat + " ,Longitude:" + car.Position.Lon + " ,Velocity:" + car.Speed + " ,Orientation:" + car.Heading);
 
-                }
             }
         }
     }

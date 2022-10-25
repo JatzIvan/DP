@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -11,31 +12,26 @@ using WebSocketSharp.NetCore;
 
 namespace WebSocketLibrary
 {
-    public class UdpSocketClientImplementation : IObservable<CarUpdateInfoWrapper>
-    {
+    /**
+     * UDP Connections implementation that adds some TCP overhead
+     * Because UDP sockets are connectionless, we need to create a custom overhead to connect(handshake), keepalive, acknowledge and close connection
+     * 
+     */
+    public class UdpSocketClientImplementation : AbstractSocket
+    { 
 
         public struct UdpState
         {
             public UdpClient client;
             public IPEndPoint endpoint;
+            public int index;
         }
-
-/*        private static ManualResetEvent connectDone =
-    new ManualResetEvent(false);
-        private static ManualResetEvent sendDone =
-            new ManualResetEvent(false);
-        private static ManualResetEvent receiveDone =
-            new ManualResetEvent(false);*/
 
         private UdpClient Client;
 
-        private IPEndPoint ep;
-        
-        public string Name { get; set; }
+        private IPEndPoint EP;
 
-        private List<IObserver<CarUpdateInfoWrapper>> registeredMessageHandlers = new List<IObserver<CarUpdateInfoWrapper>>();
-
-        public UdpSocketClientImplementation(string host, string port, string name)
+        public UdpSocketClientImplementation(string host, string port, int id)
         {
             if (host is null)
             {
@@ -47,9 +43,9 @@ namespace WebSocketLibrary
                 throw new ArgumentNullException(nameof(port));
             }
 
-            this.Name = name;
+            this.Id = id;
             /*ep = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); */// endpoint where server is listening
-            ep = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port));
+            EP = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port));
             this.Client = CreateSocket(new IPEndPoint(IPAddress.Any, 1111));
         }
 
@@ -58,18 +54,16 @@ namespace WebSocketLibrary
          */
         public bool CreateConnectionWithDataSocket() 
         {
-
             try
             {
                 //Create Subscribe Message (for now it is hardcoded)
-                SubscribeMessage firstMsg = new SubscribeMessage();
-                firstMsg.Interval = 200;
-                firstMsg.Content = SubscribeContent.vehicles;
-                firstMsg.ClientPort = 1111;
+                //SubscribeMessage firstMsg = new SubscribeMessage();
+                //firstMsg.Interval = 200;
+                //firstMsg.Content = SubscribeContent.vehicles;
 
 
                 // Setup connection with data server
-                HandleHandShake(firstMsg);
+                isAlive = checkIfAlive();
 
                 // Start listening for data stream
                 StartListening();
@@ -88,37 +82,64 @@ namespace WebSocketLibrary
         {
             UdpState state = new UdpState();
             state.client = Client;
-            state.endpoint = ep;
+            state.endpoint = EP;
             /**
              * Handle Errors
              */
 
+            //if (checkIfAlive())
+            //{
             Client.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
+            //}
             
         }
 
-        private Byte[] ConvertMesssageToBytes(object objectToConvert)
-        {
-            return Encoding.ASCII.GetBytes(GetStringFromObject(objectToConvert));
-        }
-        
         private UdpClient CreateSocket(IPEndPoint socketEp)
         {
             UdpClient localClient = new UdpClient(socketEp);
+            // This is required, because when UDP socket looses connection (wtf?), then c# will throw exceptions
+            // This does not make much sense
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                uint IOC_IN = 0x80000000;
+                uint IOC_VENDOR = 0x18000000;
+                uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+                localClient.Client.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+            }
             localClient.EnableBroadcast = true;
             return localClient;
         }
+        
 
-        private void HandleHandShake(SubscribeMessage msg)
+        // Wait for acknowledgement
+        // It is a synchronous wait so thread will wait until it is finished
+        // We do not care about the content so we just return bool depending if ack arrived
+        public override bool GetACK()
         {
-            Byte[] sendBytes = ConvertMesssageToBytes(msg);
+            // Wait for 5 secs
+            Client.Client.ReceiveTimeout = 5000;
 
-            SendMessage(sendBytes);
-        }
+            Byte[] data = Client.Receive(ref EP);
 
-        private string GetStringFromObject(object objectToSerialize)
-        {
-            return JsonConvert.SerializeObject(objectToSerialize);
+            string receiveString = Encoding.ASCII.GetString(data);
+            AcknowledgeMessage parsedObject = null;
+            try
+            {
+                parsedObject = JsonConvert.DeserializeObject<AcknowledgeMessage>(receiveString);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error occured while parsing Incomming message");
+                Console.WriteLine(e.ToString());
+                //TODO setup log with all incidents
+            }
+
+            if (parsedObject != null)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /**
@@ -126,38 +147,27 @@ namespace WebSocketLibrary
          */
         public void Ws_HandleMessage(IAsyncResult ar)
         {
-            Console.WriteLine("HELLO");
+
             UdpClient client = ((UdpState)(ar.AsyncState)).client;
             IPEndPoint endpoint = ((UdpState)(ar.AsyncState)).endpoint;
 
-
-            byte[] receiveBytes = client.EndReceive(ar, ref endpoint);
-
-
-
-            if (receiveBytes.Length >= 4)
+            byte[] receiveBytes = new byte[0];
+            try
             {
-                string receiveString = Encoding.ASCII.GetString(receiveBytes);
-                CarUpdateInfoWrapper parsedObject = null;
-                try
-                {
-                    parsedObject = JsonConvert.DeserializeObject<CarUpdateInfoWrapper>(receiveString);
-                }catch(Exception e)
-                {
-                    Console.WriteLine("Error occured while parsing Incomming message");
-                    Console.WriteLine(e.ToString());
-                    //TODO setup log with all incidents
-                }
-
-                if(parsedObject != null)
-                {
-                    foreach(IObserver<CarUpdateInfoWrapper> handler in registeredMessageHandlers)
-                    {
-                        handler.OnNext(parsedObject);
-                    }
-                }
-
+                receiveBytes = client.EndReceive(ar, ref endpoint);
             }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            Console.WriteLine("Socket " + Id + " has recieved data");
+
+            //if (receiveBytes.Length >= 4)
+            //{
+                string receiveString = Encoding.ASCII.GetString(receiveBytes);
+                ResolveMessageType(receiveString);
+            //}
 
 
             UdpState state = new UdpState();
@@ -166,49 +176,71 @@ namespace WebSocketLibrary
             client.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
         }
 
-       /* private bool IsAlive(int attempt)
+        public override void SendMessage(Byte[] msg)
         {
-            if (!ws.IsAlive)
+            if (checkIfAlive())
             {
-                ws.Connect();
+                Client.Send(msg, msg.Length, EP);
             }
-
-            if (!ws.IsAlive && attempt < 10)
-            {
-                IsAlive(attempt + 1);
-            }
-
-            return ws.IsAlive;
-
-        }*/
-
-        public void SendMessage(Byte[] msg)
-        {
-            Client.Send(msg, msg.Length, ep);
+            
         }
-
-        public void CloseConnection()
+        
+        public override void CloseConnection()
         {
 
-            //if (ws.IsAlive)
-            //{
             registeredMessageHandlers.ForEach(handler =>
             {
                 handler.OnCompleted();
-                });
+            });
             registeredMessageHandlers.Clear();
+
+            SendCloseMessage();
             Client.Close();
-            //}
+
         }                                                      
 
-        public IDisposable Subscribe(IObserver<CarUpdateInfoWrapper> observer)
+        // Inform Other side that connection is closing
+        private void SendCloseMessage()
         {
-            if (!registeredMessageHandlers.Contains(observer))
-            {
-                registeredMessageHandlers.Add(observer);
-            }
-            return new Unsubscriber<CarUpdateInfoWrapper>(registeredMessageHandlers, observer);
+            UnsubscribeMessage msg = new UnsubscribeMessage();
+
+            Byte[] sendBytes = ConvertMesssageToBytes(msg);
+
+            SendMessage(sendBytes);
         }
 
+        public void HandleHandShake()
+        {
+            //Create Subscribe Message (for now it is hardcoded)
+            SubscribeMessage firstMsg = GetSubscribeMessage();
+
+            //do
+            //{
+              //  Console.WriteLine("Trying to Connect, total retries = " + totalWait);
+              //  Thread.Sleep(wait);
+                Byte[] sendBytes = ConvertMesssageToBytes(firstMsg);
+                Client.Send(sendBytes, sendBytes.Length, EP);
+            //  wait = 10000;
+            //  totalWait++;
+
+            //} while (GetACK());
+
+            //return GetACK();
+        }
+
+        public bool checkIfAlive()
+        {
+            return isAlive;
+
+           /* if (!isAlive)
+            {
+
+
+                HandleHandShake(firstMsg);
+
+            }
+
+            return isAlive;*/
+        }
     }
 }

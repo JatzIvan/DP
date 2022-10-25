@@ -5,7 +5,7 @@ using WebSocketLibrary.Models;
 
 namespace WebSocketLibrary
 {
-    public class WebSocketMessageHandler<T> : IObserver<CarUpdateInfoWrapper> where T: ICollisionDetector 
+    public class WebSocketMessageHandler<T> : IObserver<List<VehicleData>> where T: ICollisionDetector 
     {
 
         private string Name;
@@ -40,11 +40,11 @@ namespace WebSocketLibrary
             throw new NotImplementedException();
         }
 
-        public virtual void OnNext(CarUpdateInfoWrapper value)
+        public virtual void OnNext(List<VehicleData> value)
         {
 
             //Console.WriteLine("Latitude: " + value.RecievedData[0].Lat + " ,Longitude:" + value.RecievedData[0].Lon + " ,Velocity:" + value.RecievedData[0].Vel + " ,Orientation:" + value.RecievedData[0].Orientation);
-            CollisionDetector.PerformCalculations(value.RecievedData);
+            CollisionDetector.PerformCalculations(value);
         }
         public virtual void Subscribe(UdpSocketClientImplementation provider)
         {

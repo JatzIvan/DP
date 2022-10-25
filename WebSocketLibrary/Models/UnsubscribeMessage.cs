@@ -6,13 +6,10 @@ using System.Text;
 
 namespace WebSocketLibrary.Models
 {
-    public class UnsubscribeMessage
+    public class UnsubscribeMessage: AbstractMessage
     {
 
-        public int Index { get; set; }
-        public string Type = "unsubscribe";
-        [JsonConverter(typeof(IsoDateTimeConverter))]
-        public DateTime Timestamp = DateTime.Now;
+        public new string Type = "unsubscribe";
 
     }
 }

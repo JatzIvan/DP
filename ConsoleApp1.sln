@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseHandlerLibrary", "D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoadVisualisation", "RoadVisualisation\RoadVisualisation.csproj", "{DC0A6CE9-06D5-4728-96F7-0DBA7808C191}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CollisionDetector", "CollisionDetector\CollisionDetector.csproj", "{3C5DA719-E1AD-4D2D-ACFD-5C974EABD00C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{DC0A6CE9-06D5-4728-96F7-0DBA7808C191}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC0A6CE9-06D5-4728-96F7-0DBA7808C191}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC0A6CE9-06D5-4728-96F7-0DBA7808C191}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C5DA719-E1AD-4D2D-ACFD-5C974EABD00C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C5DA719-E1AD-4D2D-ACFD-5C974EABD00C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C5DA719-E1AD-4D2D-ACFD-5C974EABD00C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C5DA719-E1AD-4D2D-ACFD-5C974EABD00C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

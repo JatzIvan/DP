@@ -1,7 +1,6 @@
 ﻿using ConsoleApp1.Api;
 using ConsoleApp2;
 using ConsoleApp2.RoadSectionHandling;
-using ConsoleApp2.RoadSectionHandling.CircleCurvitureModel;
 using ConsoleApp2.RoadSectionHandling.Data;
 using ConsoleApp2.RoadSectionHandling.Model;
 using ConsoleApp2.RoadSectionHandling.RoadSimplificators;
