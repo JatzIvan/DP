@@ -1,11 +1,11 @@
-﻿using ConsoleApp2.RoadSectionHandling.Model;
+﻿using CoreLibrary.RoadSectionHandling.Model;
 using CoreLibrary.RoadSectionHandling.CollisionCalculators;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using WebSocketLibrary.Models;
 
-namespace ConsoleApp2.RoadSectionHandling.CollisionCalculators.CurveCalculators
+namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
 {
     class SimpleCurveRoadCurvatureCalculator : ICollisionCalculatorImplementation
     {
@@ -26,7 +26,11 @@ namespace ConsoleApp2.RoadSectionHandling.CollisionCalculators.CurveCalculators
 
         public CollisionInfo PerformCollisionCalculations(VehicleData vehicle1, VehicleData vehicle2, Dictionary<LocationPoint, AbstractRoadModel> currectRoadModel)
         {
-            throw new NotImplementedException();
+
+            Console.WriteLine("Curvature Calc");
+
+            return null;
+
         }
     }
 }

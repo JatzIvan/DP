@@ -1,9 +1,9 @@
 ﻿using ConsoleApp1.Api;
-using ConsoleApp2;
-using ConsoleApp2.RoadSectionHandling;
-using ConsoleApp2.RoadSectionHandling.Data;
-using ConsoleApp2.RoadSectionHandling.Model;
-using ConsoleApp2.RoadSectionHandling.RoadSimplificators;
+using CoreLibrary;
+using CoreLibrary.RoadSectionHandling;
+using CoreLibrary.RoadSectionHandling.Data;
+using CoreLibrary.RoadSectionHandling.Model;
+using CoreLibrary.RoadSectionHandling.RoadSimplificators;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

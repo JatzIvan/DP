@@ -1,9 +1,9 @@
-﻿using ConsoleApp2.RoadSectionHandling.Model;
+﻿using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ConsoleApp2.RoadSectionHandling
+namespace CoreLibrary.RoadSectionHandling
 {
     public static class MapParserUtils
     {
@@ -28,6 +28,26 @@ namespace ConsoleApp2.RoadSectionHandling
             double long1 = ConvertDegreesToRadians(a.Longitude);
             double lat2 = ConvertDegreesToRadians(b.Latitude);
             double long2 = ConvertDegreesToRadians(b.Longitude);
+
+            double dlon = long2 - long1;
+            double dlat = lat2 - lat1;
+            double h1 = Math.Pow(Math.Sin(dlat / 2), 2) +
+                       Math.Cos(lat1) * Math.Cos(lat2) *
+                       Math.Pow(Math.Sin(dlon / 2), 2);
+
+            double h2 = 2 * Math.Atan2(Math.Sqrt(h1), Math.Sqrt(1 - h1));
+
+            return h2 * rEarth;
+
+        }
+
+        public static double CalculateDistanceBetweenPointsFromRadians(LocationPoint a, LocationPoint b)
+        {
+
+            double lat1 = a.Latitude;
+            double long1 = a.Longitude;
+            double lat2 = b.Latitude;
+            double long2 = b.Longitude;
 
             double dlon = long2 - long1;
             double dlat = lat2 - lat1;

@@ -1,6 +1,6 @@
 ﻿using ConsoleApp1.Api;
-using ConsoleApp2.RoadSectionHandling;
-using ConsoleApp2.RoadSectionHandling.Model;
+using CoreLibrary.RoadSectionHandling;
+using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using WebSocketLibrary;
 using WebSocketLibrary.Models;
 
-namespace ConsoleApp2
+namespace CoreLibrary
 {
     class Program
     {

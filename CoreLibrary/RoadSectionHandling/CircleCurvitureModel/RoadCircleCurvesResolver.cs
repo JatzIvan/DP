@@ -1,11 +1,11 @@
-﻿using ConsoleApp2.RoadSectionHandling.Data;
-using ConsoleApp2.RoadSectionHandling.Model;
+﻿using CoreLibrary.RoadSectionHandling.Data;
+using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ConsoleApp2.RoadSectionHandling.CircleCurvitureModel
+namespace CoreLibrary.RoadSectionHandling.CircleCurvitureModel
 {
     class RoadCircleCurvesResolver : ICurvesResolver
     {

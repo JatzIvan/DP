@@ -1,14 +1,14 @@
-﻿using ConsoleApp2.RoadSectionHandling.CircleCurvitureModel;
-using ConsoleApp2.RoadSectionHandling.Data;
-using ConsoleApp2.RoadSectionHandling.Model;
-using ConsoleApp2.RoadSectionHandling.RoadSimplificators;
+﻿using CoreLibrary.RoadSectionHandling.CircleCurvitureModel;
+using CoreLibrary.RoadSectionHandling.Data;
+using CoreLibrary.RoadSectionHandling.Model;
+using CoreLibrary.RoadSectionHandling.RoadSimplificators;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using static ConsoleApp2.RoadSectionHandling.Data.RoadCurvitureCalculatorFactory;
-using static ConsoleApp2.RoadSectionHandling.Data.SectionSimplificationFactory;
+using static CoreLibrary.RoadSectionHandling.Data.RoadCurvitureCalculatorFactory;
+using static CoreLibrary.RoadSectionHandling.Data.SectionSimplificationFactory;
 
-namespace ConsoleApp2.RoadSectionHandling
+namespace CoreLibrary.RoadSectionHandling
 {
     public class RoadDataHandler
     {

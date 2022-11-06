@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using WebSocketLibrary.Models;
 
 namespace WebSocketLibrary
@@ -42,9 +43,10 @@ namespace WebSocketLibrary
 
         public virtual void OnNext(List<VehicleData> value)
         {
-
+            Thread td = new Thread(() => CollisionDetector.PerformCalculations(value));
+            td.Start();
             //Console.WriteLine("Latitude: " + value.RecievedData[0].Lat + " ,Longitude:" + value.RecievedData[0].Lon + " ,Velocity:" + value.RecievedData[0].Vel + " ,Orientation:" + value.RecievedData[0].Orientation);
-            CollisionDetector.PerformCalculations(value);
+            //CollisionDetector.PerformCalculations(value);
         }
         public virtual void Subscribe(UdpSocketClientImplementation provider)
         {

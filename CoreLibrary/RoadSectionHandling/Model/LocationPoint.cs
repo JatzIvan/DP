@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace ConsoleApp2.RoadSectionHandling.Model
+namespace CoreLibrary.RoadSectionHandling.Model
 {
     public class LocationPoint
     {

@@ -1,5 +1,5 @@
 using ConsoleApp1.Api;
-using ConsoleApp2;
+using CoreLibrary;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace ConsoleApp2.RoadSectionHandling.CollisionCalculators.CurveCalculators
+namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
 {
     class CurveCollisionCalculatorFactory : ICollisionCalculatorFactory
     {

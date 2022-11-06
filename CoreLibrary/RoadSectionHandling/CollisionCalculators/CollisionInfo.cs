@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using static ConsoleApp2.RoadSectionHandling.CollisionCalculators.ICollisionCalculatorImplementation;
+using static CoreLibrary.RoadSectionHandling.CollisionCalculators.ICollisionCalculatorImplementation;
 
 namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
 {

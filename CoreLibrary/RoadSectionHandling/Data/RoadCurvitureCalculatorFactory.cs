@@ -1,12 +1,12 @@
-﻿using ConsoleApp2.RoadSectionHandling.CircleCurvitureModel;
-using ConsoleApp2.RoadSectionHandling.Model;
+﻿using CoreLibrary.RoadSectionHandling.CircleCurvitureModel;
+using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ConsoleApp2.RoadSectionHandling.Data
+namespace CoreLibrary.RoadSectionHandling.Data
 {
     class RoadCurvitureCalculatorFactory
     {

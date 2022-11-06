@@ -1,11 +1,11 @@
-﻿using ConsoleApp2.RoadSectionHandling.Model;
-using ConsoleApp2.RoadSectionHandling.RoadSimplificators;
+﻿using CoreLibrary.RoadSectionHandling.Model;
+using CoreLibrary.RoadSectionHandling.RoadSimplificators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ConsoleApp2.RoadSectionHandling.Data
+namespace CoreLibrary.RoadSectionHandling.Data
 {
     public abstract class ISectionSimplificator
     {

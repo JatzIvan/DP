@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using WebSocketLibrary.Models;
@@ -159,10 +160,13 @@ namespace WebSocketLibrary
         {
             if (data != null)
             {
-                foreach (IObserver<CarUpdateInfo> handler in registeredMessageHandlers)
+                Stopwatch sw = Stopwatch.StartNew();
+                foreach (IObserver<List<VehicleData>> handler in registeredMessageHandlers)
                 {
-                    handler.OnNext(data);
+                    handler.OnNext(data.Vehicles);
                 }
+
+                Console.WriteLine(sw.ElapsedMilliseconds);
             }
         }
 

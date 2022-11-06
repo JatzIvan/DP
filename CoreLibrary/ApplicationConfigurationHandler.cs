@@ -1,11 +1,11 @@
-﻿using ConsoleApp2.RoadSectionHandling;
-using ConsoleApp2.RoadSectionHandling.Data;
-using ConsoleApp2.RoadSectionHandling.RoadSimplificators;
+﻿using CoreLibrary.RoadSectionHandling;
+using CoreLibrary.RoadSectionHandling.Data;
+using CoreLibrary.RoadSectionHandling.RoadSimplificators;
 using System;
 using System.Configuration;
 using System.Globalization;
 
-namespace ConsoleApp2
+namespace CoreLibrary
 {
     public class ApplicationConfigurationHandler
     {

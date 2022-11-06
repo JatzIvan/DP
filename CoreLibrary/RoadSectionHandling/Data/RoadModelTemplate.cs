@@ -1,9 +1,9 @@
-﻿using ConsoleApp2.RoadSectionHandling.Model;
+﻿using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ConsoleApp2.RoadSectionHandling.Data
+namespace CoreLibrary.RoadSectionHandling.Data
 {
     interface RoadModelTemplate<T>
     {

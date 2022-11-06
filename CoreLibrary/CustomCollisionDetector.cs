@@ -1,11 +1,11 @@
-﻿using ConsoleApp2.RoadSectionHandling.Model;
+﻿using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using WebSocketLibrary;
 using WebSocketLibrary.Models;
 
-namespace ConsoleApp2
+namespace CoreLibrary
 {
     class CustomCollisionDetector : AbstractCollisionDetector
     {

@@ -1,9 +1,9 @@
-﻿using ConsoleApp2;
-using ConsoleApp2.RoadSectionHandling;
-using ConsoleApp2.RoadSectionHandling.CollisionCalculators;
-using ConsoleApp2.RoadSectionHandling.CollisionCalculators.CurveCalculators;
-using ConsoleApp2.RoadSectionHandling.CollisionCalculators.StraightCalculators;
-using ConsoleApp2.RoadSectionHandling.Model;
+﻿using CoreLibrary;
+using CoreLibrary.RoadSectionHandling;
+using CoreLibrary.RoadSectionHandling.CollisionCalculators;
+using CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators;
+using CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators;
+using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +12,9 @@ using WebSocketLibrary.Models;
 
 namespace WebSocketLibrary
 {
-    abstract class AbstractCollisionDetector : ICollisionDetector
+    public abstract class AbstractCollisionDetector : ICollisionDetector
     {
-        Dictionary<LocationPoint, AbstractRoadModel> currectRoadModel;
+        protected Dictionary<LocationPoint, AbstractRoadModel> currectRoadModel;
 
         public AbstractCollisionDetector(Dictionary<LocationPoint, AbstractRoadModel> currectRoadModel)
         {
@@ -141,7 +141,7 @@ namespace WebSocketLibrary
                 //RadiusOfCurvature
                 // TODO: use value from config
                 // TODO: test and determine best radius for method 
-                if (DetermineDirection(vehicle1.Heading, v1Point) ? v1Point.Next.RadiusOfCurvature > 0.05 : v1Point.Previous.RadiusOfCurvature > 0.05)
+                if (DetermineDirection(vehicle1.Heading, v1Point) ? (1 / v1Point.Next.RadiusOfCurvature) < ApplicationConfigurationHandler.CurvatureTreshold : (1 / v1Point.Previous.RadiusOfCurvature) < ApplicationConfigurationHandler.CurvatureTreshold)
                 {
                     return true;
                 }
@@ -151,7 +151,7 @@ namespace WebSocketLibrary
                     break;
                 }
 
-                AbstractRoadModel v1NextPoint = DetermineDirection(vehicle1.Heading, v1Point) ? v1Point.Next.Point : v1Point.Previous.Point;
+                v1Point = DetermineDirection(vehicle1.Heading, v1Point) ? v1Point.Next.Point : v1Point.Previous.Point;
             }
 
             return false;
@@ -160,12 +160,13 @@ namespace WebSocketLibrary
         /**
          * Simple method pairs cars with eachother for later
          */
-        public List<ValueTuple<VehicleData, VehicleData>> CreateVehiclePairs(List<VehicleData> vehicles)
+        public IEnumerable<IEnumerable<VehicleData>> CreateVehiclePairs(List<VehicleData> vehicles)
         {
 
             List<ValueTuple<VehicleData, VehicleData>> pairs = new List<ValueTuple<VehicleData, VehicleData>>();
+            return GetPermutations(vehicles, 2);
 
-            foreach (VehicleData vehicle1 in vehicles)
+            /*foreach (VehicleData vehicle1 in vehicles)
             {
                 foreach(VehicleData vehicle2 in vehicles)
                 {
@@ -176,8 +177,26 @@ namespace WebSocketLibrary
                 }
             }
 
-            return pairs;
+            return pairs;*/
 
+        }
+
+        // https://stackoverflow.com/questions/12249051/unique-combinations-of-list
+        IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> items, int count)
+        {
+            int i = 0;
+            foreach (var item in items)
+            {
+                if (count == 1)
+                    yield return new T[] { item };
+                else
+                {
+                    foreach (var result in GetPermutations(items.Skip(i + 1), count - 1))
+                        yield return new T[] { item }.Concat(result);
+                }
+
+                ++i;
+            }
         }
 
         /**

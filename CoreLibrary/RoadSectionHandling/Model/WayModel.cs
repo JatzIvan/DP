@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace ConsoleApp2.RoadSectionHandling.Model
+namespace CoreLibrary.RoadSectionHandling.Model
 {
     public class WayModel
     {

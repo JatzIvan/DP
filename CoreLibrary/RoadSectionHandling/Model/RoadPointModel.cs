@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace ConsoleApp2.RoadSectionHandling.Model
+namespace CoreLibrary.RoadSectionHandling.Model
 {
     public class RoadPointModel : IDatabaseModel<RoadPointModel>
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace ConsoleApp2.RoadSectionHandling.CollisionCalculators.StraightCalculators
+namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators
 {
     class StraightCollisionCalculatorFactory : ICollisionCalculatorFactory
     {
@@ -61,7 +61,7 @@ namespace ConsoleApp2.RoadSectionHandling.CollisionCalculators.StraightCalculato
         public ICollisionCalculatorImplementation GetImplementation()
         {
 
-            Type foundType = straightCollisionTypes.Where(i => i.GetType().Name.Equals(ApplicationConfigurationHandler.StraightCollisionCalculator))
+            Type foundType = straightCollisionTypes.Where(i => i.Name.Equals(ApplicationConfigurationHandler.StraightCollisionCalculator))
                 .FirstOrDefault();
 
             if(foundType == null)

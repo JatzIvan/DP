@@ -21,6 +21,13 @@ namespace WebSocketLibrary.Models
 
     public class PositionWrapper
     {
+
+        public PositionWrapper(float Lat, float Lon)
+        {
+            this.Lat = Lat;
+            this.Lon = Lon;
+        }
+
         public float Lat { get; set; }
         public float Lon { get; set; }
     }

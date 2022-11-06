@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ConsoleApp2.RoadSectionHandling.CollisionCalculators
+namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
 {
     public interface ICollisionCalculatorFactory
     {

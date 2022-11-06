@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ConsoleApp2.RoadSectionHandling.Model
+namespace CoreLibrary.RoadSectionHandling.Model
 {
 /*    public class RoadCurvitureModel : AbstractRoadModel, IDatabaseModel<RoadCurvitureModel>
     {

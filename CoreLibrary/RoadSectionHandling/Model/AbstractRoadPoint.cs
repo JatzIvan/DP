@@ -1,9 +1,9 @@
-﻿using ConsoleApp2.RoadSectionHandling.Data;
+﻿using CoreLibrary.RoadSectionHandling.Data;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ConsoleApp2.RoadSectionHandling.Model
+namespace CoreLibrary.RoadSectionHandling.Model
 {
     public class AbstractRoadModel
     {

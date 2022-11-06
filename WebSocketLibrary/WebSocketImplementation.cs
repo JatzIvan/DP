@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -44,8 +45,9 @@ namespace WebSocketLibrary
             }
 
             this.Id = id;
-            /*ep = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); */// endpoint where server is listening
-            EP = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port));
+            EP = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); // endpoint where server is listening
+            //IPAddress ip = Dns.GetHostEntry("integration_module").AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork);
+            //EP = new IPEndPoint(ip, Int32.Parse(port));
             this.Client = CreateSocket(new IPEndPoint(IPAddress.Any, 1111));
         }
 

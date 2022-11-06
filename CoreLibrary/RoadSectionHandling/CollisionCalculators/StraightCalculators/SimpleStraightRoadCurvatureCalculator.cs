@@ -1,11 +1,11 @@
-﻿using ConsoleApp2.RoadSectionHandling.Model;
+﻿using CoreLibrary.RoadSectionHandling.Model;
 using CoreLibrary.RoadSectionHandling.CollisionCalculators;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using WebSocketLibrary.Models;
 
-namespace ConsoleApp2.RoadSectionHandling.CollisionCalculators.StraightCalculators
+namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators
 {
     public class SimpleStraightRoadCurvatureCalculator : ICollisionCalculatorImplementation
     {
