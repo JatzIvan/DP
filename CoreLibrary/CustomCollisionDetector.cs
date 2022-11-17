@@ -1,4 +1,5 @@
 ﻿using CoreLibrary.RoadSectionHandling.Model;
+using NetTopologySuite.Index.KdTree;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,14 +11,14 @@ namespace CoreLibrary
     class CustomCollisionDetector : AbstractCollisionDetector
     {
 
-        public CustomCollisionDetector(Dictionary<LocationPoint, AbstractRoadModel> currectRoadModel) : base(currectRoadModel)
+        public CustomCollisionDetector(KdTree<AbstractRoadModel> currectRoadModel) : base(currectRoadModel)
         {
 
         }
 
-        public override void PerformCalculations(List<VehicleData> data)
+        public override void PerformCalculations(ObserverWrapper data)
         {
-            foreach (VehicleData car in data)
+            foreach (VehicleData car in data.Data)
             {
                 Console.WriteLine("Latitude: " + car.Position.Lat + " ,Longitude:" + car.Position.Lon + " ,Velocity:" + car.Speed + " ,Orientation:" + car.Heading);
 

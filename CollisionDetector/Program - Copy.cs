@@ -1,15 +1,20 @@
-﻿using CoreLibrary.RoadSectionHandling.Model;
+﻿using ConsoleApp1.Api;
+using CoreLibrary;
+using CoreLibrary.RoadSectionHandling;
 using CoreLibrary.RoadSectionHandling.CollisionCalculators;
+using CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators;
+using CoreLibrary.RoadSectionHandling.Model;
+using NetTopologySuite.Index.KdTree;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading;
+using WebSocketLibrary;
 using WebSocketLibrary.Models;
-using NetTopologySuite.Index.KdTree;
 
-namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators
+namespace CollisionDetector
 {
-    [CollisionType(CollisionTypeEnum.STRAIGHT)]
-    public class SimpleStraightRoadCurvatureCalculator : ICollisionCalculatorImplementation
+    [CollisionType(CollisionTypeEnum.CURVATURE)]
+    public class TestXX : ICollisionCalculatorImplementation
     {
         public double CalculateTTC()
         {

@@ -5,12 +5,12 @@ using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling.Data
 {
-    interface ICurvesResolver
+    public interface ICurvesResolver
     {
         /**
          * Method is used to calculate "curvature" between points on map
          */
-        public Dictionary<LocationPoint, AbstractRoadModel> CalculateCurvesForWays();
+        public List<AbstractRoadModel> CalculateCurvesForWays();
 
     }
 }

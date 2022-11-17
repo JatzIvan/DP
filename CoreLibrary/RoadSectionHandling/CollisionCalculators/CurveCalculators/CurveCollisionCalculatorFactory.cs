@@ -6,18 +6,36 @@ using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
 {
-    class CurveCollisionCalculatorFactory : ICollisionCalculatorFactory
+    class CurveCollisionCalculatorFactory : AbstractCalculatorFactory, ICollisionCalculatorFactory
     {
         private static ICollisionCalculatorFactory INSTANCE;
 
-        private static List<Type> curveCollisionImplementations = new List<Type>();
+        //private static List<Type> curveCollisionImplementations = new List<Type>();
+        private static List<ValueTuple<Type, Func<object>>> curveCollisionImplementations = new List<ValueTuple<Type, Func<object>>>();
+        private static ValueTuple<Type, Func<object>> defaultConstructor;
+
 
         // Initialize before anything to be ready to use
         static CurveCollisionCalculatorFactory(){
-            LoadImplementations();
+            //LoadImplementations();
+            //curveCollisionImplementations = LoadImplementations(new CollisionTypeAttribute(CollisionTypeEnum.CURVATURE), typeof(ICollisionCalculatorImplementation));
+            List<Type> calculators = LoadImplementations(new CollisionTypeAttribute(CollisionTypeEnum.CURVATURE), typeof(ICollisionCalculatorImplementation));
+            foreach (Type calculator in calculators)
+            {
+                curveCollisionImplementations.Add((calculator, CreateCreator(calculator)));
+            }
+
+            defaultConstructor = (typeof(SimpleCurveRoadCurvatureCalculator), CreateCreator(typeof(SimpleCurveRoadCurvatureCalculator)));
+
+
         }
 
-        private static void LoadImplementations()
+        public override List<Type> GetLoadedTypes()
+        {
+            return curveCollisionImplementations.Select(_ => _.Item1).ToList();
+        }
+
+        /*private static void LoadImplementations()
         {
             Type calculatorType = typeof(ICollisionCalculatorImplementation);
 
@@ -29,7 +47,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
             // Some more magic to create instances of gathered types (we do not need to provide any data to constructors)
             //implKlazzes.ForEach(klazz => curveCollisionImplementations.Add((ICollisionCalculatorImplementation)Activator.CreateInstance(klazz)));
 
-        }
+        }*/
 
         private CurveCollisionCalculatorFactory()
         {
@@ -60,15 +78,15 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
         public ICollisionCalculatorImplementation GetImplementation()
         {
 
-            Type foundType = curveCollisionImplementations.Where(i => i.GetType().Name.Equals(ApplicationConfigurationHandler.CurveCollisionCalculator))
+            ValueTuple <Type, Func<object>> foundType = curveCollisionImplementations.Where(i => i.Item1.Name.Equals(ApplicationConfigurationHandler.CurveCollisionCalculator))
                 .FirstOrDefault();
 
-            if (foundType == null)
+            if (foundType.Equals(default(ValueTuple<Type, Func<object>>)))
             {
-                foundType = typeof(SimpleCurveRoadCurvatureCalculator);
+                foundType = defaultConstructor;
             }
 
-            return (ICollisionCalculatorImplementation) Activator.CreateInstance(foundType);
+            return (ICollisionCalculatorImplementation)foundType.Item2();
 
         }
     }

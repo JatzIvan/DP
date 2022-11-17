@@ -7,20 +7,16 @@ using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling.RoadSimplificators
 {
-    class DouglasPeuckerRoadSectionSimplification : ISectionSimplificator{ 
+    [RoadSimplificator]
+    public class DouglasPeuckerRoadSectionSimplification : ISectionSimplificator{ 
 /*        private float Tolerance { get; set; } = 0.05f;*/
 
-        public DouglasPeuckerRoadSectionSimplification(Dictionary<LocationPoint, AbstractRoadModel> connectedWays, DouglasPeuckerConfig config) : base(connectedWays, config)
+        public DouglasPeuckerRoadSectionSimplification(List<AbstractRoadModel> connectedWays) : base(connectedWays)
         {
             if (connectedWays is null)
             {
                 throw new ArgumentNullException(nameof(connectedWays));
             }
-        }
-
-        public DouglasPeuckerRoadSectionSimplification(Dictionary<LocationPoint, AbstractRoadModel> connectedWays) : base(connectedWays, new DouglasPeuckerConfig(0.05f))
-        {
-
         }
 
         private Tuple<double, int> FindPointWithMaximumDistance(List<AbstractRoadModel> model)
@@ -90,6 +86,9 @@ namespace CoreLibrary.RoadSectionHandling.RoadSimplificators
 
         }
 
-
+        public override AbstractSimplificationModel CreateConfig()
+        {
+            return new DouglasPeuckerConfig(ApplicationConfigurationHandler.DPTolerance);
+        }
     }
 }

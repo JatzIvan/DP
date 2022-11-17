@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using WebSocketLibrary.Models;
 
 namespace WebSocketLibrary
 {
-    public class WebSocketMessageHandler<T> : IObserver<List<VehicleData>> where T: ICollisionDetector 
+    public class WebSocketMessageHandler<T> : IObserver<ObserverWrapper> where T: ICollisionDetector 
     {
 
         private string Name;
@@ -41,12 +43,16 @@ namespace WebSocketLibrary
             throw new NotImplementedException();
         }
 
-        public virtual void OnNext(List<VehicleData> value)
+        public virtual void OnNext(ObserverWrapper value)
         {
-            Thread td = new Thread(() => CollisionDetector.PerformCalculations(value));
-            td.Start();
+
+            Stopwatch sw = Stopwatch.StartNew();
+            Task task = Task.Run(() => CollisionDetector.PerformCalculations(value));
+            //Thread td = new Thread(() => CollisionDetector.PerformCalculations(value));
+            //td.Start();
             //Console.WriteLine("Latitude: " + value.RecievedData[0].Lat + " ,Longitude:" + value.RecievedData[0].Lon + " ,Velocity:" + value.RecievedData[0].Vel + " ,Orientation:" + value.RecievedData[0].Orientation);
             //CollisionDetector.PerformCalculations(value);
+            Console.WriteLine("Time elapsed for thread creation " + sw.ElapsedMilliseconds);
         }
         public virtual void Subscribe(UdpSocketClientImplementation provider)
         {

@@ -10,21 +10,21 @@ namespace CoreLibrary.RoadSectionHandling.Data
     public abstract class ISectionSimplificator
     {
 
-        private Dictionary<LocationPoint, AbstractRoadModel> SimplifiedModel { get; set; }
+        private List<AbstractRoadModel> SimplifiedModel { get; set; }
 
-        private Dictionary<LocationPoint, AbstractRoadModel> ConnectedWays { get; set; }
+        private List<AbstractRoadModel> ConnectedWays { get; set; }
 
         protected AbstractSimplificationModel Config { get; set; }
 
-        public ISectionSimplificator(Dictionary<LocationPoint, AbstractRoadModel> connectedWays, AbstractSimplificationModel config)
+        public ISectionSimplificator(List<AbstractRoadModel> connectedWays)
         {
-            if (connectedWays is null || config is null)
+            if (connectedWays is null)
             {
                 throw new ArgumentNullException(nameof(connectedWays));
             }
 
             this.ConnectedWays = connectedWays;
-            this.Config = config;
+            this.Config = CreateConfig();
         }
 
         /**
@@ -32,10 +32,10 @@ namespace CoreLibrary.RoadSectionHandling.Data
          */
         protected abstract List<AbstractRoadModel> Simplify(List<AbstractRoadModel> model);
 
-        private List<AbstractRoadModel> CreateSortedListOfRoadPoints(Dictionary<LocationPoint, AbstractRoadModel> connectedWays)
+        private List<AbstractRoadModel> CreateSortedListOfRoadPoints(List<AbstractRoadModel> connectedWays)
         {
 
-            AbstractRoadModel firstPoint = connectedWays.First().Value;
+            AbstractRoadModel firstPoint = connectedWays.First();
 
             //Find first
             while (true)
@@ -77,7 +77,7 @@ namespace CoreLibrary.RoadSectionHandling.Data
          * Generic implementation to get Simplified road model. 
          * This function performs all necessary steps so implementing new "Algorithms" should be easy
          */
-        public Dictionary<LocationPoint, AbstractRoadModel> GetSimplifiedModel()
+        public List<AbstractRoadModel> GetSimplifiedModel()
         {
             if (SimplifiedModel != null && SimplifiedModel.Count > 0)
             {
@@ -86,7 +86,7 @@ namespace CoreLibrary.RoadSectionHandling.Data
 
             List<AbstractRoadModel> simplifiedModelList = Simplify(CreateSortedListOfRoadPoints(ConnectedWays));
 
-            SimplifiedModel = new Dictionary<LocationPoint, AbstractRoadModel>();
+            SimplifiedModel = new List<AbstractRoadModel>();
 
             AbstractRoadModel previous = null;
 
@@ -103,13 +103,15 @@ namespace CoreLibrary.RoadSectionHandling.Data
                     model.Previous.Heading = MapParserUtils.CalculateBearingBetweenPoints(model.CurrentLocation, previous.CurrentLocation);
                 }
 
-                SimplifiedModel.Add(model.CurrentLocation, model);
+                SimplifiedModel.Add(model);
                 previous = model;
             }
 
             return SimplifiedModel;
 
         }
+
+        public abstract AbstractSimplificationModel CreateConfig();
 
     }
 }

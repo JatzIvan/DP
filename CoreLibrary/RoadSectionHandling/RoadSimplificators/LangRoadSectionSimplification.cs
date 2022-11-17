@@ -2,15 +2,18 @@
 using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling.RoadSimplificators
 {
+    [RoadSimplificator]
     public class LangRoadSectionSimplification : ISectionSimplificator
     {
 
-        public LangRoadSectionSimplification(Dictionary<LocationPoint, AbstractRoadModel> connectedWays, LangConfig conf) : base(connectedWays, conf)
+        public LangRoadSectionSimplification(List<AbstractRoadModel> connectedWays) : base(connectedWays)
         {
         }
 
@@ -70,6 +73,31 @@ namespace CoreLibrary.RoadSectionHandling.RoadSimplificators
             }
 
             return model;
+        }
+
+        public override AbstractSimplificationModel CreateConfig()
+        {
+            int regionSize;
+            try
+            {
+                if(ApplicationConfigurationHandler.LangRegionSize == 0)
+                {
+                    regionSize = int.Parse(ConfigurationManager.AppSettings.Get("LangRegionSize"), CultureInfo.InvariantCulture);
+                }
+                else
+                {
+                    regionSize = ApplicationConfigurationHandler.LangRegionSize;
+                }
+                //regionSize = int.Parse(ConfigurationManager.AppSettings.Get("LangRegionSize"), CultureInfo.InvariantCulture);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Console.WriteLine("Missing or invalid config value for region size, defaulting 4");
+                regionSize = 4;
+            }
+            return new LangConfig(ApplicationConfigurationHandler.DPTolerance, regionSize);
         }
     }
 }

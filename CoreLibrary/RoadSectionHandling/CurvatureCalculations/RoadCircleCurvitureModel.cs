@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CoreLibrary.RoadSectionHandling.CircleCurvitureModel
+namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 {
     public class RoadCircleCurvitureModel : AbstractRoadModel, IDatabaseModel<RoadCircleCurvitureModel>
     {

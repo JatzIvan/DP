@@ -6,19 +6,36 @@ using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators
 {
-    class StraightCollisionCalculatorFactory : ICollisionCalculatorFactory
+    class StraightCollisionCalculatorFactory : AbstractCalculatorFactory, ICollisionCalculatorFactory
     {
 
         private static ICollisionCalculatorFactory INSTANCE;
-        private static List<Type> straightCollisionTypes = new List<Type>();
+        //private static List<Type> straightCollisionTypes = new List<Type>();
+
+        private static List<ValueTuple<Type, Func<object>>> straightCollisionTypes = new List<ValueTuple<Type, Func<object>>>();
+        private static ValueTuple<Type, Func<object>> defaultConstructor;
+
 
         // Initialize before anything to be ready to use
         static StraightCollisionCalculatorFactory()
         {
-            LoadImplementationTypes();
+            List<Type> calculators = LoadImplementations(new CollisionTypeAttribute(CollisionTypeEnum.STRAIGHT), typeof(ICollisionCalculatorImplementation));
+            foreach (Type calculator in calculators)
+            {
+                straightCollisionTypes.Add((calculator, CreateCreator(calculator)));
+            }
+
+            defaultConstructor = (typeof(SimpleStraightRoadCurvatureCalculator), CreateCreator(typeof(SimpleStraightRoadCurvatureCalculator)));
+
+
         }
 
-        private static void LoadImplementationTypes()
+        public override List<Type> GetLoadedTypes()
+        {
+            return straightCollisionTypes.Select(_ => _.Item1).ToList();
+        }
+
+        /*private static void LoadImplementationTypes()
         {
             Type calculatorType = typeof(ICollisionCalculatorImplementation);
 
@@ -30,7 +47,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
             // Some more magic to create instances of gathered types (we do not need to provide any data to constructors)
             //implKlazzes.ForEach(klazz => straightCollisionImplementations.Add((ICollisionCalculatorImplementation)Activator.CreateInstance(klazz)));
 
-        }
+        }*/
         private StraightCollisionCalculatorFactory()
         {
 
@@ -61,15 +78,15 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
         public ICollisionCalculatorImplementation GetImplementation()
         {
 
-            Type foundType = straightCollisionTypes.Where(i => i.Name.Equals(ApplicationConfigurationHandler.StraightCollisionCalculator))
+            ValueTuple<Type, Func<object>> foundType = straightCollisionTypes.Where(i => i.Item1.Name.Equals(ApplicationConfigurationHandler.StraightCollisionCalculator))
                 .FirstOrDefault();
 
-            if(foundType == null)
+            if(foundType.Equals(default(ValueTuple<Type, Func<object>>)))
             {
-                foundType = typeof(SimpleStraightRoadCurvatureCalculator);
+                foundType = defaultConstructor;
             }
 
-            return (ICollisionCalculatorImplementation) Activator.CreateInstance(foundType);
+            return (ICollisionCalculatorImplementation) foundType.Item2();
 
         }
     }

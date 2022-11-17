@@ -14,8 +14,16 @@ namespace CoreLibrary.RoadSectionHandling.Model
 
         public double RadiusOfCircle { get; set; } = 0;
 
+        public double Angle { get; set; } = 0;
+
+        public double RadiusAccountedForByAngle { get; set; } = 0;
+
+        public double MaxSpeed { get; set; } = Double.MaxValue;
+
         //Temporary
         public LocationPoint TangentOfPoint { get; set; }
+
+        public double Distance { get; set; }
 
         public AbstractRoadModel(LocationPoint point)
         {
@@ -36,6 +44,8 @@ namespace CoreLibrary.RoadSectionHandling.Model
         public double RadiusOfCurvature { get; set; }
 
         public double Heading { get; set; }
+
+        public double MaxSpeed { get; set; } = Double.MaxValue;
 
         public AbstractRoadModel Point { get; set; }
 

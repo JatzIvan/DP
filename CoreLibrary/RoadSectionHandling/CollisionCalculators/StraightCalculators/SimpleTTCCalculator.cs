@@ -1,4 +1,5 @@
 ﻿using CoreLibrary.RoadSectionHandling.Model;
+using NetTopologySuite.Index.KdTree;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -7,31 +8,36 @@ using WebSocketLibrary.Models;
 
 namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators
 {
+    [CollisionType(CollisionTypeEnum.STRAIGHT)]
     class SimpleTTCCalculator : ICollisionCalculatorImplementation
     {
 
         // Radius of Earth (in m)
         private float R = 6378137;
 
-        public float CalculateTTC()
+        private bool CollisionWillHappen = false;
+        private double TTC;
+        private ICollisionCalculatorImplementation.CollisionSeverity Severity;
+
+        public double CalculateTTC()
         {
-            throw new NotImplementedException();
+            return TTC;
         }
 
         public bool CollisionOccured()
         {
-            throw new NotImplementedException();
+            return CollisionWillHappen;
         }
 
         public ICollisionCalculatorImplementation.CollisionSeverity GetCollisionSeverity()
         {
-            throw new NotImplementedException();
+            return Severity;
         }
 
         // Longitude X
         // Latitude Y
         // https://www.movable-type.co.uk/scripts/latlong.html
-        public CollisionInfo PerformCollisionCalculations(VehicleData vehicle1, VehicleData vehicle2, Dictionary<LocationPoint, AbstractRoadModel> currectRoadModel)
+        public AbstractRoadModel PerformCollisionCalculations(VehicleData vehicle1, VehicleData vehicle2, KdTree<AbstractRoadModel> currectRoadModel)
         {
 
             //double d = Math.Sqrt(Math.Pow((vehicle1.Position.Lon - vehicle2.Position.Lon), 2) + Math.Pow(vehicle1.Position.Lat - vehicle2.Position.Lat, 2));
@@ -109,14 +115,16 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
             double delta_long_1_3 = Math.Atan2(Math.Sin(b1) * Math.Sin(ang_dist_1_3) * Math.Cos(lat1), Math.Cos(ang_dist_1_3) - Math.Sin(lat1) * Math.Sin(lat3));
             double lon3 = lon1 + delta_long_1_3;
 
-            double TTX1 = MapParserUtils.CalculateDistanceBetweenPointsFromRadians(new LocationPoint(lon3, lat3), new LocationPoint(lon1, lat1)) * 1000 / vehicle1.Speed;
-            double TTX2 = MapParserUtils.CalculateDistanceBetweenPointsFromRadians(new LocationPoint(lon3, lat3), new LocationPoint(lon2, lat2)) * 1000 / vehicle2.Speed;
+            double TTX1 = MapParserUtils.CalculateDistanceBetweenPointsFromRadians(new LocationPoint(lon3, lat3), new LocationPoint(lon1, lat1)) / vehicle1.Speed;
+            double TTX2 = MapParserUtils.CalculateDistanceBetweenPointsFromRadians(new LocationPoint(lon3, lat3), new LocationPoint(lon2, lat2)) / vehicle2.Speed;
 
             Console.WriteLine(MapParserUtils.ConvertRadiansToDegrees(lat3) + " " + MapParserUtils.ConvertRadiansToDegrees(lon3));
 
             if(Math.Abs(TTX1 - TTX2) <= 5)
             {
                 Console.WriteLine("They should meet");
+                CollisionWillHappen = true;
+                TTC = (TTX1 < TTX2 ? TTX1 : TTX2);
             }
             else
             {

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using WebSocketLibrary.Models;
+using NetTopologySuite.Index.KdTree;
 
 namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
 {
@@ -14,9 +15,9 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
          * If method returns null, there is no collision
          * When CollisionInfo is returned, it should be provided to both vehicles
          */
-        public CollisionInfo PerformCollisionCalculations(VehicleData vehicle1, VehicleData vehicle2, Dictionary<LocationPoint, AbstractRoadModel> currectRoadModel);
+        public AbstractRoadModel PerformCollisionCalculations(VehicleData vehicle1, VehicleData vehicle2, KdTree<AbstractRoadModel> currectRoadModel);
 
-        public float CalculateTTC();
+        public double CalculateTTC();
 
         public bool CollisionOccured();
 
@@ -24,7 +25,8 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
 
         public enum CollisionSeverity
         {
-
+            MEDIUM,
+            SEVERE
         }
 
         /**
@@ -34,6 +36,21 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
         {
 
         }
+
+        public WarningMessage CreateWarningMessage(VehicleData vehicle)
+        {
+            WarningMessage msg = new WarningMessage();
+
+            msg.Index = new Random().Next();
+            msg.VehicleId = vehicle.Id;
+            msg.TimeToCollision = CalculateTTC();
+            msg.CollisionSeverity = GetCollisionSeverity().ToString();
+            msg.CollisionType = "headon";
+
+            return msg;
+        }
+
+
 
     }
 }

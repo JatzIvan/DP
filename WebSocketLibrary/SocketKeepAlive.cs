@@ -16,7 +16,7 @@ namespace WebSocketLibrary
             {
                 Dictionary<int, UdpSocketClientImplementation> activeConnections = WebSocketManagerFactory.GetInstance().GetActiveConnections();
 
-                Console.WriteLine(activeConnections.Count);
+                //Console.WriteLine(activeConnections.Count);
 
                 foreach (KeyValuePair<int, UdpSocketClientImplementation> entry in activeConnections)
                 {
@@ -34,7 +34,7 @@ namespace WebSocketLibrary
                     }
                 }
 
-                Thread.Sleep(2000);
+                Thread.Sleep(10000);
             }
 
 

@@ -1,9 +1,15 @@
 ﻿using CoreLibrary.RoadSectionHandling;
+using CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators;
+using CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators;
+using CoreLibrary.RoadSectionHandling.CurvatureCalculations;
 using CoreLibrary.RoadSectionHandling.Data;
+using CoreLibrary.RoadSectionHandling.MaxSpeedCalculations;
 using CoreLibrary.RoadSectionHandling.RoadSimplificators;
 using System;
 using System.Configuration;
+using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 
 namespace CoreLibrary
 {
@@ -31,9 +37,13 @@ namespace CoreLibrary
 
         public static float DPTolerance { get; set; }
 
-        public static SimplMethods SimplificationMethod { get; set; } = SimplMethods.DOUGLAS_PEUCKER;
+        public static int LangRegionSize { get; set; }
 
-        public static CurvCalcMethods CurvetureCalcMethod { get; set; } = CurvCalcMethods.SIMPLE_CIRCLE;
+        public static string SimplificationMethod { get; set; } = typeof(DouglasPeuckerRoadSectionSimplification).Name;
+
+        public static string CurvetureCalcMethod { get; set; } = typeof(CircumcircleRoadCircleCurvesResolver).Name;
+
+        public static string MaxSpeedCalcMethod { get; set; } = typeof(SimpleSpeedCalculatorBasedOnCurvature).Name;
 
         public static float CurvatureTreshold { get; set; }
 
@@ -43,16 +53,16 @@ namespace CoreLibrary
 
         public static string StraightCollisionCalculator { get; set; }
 
-        public static AbstractSimplificationModel GetSimplificationModelFromConfiguration()
+        /*public static AbstractSimplificationModel GetSimplificationModelFromConfiguration()
         {
 
             switch (SimplificationMethod)
             {
-                case SimplMethods.DOUGLAS_PEUCKER:
+                case SimplMethods.DouglasPeuckerRoadSectionSimplification.ToString():
 
                     return new DouglasPeuckerConfig(DPTolerance);
 
-                case SimplMethods.LANG:
+                case SimplMethods.LangRoadSectionSimplification.ToString():
                     int regionSize;
                     try
                     {
@@ -73,11 +83,25 @@ namespace CoreLibrary
             }
 
 
-        }
+        }*/
 
         public static HandlerSetupConfig GenerateHandlerSetupConfig()
         {
-            return new HandlerSetupConfig(GetSimplificationModelFromConfiguration() , CurvetureCalcMethod);
+            return new HandlerSetupConfig(SimplificationMethod , CurvetureCalcMethod);
+        }
+
+        // Load all type implementations for constructors at the beginig of execution
+        public static void InitConstructors()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            System.Collections.Generic.List<Type> factoriesToInit = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(p => typeof(AbstractCalculatorFactory).IsAssignableFrom(p)).ToList();
+            
+            foreach(Type factory in factoriesToInit)
+            {
+                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(factory.TypeHandle);
+            }
+
+            Console.WriteLine("Factory init took " + sw.ElapsedMilliseconds);
         }
 
         public static void LoadConfiguration()
@@ -102,9 +126,12 @@ namespace CoreLibrary
                 CarDistanceSkipTreshold = float.Parse(ConfigurationManager.AppSettings.Get("CarDistanceSkipTreshold"), CultureInfo.InvariantCulture);
                 CurveCollisionCalculator = ConfigurationManager.AppSettings.Get("CurveCollisionCalculator");
                 StraightCollisionCalculator = ConfigurationManager.AppSettings.Get("StraightCollisionCalculator");
-                SimplificationMethod = (SimplMethods)Enum.Parse(typeof(SimplMethods), ConfigurationManager.AppSettings.Get("SimplificationMethod"));
-                CurvetureCalcMethod = (CurvCalcMethods)Enum.Parse(typeof(CurvCalcMethods), ConfigurationManager.AppSettings.Get("CurvetureCalcMethod"));
-
+                //SimplificationMethod = (SimplMethods)Enum.Parse(typeof(SimplMethods), ConfigurationManager.AppSettings.Get("SimplificationMethod"));
+                //CurvetureCalcMethod = (CurvCalcMethods)Enum.Parse(typeof(CurvCalcMethods), ConfigurationManager.AppSettings.Get("CurvetureCalcMethod"));
+                SimplificationMethod = ConfigurationManager.AppSettings.Get("SimplificationMethod");
+                CurvetureCalcMethod = ConfigurationManager.AppSettings.Get("CurvetureCalcMethod");
+                MaxSpeedCalcMethod = ConfigurationManager.AppSettings.Get("MaxSpeedCalcMethod");
+                InitConstructors();
             }
             catch (Exception e)
             {

@@ -4,6 +4,7 @@ using CoreLibrary.RoadSectionHandling;
 using CoreLibrary.RoadSectionHandling.Data;
 using CoreLibrary.RoadSectionHandling.Model;
 using CoreLibrary.RoadSectionHandling.RoadSimplificators;
+using NetTopologySuite.Index.KdTree;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,10 +26,12 @@ namespace RoadVisualisation
         Pen redPen = new Pen(Color.Red);
         Graphics g = null;
 
+
         static int x_cent, y_cent;
 
         static float tolerance;
         static int regionSizeVal;
+        static Dictionary<Tuple<int, int>, double> speedBasedOnPoint = new Dictionary<Tuple<int, int>, double>();
         //private static LocationPoint topPoint = new LocationPoint(17.16, 48.38);
         //private static LocationPoint bottomPoint = new LocationPoint(17.27, 48.31);
 
@@ -37,7 +40,7 @@ namespace RoadVisualisation
 
         private static Tuple<double, double> topPointXY;
         private static Tuple<double, double> bottomPointXY;
-        private readonly float EarthRadius = 6371;      //Earth Radius in Km
+        private readonly double EarthRadius = MapParserUtils.rEarth;      //Earth Radius in Km
 
         //## Now I can calculate the global X and Y for each reference point ##\\
 
@@ -83,8 +86,8 @@ namespace RoadVisualisation
             ApiHelper.InitializeClient(ApplicationConfigurationHandler.DigitalMapConnection);
             topPointXY = latlngToGlobalXY(topPoint);
             bottomPointXY = latlngToGlobalXY(bottomPoint);
-            SimplificationMethod.DataSource = Enum.GetValues(typeof(SimplMethods));
-            CurvatureCalcMethod.DataSource = Enum.GetValues(typeof(CurvCalcMethods));
+            SimplificationMethod.DataSource = ((AbstractCalculatorFactory) SectionSimplificationFactory.getInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
+            CurvatureCalcMethod.DataSource = ((AbstractCalculatorFactory) RoadCurvitureCalculatorFactory.getInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -92,12 +95,14 @@ namespace RoadVisualisation
 
         }
 
-        private void AddPoint(LocationPoint point)
+        private void AddPoint(LocationPoint point, double speed)
         {
 
             Tuple<double, double> pointLoc = latlngToScreenXY(point, new Tuple<double, double>(Canvas.Width, Canvas.Height));
+            //speedBasedOnPoint.Add(new Tuple<int, int>((int)pointLoc.Item1 - 5, (int)pointLoc.Item2 - 5), speed);
+            //g.DrawString(Math.Round(speed, 2) + "", new System.Drawing.Font("Arial", 10), new SolidBrush(Color.Black), (int)pointLoc.Item1 - 10, (int)pointLoc.Item2 - 10, new System.Drawing.StringFormat());
 
-            g.FillEllipse(new SolidBrush(Color.Black), (int)pointLoc.Item1 - 5, (int)pointLoc.Item2 - 5 , 5, 5);
+            //g.FillEllipse(new SolidBrush(Color.Black), (int)pointLoc.Item1 - 5, (int)pointLoc.Item2 - 5 , 5, 5);
         }
 
         private void DrawLine(LocationPoint point1, LocationPoint point2, double radius)
@@ -105,7 +110,7 @@ namespace RoadVisualisation
             Tuple<double, double> pointLoc1 = latlngToScreenXY(point1, new Tuple<double, double>(Canvas.Width, Canvas.Height));
             Tuple<double, double> pointLoc2 = latlngToScreenXY(point2, new Tuple<double, double>(Canvas.Width, Canvas.Height));
 
-            g.DrawLine(radius > float.Parse(CurveTolerance.Text, CultureInfo.InvariantCulture) ? Pens.Green : Pens.Red, new PointF((float)pointLoc1.Item1, (float)pointLoc1.Item2), new PointF((float)pointLoc2.Item1, (float)pointLoc2.Item2));
+            g.DrawLine(radius < float.Parse(CurveTolerance.Text, CultureInfo.InvariantCulture) ? Pens.Green : Pens.Red, new PointF((float)pointLoc1.Item1, (float)pointLoc1.Item2), new PointF((float)pointLoc2.Item1, (float)pointLoc2.Item2));
         }
 
         private async void button1_Click(object sender, EventArgs e)
@@ -119,18 +124,21 @@ namespace RoadVisualisation
 
             ApiHelper.InitializeClient();
             RoadDataHandler roadHandler = new RoadDataHandler("a", "a");
+            speedBasedOnPoint = new Dictionary<Tuple<int, int>, double>();
+            string model = (string)SimplificationMethod.SelectedItem;
+            string curv = (string)CurvatureCalcMethod.SelectedItem;
 
-            AbstractSimplificationModel model;
-            CurvCalcMethods curv = (CurvCalcMethods)CurvatureCalcMethod.SelectedItem;
+            ApplicationConfigurationHandler.DPTolerance = tolerance;
 
-            if (SimplificationMethod.SelectedItem.Equals(SimplMethods.LANG))
+            if (SimplificationMethod.SelectedItem.Equals("LangRoadSectionSimplification"))
             {
-                model = new LangConfig(tolerance, regionSizeVal);
+                ApplicationConfigurationHandler.LangRegionSize = regionSizeVal;
+                //model = new LangConfig(tolerance, regionSizeVal);
             }
-            else
+            /*else
             {
                 model = new DouglasPeuckerConfig(tolerance);
-            }
+            }*/
 
             Task task = Task.Run(() => {
                 roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv));
@@ -144,8 +152,8 @@ namespace RoadVisualisation
             //PointF point2 = PointF.Add(point1, new Size(20, 20));
             //g.DrawLine(Pens.Black, point1, point2);
 
-            Dictionary<LocationPoint, AbstractRoadModel> heckingDict = roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv));
-            List<LocationPoint> heckingList = roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv)).Keys.ToList();
+            //List<AbstractRoadModel> heckingDict = roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv));
+            //List<LocationPoint> heckingList = roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv)).Keys.ToList();
 
 /*            foreach (KeyValuePair<LocationPoint, AbstractRoadModel> entry in roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv)).Reverse())
             {
@@ -156,12 +164,12 @@ namespace RoadVisualisation
                 }
             }*/
 
-            foreach (KeyValuePair<LocationPoint, AbstractRoadModel> entry in roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv)))
+            foreach (AbstractRoadModel entry in roadHandler.GetParsedRoadDataList(new HandlerSetupConfig(model, curv)))
             {
-                AddPoint(entry.Key);
-                if (entry.Value.Next != null)
+                AddPoint(entry.CurrentLocation, entry.MaxSpeed);
+                if (entry.Next != null)
                 {
-                    DrawLine(entry.Value.CurrentLocation, entry.Value.Next.Point.CurrentLocation, 1 / entry.Value.Next.RadiusOfCurvature);
+                    DrawLine(entry.CurrentLocation, entry.Next.Point.CurrentLocation, entry.Next.RadiusOfCurvature);
                 }
             }
             Console.WriteLine("HEREE");
@@ -169,7 +177,7 @@ namespace RoadVisualisation
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (SimplificationMethod.SelectedItem.Equals(SimplMethods.LANG))
+            if (SimplificationMethod.SelectedItem.Equals("LangRoadSectionSimplification"))
             {
                 LangRange.Visible = true;
                 LangRangeLabel.Visible = true;
@@ -178,6 +186,15 @@ namespace RoadVisualisation
             {
                 LangRange.Visible = false;
                 LangRangeLabel.Visible = false;
+            }
+        }
+
+        private void Canvas_MouseMove(object sender, MouseEventArgs e)
+        {
+
+            if (speedBasedOnPoint.ContainsKey(new Tuple<int, int>(e.X, e.Y))) //checking cursor Location if inside the rect
+            {
+                Max_Speed_fld.Text = speedBasedOnPoint[new Tuple<int, int>(e.X, e.Y)] + "";//setting tooltip to Panel1
             }
         }
 
@@ -197,6 +214,11 @@ namespace RoadVisualisation
         }
 
         private void ToleranceValue_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel2_Paint(object sender, PaintEventArgs e)
         {
 
         }

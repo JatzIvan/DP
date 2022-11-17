@@ -1,5 +1,6 @@
 ﻿using CoreLibrary.RoadSectionHandling.CollisionCalculators;
 using CoreLibrary.RoadSectionHandling.Model;
+using NetTopologySuite.Index.KdTree;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,6 +8,7 @@ using WebSocketLibrary.Models;
 
 namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators
 {
+    [CollisionType(CollisionTypeEnum.STRAIGHT)]
     public class GPSStraightRoadCurvatureCalculator : ICollisionCalculatorImplementation
     {
 
@@ -21,7 +23,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
         //Each degree latitude changes, Longitude keeps same, distance will change
         private float LatL = 111319;
 
-        public float CalculateTTC()
+        public double CalculateTTC()
         {
             throw new NotImplementedException();
         }
@@ -43,7 +45,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
          * TODO: I do not think how well will this work in our application
          * TODO: find out when collision can be discarded
          */
-        public CollisionInfo PerformCollisionCalculations(VehicleData vehicle1, VehicleData vehicle2, Dictionary<LocationPoint, AbstractRoadModel> currectRoadModel)
+        public AbstractRoadModel PerformCollisionCalculations(VehicleData vehicle1, VehicleData vehicle2, KdTree<AbstractRoadModel> currectRoadModel)
         {
 
             // Geographic position angle of target vehicle relative to host vehicle

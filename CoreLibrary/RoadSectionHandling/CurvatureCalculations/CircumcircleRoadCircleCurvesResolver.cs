@@ -3,21 +3,23 @@ using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
-namespace CoreLibrary.RoadSectionHandling.CircleCurvitureModel
+namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 {
-    class RoadCircleCurvesResolver : ICurvesResolver
+    [CurvatureResolver]
+    class CircumcircleRoadCircleCurvesResolver : ICurvesResolver
     {
 
-        private Dictionary<LocationPoint, AbstractRoadModel> ConnectedWays { get; set; }
+        private List<AbstractRoadModel> ConnectedWays { get; set; }
 
-        public RoadCircleCurvesResolver(Dictionary<LocationPoint, AbstractRoadModel> connectedWays)
+        public CircumcircleRoadCircleCurvesResolver(List<AbstractRoadModel> connectedWays)
         {
             this.ConnectedWays = connectedWays;
         }
 
-        public Dictionary<LocationPoint, AbstractRoadModel> CalculateCurvesForWays()
+        public List<AbstractRoadModel> CalculateCurvesForWays()
         {
 
 
@@ -41,6 +43,7 @@ namespace CoreLibrary.RoadSectionHandling.CircleCurvitureModel
                 if (before != null)
                 {
                     current.RadiusOfCircle = GetCircleRadiusFromPoints(before.CurrentLocation, current.CurrentLocation, after.CurrentLocation);
+                    current.Angle = CalculateAngle(before.CurrentLocation, current.CurrentLocation, after.CurrentLocation);
                 }
                 //double circleRadius = getCircleRadiusFromPoints(before.CurrentLocation, current.CurrentLocation, after.CurrentLocation);
                 current = current.Next.Point;
@@ -58,9 +61,17 @@ namespace CoreLibrary.RoadSectionHandling.CircleCurvitureModel
                     break;
                 }
 
-                current.Next.RadiusOfCurvature = current.RadiusOfCircle > 0 
+
+                /*current.Next.RadiusOfCurvature = current.RadiusOfCircle > 0 
                     ? 1/(current.RadiusOfCircle + current.Next.Point.RadiusOfCircle)/ 2 
-                    : 1/current.Next.Point.RadiusOfCircle;
+                    : 1/current.Next.Point.RadiusOfCircle;*/
+
+                current.Next.RadiusOfCurvature = current.RadiusOfCircle > 0
+                    ? 1 / (
+                    Math.Abs(2 * current.RadiusOfCircle * current.Next.Point.RadiusOfCircle / 
+                    (Math.Sign(current.Angle) * current.RadiusOfCircle + Math.Sign(current.Next.Point.Angle) * current.Next.Point.RadiusOfCircle)))
+                    : 1 / current.Next.Point.RadiusOfCircle;
+
 
                 current = current.Next.Point;
 
@@ -76,9 +87,15 @@ namespace CoreLibrary.RoadSectionHandling.CircleCurvitureModel
                     break;
                 }
 
-                current.Previous.RadiusOfCurvature = current.RadiusOfCircle > 0 
-                    ? 1/(current.RadiusOfCircle + current.Previous.Point.RadiusOfCircle) / 2
-                    : 1/current.Previous.Point.RadiusOfCircle;
+                /*current.Previous.RadiusOfCurvature = current.RadiusOfCircle > 0 
+                    ? 1/((current.RadiusOfCircle + current.Previous.Point.RadiusOfCircle) / 2)
+                    : 1/current.Previous.Point.RadiusOfCircle;*/
+
+                current.Previous.RadiusOfCurvature = current.RadiusOfCircle > 0
+                        ? 1 / (
+                        Math.Abs(2 * current.RadiusOfCircle * current.Previous.Point.RadiusOfCircle /
+                        (Math.Sign(current.Angle) * current.RadiusOfCircle + Math.Sign(current.Previous.Point.Angle) * current.Previous.Point.RadiusOfCircle)))
+                        : 1 / current.Previous.Point.RadiusOfCircle;
 
                 current = current.Previous.Point;
 
@@ -91,7 +108,7 @@ namespace CoreLibrary.RoadSectionHandling.CircleCurvitureModel
         private AbstractRoadModel GetModel(bool first)
         {
 
-            AbstractRoadModel currentModel = ConnectedWays.First().Value;
+            AbstractRoadModel currentModel = ConnectedWays.First();
 
             while (true)
             {
@@ -108,6 +125,19 @@ namespace CoreLibrary.RoadSectionHandling.CircleCurvitureModel
             }
 
             return currentModel;
+
+        }
+
+        private double CalculateAngle(LocationPoint bef, LocationPoint curr, LocationPoint after)
+        {
+            double warnTreshold = 60;
+            
+            Vector2 v0 = new Vector2(Convert.ToSingle(curr.Longitude - bef.Longitude), Convert.ToSingle(curr.Latitude - bef.Latitude));
+            Vector2 v1 = new Vector2(Convert.ToSingle(after.Longitude - curr.Longitude), Convert.ToSingle(after.Latitude - curr.Latitude));
+
+            double angle = MapParserUtils.ConvertRadiansToDegrees(Math.Atan2(MapParserUtils.CalculateCrossProduct(v0, v1), Vector2.Dot(v0, v1)));
+
+            return angle != 0 ? angle : 1e-6;
 
         }
 

@@ -1,6 +1,8 @@
 ﻿using CoreLibrary.RoadSectionHandling.Model;
+using NetTopologySuite.Index.KdTree;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling
@@ -8,7 +10,7 @@ namespace CoreLibrary.RoadSectionHandling
     public static class MapParserUtils
     {
 
-        public static double rEarth = 6371; // Radius of earth
+        public static double rEarth = 6371000; // Radius of earth
 
         public static double ConvertDegreesToRadians(double val)
         {
@@ -80,7 +82,7 @@ namespace CoreLibrary.RoadSectionHandling
         }
 
         // source: http://stackoverflow.com/questions/1299567/how-to-calculate-distance-from-a-point-to-a-line-segment-on-a-sphere
-        private static LocationPoint CalculateDistanceToNearestPointGreatCircle(LocationPoint a, LocationPoint b, LocationPoint c)
+        public static LocationPoint CalculateDistanceToNearestPointGreatCircle(LocationPoint a, LocationPoint b, LocationPoint c)
         {
             ValueTuple<double, double, double> a_ = ConvertGPStoCartsian(a);
             ValueTuple<double, double, double> b_ = ConvertGPStoCartsian(b);
@@ -90,7 +92,7 @@ namespace CoreLibrary.RoadSectionHandling
             ValueTuple<double, double, double> F = CalculateVectorProduct(c_, G);
             ValueTuple<double, double, double> t = CalculateVectorProduct(G, F);
 
-            return ConvertFromCartsianToGPS(MultiplyVectorByScalar(NormalizeXYZCoordinates(t), 6371));
+            return ConvertFromCartsianToGPS(MultiplyVectorByScalar(NormalizeXYZCoordinates(t), rEarth));
         }
 
 
@@ -98,13 +100,13 @@ namespace CoreLibrary.RoadSectionHandling
         /*
          * return Tuple<x,y,z>
          */
-        private static ValueTuple<double, double, double> ConvertGPStoCartsian(LocationPoint coord)
+        public static ValueTuple<double, double, double> ConvertGPStoCartsian(LocationPoint coord)
         {
             double x, y, z;
             x = rEarth * Math.Cos(ConvertDegreesToRadians(coord.Latitude)) * Math.Cos(ConvertDegreesToRadians(coord.Longitude));
             y = rEarth * Math.Cos(ConvertDegreesToRadians(coord.Latitude)) * Math.Sin(ConvertDegreesToRadians(coord.Longitude));
             z = rEarth * Math.Sin(ConvertDegreesToRadians(coord.Latitude));
-            return (x,y,z);
+            return (x, y, z);
         }
 
         private static LocationPoint ConvertFromCartsianToGPS((double x, double y, double z) xyCoords)
@@ -131,9 +133,19 @@ namespace CoreLibrary.RoadSectionHandling
             return (x, y, z);
         }
 
-        private static ValueTuple<double, double, double> NormalizeXYZCoordinates((double x, double y, double z) t)
+        public static double CalculateCrossProduct(Vector2 vect1, Vector2 vect2)
         {
-            double length = Math.Sqrt((t.x * t.x) + (t.y * t.y) + (t.z * t.z));
+            return vect1.X * vect2.Y - vect2.X * vect1.Y;
+        }
+
+        public static double CalculateXYZMagnitude((double x , double y, double z) t)
+        {
+            return Math.Sqrt((t.x * t.x) + (t.y * t.y) + (t.z * t.z));
+        }
+
+        public static ValueTuple<double, double, double> NormalizeXYZCoordinates((double x, double y, double z) t)
+        {
+            double length = CalculateXYZMagnitude(t);
             double normX, normY, normZ;
             normX = t.x / length;
             normY = t.y / length;
@@ -141,7 +153,7 @@ namespace CoreLibrary.RoadSectionHandling
             return (normX, normY, normZ);
         }
 
-        private static ValueTuple<double, double, double> MultiplyVectorByScalar((double x, double y, double z) vector, double k)
+        public static ValueTuple<double, double, double> MultiplyVectorByScalar((double x, double y, double z) vector, double k)
         {
             double multX, multY, multZ;
             multX = vector.x * k;
@@ -165,6 +177,30 @@ namespace CoreLibrary.RoadSectionHandling
             double θ = Math.Atan2(y, x);
             return (θ * 180 / Math.PI + 360) % 360; // in degrees
 
+        }
+
+        public static KdTree<LocationPoint> CreateKdTreeWithCoordinates(List<LocationPoint> points)
+        {
+            KdTree<LocationPoint> finalTree = new KdTree<LocationPoint>();
+
+            foreach(LocationPoint point in points)
+            {
+                finalTree.Insert(new GeoAPI.Geometries.Coordinate(point.Longitude, point.Latitude), point);
+            }
+
+            return finalTree;
+        }
+
+        public static KdTree<AbstractRoadModel> CreateKdTreeWithCoordinates(List<AbstractRoadModel> points)
+        {
+            KdTree<AbstractRoadModel> finalTree = new KdTree<AbstractRoadModel>();
+
+            foreach (AbstractRoadModel point in points)
+            {
+                finalTree.Insert(new GeoAPI.Geometries.Coordinate(point.CurrentLocation.Longitude, point.CurrentLocation.Latitude), point);
+            }
+
+            return finalTree;
         }
 
     }

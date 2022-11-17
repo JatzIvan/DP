@@ -16,6 +16,8 @@ namespace WebSocketLibrary.Models
         public float Speed { get; set; }
         public float Acceleration { get; set; }
         public float Heading { get; set; }
+
+        public float SteeringAngle { get; set; }
         public PositionWrapper Position { get; set; }
     }
 

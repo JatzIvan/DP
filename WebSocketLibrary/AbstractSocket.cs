@@ -11,12 +11,12 @@ namespace WebSocketLibrary
     /**
      * Socket blueprint, that contains all the necessary variables and methods to construct correct custom sockets
      */
-    public abstract class AbstractSocket : IObservable<List<VehicleData>>
+    public abstract class AbstractSocket : IObservable<ObserverWrapper>
     {
         /**
          * All data observers attached to this socket
          */ 
-        protected List<IObserver<List<VehicleData>>> registeredMessageHandlers = new List<IObserver<List<VehicleData>>>();
+        protected List<IObserver<ObserverWrapper>> registeredMessageHandlers = new List<IObserver<ObserverWrapper>>();
         protected bool isAlive = false;
         // Messages that need to be acknowledged
         protected Dictionary<int, AbstractMessage> messageQueue = new Dictionary<int, AbstractMessage>();
@@ -27,7 +27,7 @@ namespace WebSocketLibrary
         public KeepAliveMessage GetKeepAliveMessage()
         {
 
-            Console.WriteLine("Num of messages " + messageQueue.Count);
+           // Console.WriteLine("Num of messages " + messageQueue.Count);
             
             KeepAliveMessage msg = (KeepAliveMessage) messageQueue.Values.FirstOrDefault(a => typeof(KeepAliveMessage) == a.GetType());
 
@@ -64,7 +64,7 @@ namespace WebSocketLibrary
             {
                 msg = new SubscribeMessage();
                 msg.Index = new Random().Next();
-                msg.Interval = 200;
+                msg.Interval = 2;
                 msg.Content = SubscribeContent.vehicles;
                 AddToMessageQueue(msg.Index, msg);
             }
@@ -78,13 +78,13 @@ namespace WebSocketLibrary
         }
 
         // Add unique observers to socket
-        public IDisposable Subscribe(IObserver<List<VehicleData>> observer)
+        public IDisposable Subscribe(IObserver<ObserverWrapper> observer)
         {
             if (!registeredMessageHandlers.Contains(observer))
             {
                 registeredMessageHandlers.Add(observer);
             }
-            return new Unsubscriber<List<VehicleData>>(registeredMessageHandlers, observer);
+            return new Unsubscriber<ObserverWrapper>(registeredMessageHandlers, observer);
         }
 
         public static string GetStringFromObject(object objectToSerialize)
@@ -124,6 +124,8 @@ namespace WebSocketLibrary
                 return;
             }
 
+            //Console.WriteLine(parsedObject.Type);
+
             switch (parsedObject.Type)
             {
                 case "acknowledge":
@@ -160,13 +162,13 @@ namespace WebSocketLibrary
         {
             if (data != null)
             {
-                Stopwatch sw = Stopwatch.StartNew();
-                foreach (IObserver<List<VehicleData>> handler in registeredMessageHandlers)
+
+                foreach (IObserver<ObserverWrapper> handler in registeredMessageHandlers)
                 {
-                    handler.OnNext(data.Vehicles);
+                    handler.OnNext(new ObserverWrapper(data.Vehicles, this.Id));
                 }
 
-                Console.WriteLine(sw.ElapsedMilliseconds);
+                //Console.WriteLine(sw.ElapsedMilliseconds);
             }
         }
 

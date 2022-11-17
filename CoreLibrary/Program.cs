@@ -28,7 +28,7 @@ namespace CoreLibrary
 
             WebSocketMessageHandler<ICollisionDetector> observer = new WebSocketMessageHandler<ICollisionDetector>("handler1", new CustomCollisionDetector(null));
 
-            WebSocketManagerFactory.GetInstance().OpenConnection(ws, new List<IObserver<List<VehicleData>>> { observer });
+            WebSocketManagerFactory.GetInstance().OpenConnection(ws, new List<IObserver<ObserverWrapper>> { observer });
 
            /* while (true)
             {

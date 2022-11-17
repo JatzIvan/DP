@@ -3,20 +3,22 @@ using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
-namespace CoreLibrary.RoadSectionHandling.CircleCurvitureModel
+namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 {
+    [CurvatureResolver]
     class OsculatingCircleCurvesResolver : ICurvesResolver
     {
-        private Dictionary<LocationPoint, AbstractRoadModel> ConnectedWays { get; set; }
+        private List<AbstractRoadModel> ConnectedWays { get; set; }
 
-        public OsculatingCircleCurvesResolver(Dictionary<LocationPoint, AbstractRoadModel> connectedWays)
+        public OsculatingCircleCurvesResolver(List<AbstractRoadModel> connectedWays)
         {
             this.ConnectedWays = connectedWays;
         }
 
-        public Dictionary<LocationPoint, AbstractRoadModel> CalculateCurvesForWays()
+        public List<AbstractRoadModel> CalculateCurvesForWays()
         {
 
 
@@ -104,7 +106,7 @@ namespace CoreLibrary.RoadSectionHandling.CircleCurvitureModel
         private AbstractRoadModel GetModel(bool first)
         {
 
-            AbstractRoadModel currentModel = ConnectedWays.First().Value;
+            AbstractRoadModel currentModel = ConnectedWays.First();
 
             while (true)
             {

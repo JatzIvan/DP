@@ -51,7 +51,7 @@ namespace WebSocketLibrary
 
         }
 
-        public bool OpenConnection(UdpSocketClientImplementation connection, List<IObserver<List<VehicleData>>> handler)
+        public bool OpenConnection(UdpSocketClientImplementation connection, List<IObserver<ObserverWrapper>> handler)
         {
 
             if(connection == null || !RegisteredConnections.ContainsValue(connection))
@@ -72,7 +72,7 @@ namespace WebSocketLibrary
         }
 
 
-        public bool OpenConnection(int connectionId, List<IObserver<List<VehicleData>>> handler)
+        public bool OpenConnection(int connectionId, List<IObserver<ObserverWrapper>> handler)
         {
             return OpenConnection(RegisteredConnections[connectionId], handler);
         }

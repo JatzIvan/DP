@@ -33,6 +33,7 @@ namespace RoadVisualisation
             this.Redraw = new System.Windows.Forms.Button();
             this.ToleranceValue = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.Max_Speed_fld = new System.Windows.Forms.TextBox();
             this.CurveTolerance = new System.Windows.Forms.TextBox();
             this.CurvatureCalcMethod = new System.Windows.Forms.ComboBox();
             this.LangRangeLabel = new System.Windows.Forms.Label();
@@ -51,6 +52,7 @@ namespace RoadVisualisation
             this.Canvas.Size = new System.Drawing.Size(800, 446);
             this.Canvas.TabIndex = 0;
             this.Canvas.Paint += new System.Windows.Forms.PaintEventHandler(this.Canvas_Paint);
+            this.Canvas.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Canvas_MouseMove);
             // 
             // Redraw
             // 
@@ -73,6 +75,7 @@ namespace RoadVisualisation
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.Max_Speed_fld);
             this.panel2.Controls.Add(this.CurveTolerance);
             this.panel2.Controls.Add(this.CurvatureCalcMethod);
             this.panel2.Controls.Add(this.LangRangeLabel);
@@ -86,6 +89,15 @@ namespace RoadVisualisation
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(800, 48);
             this.panel2.TabIndex = 3;
+            this.panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.panel2_Paint);
+            // 
+            // Max_Speed_fld
+            // 
+            this.Max_Speed_fld.Enabled = false;
+            this.Max_Speed_fld.Location = new System.Drawing.Point(420, 12);
+            this.Max_Speed_fld.Name = "Max_Speed_fld";
+            this.Max_Speed_fld.Size = new System.Drawing.Size(79, 23);
+            this.Max_Speed_fld.TabIndex = 9;
             // 
             // CurveTolerance
             // 
@@ -119,7 +131,7 @@ namespace RoadVisualisation
             // 
             this.LangRange.Location = new System.Drawing.Point(339, 12);
             this.LangRange.Name = "LangRange";
-            this.LangRange.Size = new System.Drawing.Size(135, 23);
+            this.LangRange.Size = new System.Drawing.Size(64, 23);
             this.LangRange.TabIndex = 5;
             this.LangRange.Text = "4";
             this.LangRange.Visible = false;
@@ -171,6 +183,7 @@ namespace RoadVisualisation
         private System.Windows.Forms.TextBox LangRange;
         private System.Windows.Forms.ComboBox CurvatureCalcMethod;
         private System.Windows.Forms.TextBox CurveTolerance;
+        private System.Windows.Forms.TextBox Max_Speed_fld;
     }
 }
 

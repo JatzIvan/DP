@@ -8,7 +8,7 @@ namespace WebSocketLibrary
     public interface ICollisionDetector
     {
 
-        public void PerformCalculations(List<VehicleData> data);
+        public void PerformCalculations(ObserverWrapper data);
 
     }
 }

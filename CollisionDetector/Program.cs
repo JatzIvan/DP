@@ -3,6 +3,7 @@ using CoreLibrary;
 using CoreLibrary.RoadSectionHandling;
 using CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators;
 using CoreLibrary.RoadSectionHandling.Model;
+using NetTopologySuite.Index.KdTree;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -37,11 +38,15 @@ namespace CollisionDetector
 
             UdpSocketClientImplementation ws = WebSocketManagerFactory.GetInstance().CreateConnection(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next());
 
-            Dictionary<LocationPoint, AbstractRoadModel>  data = roadHandler.GetParsedRoadData(ApplicationConfigurationHandler.GenerateHandlerSetupConfig());
+            //KdTree<AbstractRoadModel> data = roadHandler.GetParsedRoadData(ApplicationConfigurationHandler.GenerateHandlerSetupConfig());
+            
+            //List<(Dictionary<LocationPoint, AbstractRoadModel>, double)> vvv = roadHandler.GatherCurvaturesBetweenVehicles();
+            
+            WebSocketMessageHandler<ICollisionDetector> observer = new WebSocketMessageHandler<ICollisionDetector>("handler1", new CustomCollisionDataHandler(roadHandler));
 
-            WebSocketMessageHandler<ICollisionDetector> observer = new WebSocketMessageHandler<ICollisionDetector>("handler1", new CustomCollisionDataHandler(data));
+            //WebSocketMessageHandler<ICollisionDetector> observer = new WebSocketMessageHandler<ICollisionDetector>("handler1", new JustPrintCollisionDataHandler(null));
 
-            WebSocketManagerFactory.GetInstance().OpenConnection(ws, new List<IObserver<List<VehicleData>>> { observer });
+            WebSocketManagerFactory.GetInstance().OpenConnection(ws, new List<IObserver<ObserverWrapper>> { observer });
 
             Console.WriteLine("Out");
 

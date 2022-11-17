@@ -46,6 +46,7 @@ namespace WebSocketLibrary
 
             this.Id = id;
             EP = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); // endpoint where server is listening
+            
             //IPAddress ip = Dns.GetHostEntry("integration_module").AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork);
             //EP = new IPEndPoint(ip, Int32.Parse(port));
             this.Client = CreateSocket(new IPEndPoint(IPAddress.Any, 1111));
@@ -163,7 +164,7 @@ namespace WebSocketLibrary
                 Console.WriteLine(e);
             }
 
-            Console.WriteLine("Socket " + Id + " has recieved data");
+            //Console.WriteLine("Socket " + Id + " has recieved data");
 
             //if (receiveBytes.Length >= 4)
             //{

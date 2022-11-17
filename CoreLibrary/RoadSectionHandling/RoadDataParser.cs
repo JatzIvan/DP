@@ -38,7 +38,7 @@ namespace CoreLibrary.RoadSectionHandling
         // Create a dictionary of connected points from sorted list
         // Key -- GPS location of point
         // Value -- point definition w/ curviture
-        private Dictionary<LocationPoint, AbstractRoadModel> CreateRoadCurvitureModelDictionary(List<RoadPointModel> sortedByRoads)
+        private List<AbstractRoadModel> CreateRoadCurvitureModelDictionary(List<RoadPointModel> sortedByRoads)
         {
 
             Dictionary<LocationPoint, AbstractRoadModel> roadCurvOut = new Dictionary<LocationPoint, AbstractRoadModel>();
@@ -61,7 +61,14 @@ namespace CoreLibrary.RoadSectionHandling
 
                     if (beforeCurvitureModel != null)
                     {
+
+                        currentCurvitureModel.Distance = beforeCurvitureModel.Distance + MapParserUtils.CalculateDistanceBetweenPoints(beforeCurvitureModel.CurrentLocation
+                            , currentCurvitureModel.CurrentLocation);
                         beforeCurvitureModel.Next = new SegmentCurvitureChain(currentCurvitureModel);
+                        /*currentCurvitureModel.Previous.Distance += MapParserUtils.CalculateBearingBetweenPoints(currentCurvitureModel.CurrentLocation
+                        , beforeCurvitureModel.CurrentLocation);
+                        beforeCurvitureModel.Next.Distance += MapParserUtils.CalculateBearingBetweenPoints(beforeCurvitureModel.CurrentLocation
+                        , currentCurvitureModel.CurrentLocation);*/
                     }
 
                     roadCurvOut.Add(way, currentCurvitureModel);
@@ -71,13 +78,13 @@ namespace CoreLibrary.RoadSectionHandling
                 }
             }
 
-            return roadCurvOut;
+            return roadCurvOut.Values.ToList();
         }
 
         // Function creates a dictionary of connected points
         // Key -- GPS location of point
         // Value -- point definition w/ curviture
-        public Dictionary<LocationPoint, AbstractRoadModel> GetConnectedWays()
+        public List<AbstractRoadModel> GetConnectedWays()
         {
             Dictionary<Tuple<LocationPoint, LocationPoint>, RoadPointModel> modelDict = CreateModelDictionary();
 
@@ -117,7 +124,7 @@ namespace CoreLibrary.RoadSectionHandling
 
                     LocationPoint currentFirst = sortedByRoads.First().Way.Points.First();
 
-                    Console.WriteLine(currentFirst.Longitude + ":" + currentFirst.Latitude);
+                    //Console.WriteLine(currentFirst.Longitude + ":" + currentFirst.Latitude);
 
                     // Check which record in dictionary has "Road segment end" same as start of current first segment
                     // Found segment is places on front
@@ -165,9 +172,9 @@ namespace CoreLibrary.RoadSectionHandling
 
             }
 
-            Dictionary<LocationPoint, AbstractRoadModel> joinedDict = CreateRoadCurvitureModelDictionary(sortedByRoads);
+            //Dictionary<LocationPoint, AbstractRoadModel> joinedDict = CreateRoadCurvitureModelDictionary(sortedByRoads);
            
-            return joinedDict;
+            return CreateRoadCurvitureModelDictionary(sortedByRoads);
         }
 
     }

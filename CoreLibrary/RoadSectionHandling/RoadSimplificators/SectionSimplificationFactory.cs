@@ -2,14 +2,32 @@
 using CoreLibrary.RoadSectionHandling.RoadSimplificators;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling.Data
 {
-    class SectionSimplificationFactory
+    public class SectionSimplificationFactory: AbstractCalculatorFactory
     {
+
+        private static List<ValueTuple<Type, Func<List<AbstractRoadModel>, object>>> loadedSimplificators = new List<ValueTuple<Type, Func<List<AbstractRoadModel>, object>>>();
+        private static ValueTuple<Type, Func<List<AbstractRoadModel>, object>> defaultConstructor;
+
         private SectionSimplificationFactory()
         {
+
+        }
+
+        static SectionSimplificationFactory()
+        {
+
+            List<Type> simplificators = LoadImplementations(new RoadSimplificatorAttribute(), typeof(ISectionSimplificator));
+            foreach(Type simplificator in simplificators)
+            {
+                loadedSimplificators.Add((simplificator, CreateCreator<List<AbstractRoadModel>>(simplificator)));
+            }
+
+            defaultConstructor = (typeof(DouglasPeuckerRoadSectionSimplification), CreateCreator<List<AbstractRoadModel>>(typeof(DouglasPeuckerRoadSectionSimplification)));
 
         }
 
@@ -29,12 +47,12 @@ namespace CoreLibrary.RoadSectionHandling.Data
         {
             if(config is DouglasPeuckerConfig)
             {
-                return SimplMethods.DOUGLAS_PEUCKER;
+                return SimplMethods.DouglasPeuckerRoadSectionSimplification;
             }
 
             if (config is LangConfig)
             {
-                return SimplMethods.LANG;
+                return SimplMethods.LangRoadSectionSimplification;
             }
 
             return null;
@@ -44,23 +62,32 @@ namespace CoreLibrary.RoadSectionHandling.Data
         /**
          *  Return simplification method based on config Type.
          */
-        public ISectionSimplificator GetSimplificatiorImplementation(Dictionary<LocationPoint, AbstractRoadModel> connectedWays, AbstractSimplificationModel config)
+        public ISectionSimplificator GetSimplificatiorImplementation(List<AbstractRoadModel> connectedWays, string simplType)
         {
-            switch (resolveMethod(config))
+
+            ValueTuple<Type, Func<List<AbstractRoadModel>, object>> foundType = loadedSimplificators.Where(i => i.Item1.Name.Equals(simplType))
+            .FirstOrDefault();
+
+            if (foundType.Equals(default(ValueTuple<Type, Func<object[], object>>)))
             {
-                case SimplMethods.DOUGLAS_PEUCKER:
-                    return new DouglasPeuckerRoadSectionSimplification(connectedWays, (DouglasPeuckerConfig) config);
-                case SimplMethods.LANG:
-                    return new LangRoadSectionSimplification(connectedWays, (LangConfig) config);
-                default:
-                    return null;
+                foundType = defaultConstructor;
             }
+
+            return (ISectionSimplificator)foundType.Item2(connectedWays);
+
+            //return (ISectionSimplificator)Activator.CreateInstance(foundType, connectedWays);
+
+        }
+
+        public override List<Type> GetLoadedTypes()
+        {
+            return loadedSimplificators.Select(_ => _.Item1).ToList();
         }
     }
     public enum SimplMethods
     {
-        DOUGLAS_PEUCKER,
-        LANG
+        DouglasPeuckerRoadSectionSimplification,
+        LangRoadSectionSimplification
     }
 
 }
