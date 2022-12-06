@@ -8,15 +8,15 @@ using WebSocketLibrary.Models;
 
 namespace WebSocketLibrary
 {
-    public class WebSocketMessageHandler<T> : IObserver<ObserverWrapper> where T: ICollisionDetector 
+    public class WebSocketMessageHandler<T> : IObserver<T> where T: ObserverWrapper
     {
 
         private string Name;
         private IDisposable Unsubscriber;
-        private T CollisionDetector;
+        private IMessageHandler<T> CollisionDetector;
 
         // TODO: add calculation templates
-        public WebSocketMessageHandler(string name, T collisionDetector)
+        public WebSocketMessageHandler(string name, IMessageHandler<T> collisionDetector)
         {
             if (String.IsNullOrEmpty(name))
             {
@@ -40,29 +40,29 @@ namespace WebSocketLibrary
          */
         public virtual void OnError(Exception error)
         {
-            throw new NotImplementedException();
+            Console.WriteLine("Error occured during data handling");
         }
 
-        public virtual void OnNext(ObserverWrapper value)
+        public virtual void OnNext(T value)
         {
 
             Stopwatch sw = Stopwatch.StartNew();
-            Task task = Task.Run(() => CollisionDetector.PerformCalculations(value));
+            Task task = Task.Run(() => CollisionDetector.PerformActions(value));
             //Thread td = new Thread(() => CollisionDetector.PerformCalculations(value));
             //td.Start();
             //Console.WriteLine("Latitude: " + value.RecievedData[0].Lat + " ,Longitude:" + value.RecievedData[0].Lon + " ,Velocity:" + value.RecievedData[0].Vel + " ,Orientation:" + value.RecievedData[0].Orientation);
             //CollisionDetector.PerformCalculations(value);
-            Console.WriteLine("Time elapsed for thread creation " + sw.ElapsedMilliseconds);
+            //Console.WriteLine("Time elapsed for thread creation " + sw.ElapsedMilliseconds);
         }
-        public virtual void Subscribe(UdpSocketClientImplementation provider)
+        /*public virtual void Subscribe(AbstractSocket provider)
         {
             Unsubscriber = provider.Subscribe(this);
-        }
+        }*/
 
-        public virtual void Unsubscribe()
+        /*public virtual void Unsubscribe()
         {
             Unsubscriber.Dispose();
         }
-
+        */
     }
 }

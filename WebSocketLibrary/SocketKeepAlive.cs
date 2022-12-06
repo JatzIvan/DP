@@ -14,11 +14,11 @@ namespace WebSocketLibrary
 
             while (true)
             {
-                Dictionary<int, UdpSocketClientImplementation> activeConnections = WebSocketManagerFactory.GetInstance().GetActiveConnections();
+                Dictionary<int, AbstractSocket> activeConnections = WebSocketManagerFactory.GetInstance().GetActiveConnections();
 
                 //Console.WriteLine(activeConnections.Count);
 
-                foreach (KeyValuePair<int, UdpSocketClientImplementation> entry in activeConnections)
+                foreach (KeyValuePair<int, AbstractSocket> entry in activeConnections)
                 {
 
                     KeepAliveMessage msg = entry.Value.GetKeepAliveMessage();
@@ -30,7 +30,7 @@ namespace WebSocketLibrary
                     }
                     else
                     {
-                        entry.Value.SendMessage(AbstractSocket.ConvertMesssageToBytes(msg));
+                        entry.Value.SendMessageWithAck(msg);
                     }
                 }
 

@@ -7,13 +7,10 @@ namespace WebSocketLibrary
 {
     public class ObserverWrapper
     {
-        public List<VehicleData> Data { get; set; }
-
         public int SocketId { get; set; }
 
-        public ObserverWrapper(List<VehicleData> data, int socketId)
+        public ObserverWrapper(int socketId)
         {
-            this.Data = data;
             this.SocketId = socketId;
         }
 

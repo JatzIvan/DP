@@ -13,6 +13,8 @@ namespace WebSocketLibrary.Models
 
         public float Interval { get; set; }
 
+        public string Road { get; set; }
+
     }
     public enum SubscribeContent
     {

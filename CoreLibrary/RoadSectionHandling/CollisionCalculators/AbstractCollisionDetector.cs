@@ -13,7 +13,7 @@ using WebSocketLibrary.Models;
 
 namespace WebSocketLibrary
 {
-    public abstract class AbstractCollisionDetector : ICollisionDetector
+    public abstract class AbstractCollisionDetector : IMessageHandler<VehicleObserverWrapper>
     {
         protected KdTree<AbstractRoadModel> currectRoadModel;
 
@@ -275,6 +275,7 @@ namespace WebSocketLibrary
 
             return null;
         }
-        public abstract void PerformCalculations(ObserverWrapper data);
+
+        public abstract void PerformActions(VehicleObserverWrapper data);
     }
 }

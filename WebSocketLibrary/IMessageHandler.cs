@@ -5,10 +5,10 @@ using WebSocketLibrary.Models;
 
 namespace WebSocketLibrary
 {
-    public interface ICollisionDetector
+    public interface IMessageHandler<T> where T: ObserverWrapper
     {
 
-        public void PerformCalculations(ObserverWrapper data);
+        public void PerformActions(T data);
 
     }
 }

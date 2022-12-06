@@ -21,14 +21,15 @@ namespace CoreLibrary
             ApiHelper.InitializeClient(ApplicationConfigurationHandler.DigitalMapConnection);
 
             RoadDataHandler roadHandler = new RoadDataHandler("a", "a");
+            //WebSocketMessageHandler<VehicleObserverWrapper> observer = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDetector(null));
 
-            UdpSocketClientImplementation ws = WebSocketManagerFactory.GetInstance().CreateConnection(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next());
+           // UdpSocketClientImplementation ws = WebSocketManagerFactory.GetInstance().CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(),
+           //     new List<IObserver<VehicleObserverWrapper>> { observer });
 
             //Dictionary<LocationPoint, AbstractRoadModel>  data = roadHandler.GetParsedRoadData(ApplicationConfigurationHandler.GenerateHandlerSetupConfig());
 
-            WebSocketMessageHandler<ICollisionDetector> observer = new WebSocketMessageHandler<ICollisionDetector>("handler1", new CustomCollisionDetector(null));
 
-            WebSocketManagerFactory.GetInstance().OpenConnection(ws, new List<IObserver<ObserverWrapper>> { observer });
+            //WebSocketManagerFactory.GetInstance().OpenConnection(ws, new List<IObserver<ObserverWrapper>> { observer });
 
            /* while (true)
             {
@@ -46,8 +47,8 @@ namespace CoreLibrary
             //new RoadDataHandler("a", "a");
             //RoadVisualisation.OpenWindow();
 
-            Thread td = new Thread(new SocketConnecterThread().HandlePending);
-            td.Start();
+           // Thread td = new Thread(new SocketConnecterThread().HandlePending);
+           // td.Start();
 
             Thread td2 = new Thread(new SocketKeepAlive().KeepAliveActiveConnections);
             td2.Start();

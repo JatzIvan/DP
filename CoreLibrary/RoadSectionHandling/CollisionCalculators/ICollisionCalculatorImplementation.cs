@@ -41,7 +41,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
         {
             WarningMessage msg = new WarningMessage();
 
-            msg.Index = new Random().Next();
+            //msg.Index = new Random().Next();
             msg.VehicleId = vehicle.Id;
             msg.TimeToCollision = CalculateTTC();
             msg.CollisionSeverity = GetCollisionSeverity().ToString();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using WebSocketLibrary.Models;
 
 namespace WebSocketLibrary
@@ -12,10 +13,14 @@ namespace WebSocketLibrary
     public class WebSocketManagerFactory
     {
 
-        private static Dictionary<int, UdpSocketClientImplementation> ActiveConnections { get; set; } = new Dictionary<int, UdpSocketClientImplementation>();
-        private static Dictionary<int, UdpSocketClientImplementation> PendingConnections { get; set; } = new Dictionary<int, UdpSocketClientImplementation>();
+        // Connections that
+        private static Dictionary<int, AbstractSocket> ActiveConnections { get; set; } = new Dictionary<int, AbstractSocket>();
+        
+        // Connections that have established first connections (without subscribe)
+        private static Dictionary<int, AbstractSocket> PendingConnections { get; set; } = new Dictionary<int, AbstractSocket>();
 
-        private static Dictionary<int, UdpSocketClientImplementation> RegisteredConnections { get; set; } = new Dictionary<int, UdpSocketClientImplementation>();
+        // Connections that are not connected to endpoint
+        // private static Dictionary<int, UdpSocketClientImplementation> RegisteredConnections { get; set; } = new Dictionary<int, UdpSocketClientImplementation>();
 
         private static WebSocketManagerFactory Instance;
 
@@ -33,25 +38,34 @@ namespace WebSocketLibrary
             return Instance;
         }
 
-        public UdpSocketClientImplementation CreateConnection(string url, string port)
+        public T CreateConnection<T, G>(string url, string port, List<IObserver<G>> handler) 
+            where T : AbstractSocket
+            where G : ObserverWrapper
         {
-           return this.CreateConnection(url, port, new Random().Next());
+           return this.CreateConnection<T,G>(url, port, new Random().Next(), handler);
         }
 
 
-        public UdpSocketClientImplementation CreateConnection(string host, string port, int id)
+        public T CreateConnection<T,G>(string host, string port, int id, List<IObserver<G>> handler) 
+            where T: AbstractSocket
+            where G: ObserverWrapper
         {
             //string trimmed = ReshapeWebSocketUrl(url);
 
-            UdpSocketClientImplementation ws = new UdpSocketClientImplementation(host, port, id);
+            //T ws = new T(host, port, id);
+            T ws = (T)Activator.CreateInstance(typeof(T), new object[] { host, port, id, handler });
 
-            RegisteredConnections.Add(id, ws);
+
+
+            PendingConnections.Add(id, ws);
+
+            Task.Run(ws.EstablishConnection);
 
             return ws;
 
         }
 
-        public bool OpenConnection(UdpSocketClientImplementation connection, List<IObserver<ObserverWrapper>> handler)
+        /*public bool OpenConnection(AbstractSocket connection, List<IObserver<ObserverWrapper>> handler)
         {
 
             if(connection == null || !RegisteredConnections.ContainsValue(connection))
@@ -75,9 +89,9 @@ namespace WebSocketLibrary
         public bool OpenConnection(int connectionId, List<IObserver<ObserverWrapper>> handler)
         {
             return OpenConnection(RegisteredConnections[connectionId], handler);
-        }
+        }*/
 
-        public void CloseConnection(UdpSocketClientImplementation ws)
+        public void CloseConnection(AbstractSocket ws)
         {
             lock (this)
             {
@@ -95,7 +109,7 @@ namespace WebSocketLibrary
             this.CloseConnection(GetConnection(connectionId));
         }
 
-        public UdpSocketClientImplementation GetConnection(int connectionId)
+        public AbstractSocket GetConnection(int connectionId)
         {
 
             lock (this)
@@ -119,17 +133,17 @@ namespace WebSocketLibrary
             return uri.ToString();
         }
 
-        public Dictionary<int, UdpSocketClientImplementation> GetPendingConnections()
+        public Dictionary<int, AbstractSocket> GetPendingConnections()
         {
             return PendingConnections;
         }
 
-        public Dictionary<int, UdpSocketClientImplementation> GetActiveConnections()
+        public Dictionary<int, AbstractSocket> GetActiveConnections()
         {
             return ActiveConnections;
         }
 
-        public void ActivatePendingConnection(UdpSocketClientImplementation connection)
+        public void ActivatePendingConnection(AbstractSocket connection)
         {
             lock (this)
             {
@@ -139,13 +153,13 @@ namespace WebSocketLibrary
             }
         }
 
-        public void DropActiveConnection(UdpSocketClientImplementation connection)
+        public void DropActiveConnection(AbstractSocket connection)
         {
             lock (this)
             {
-                connection.DropConnection();
                 ActiveConnections.Remove(connection.Id);
                 PendingConnections.Add(connection.Id, connection);
+                connection.DropConnection();
             }
 
         }

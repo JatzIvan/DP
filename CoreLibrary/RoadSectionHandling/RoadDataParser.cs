@@ -28,6 +28,11 @@ namespace CoreLibrary.RoadSectionHandling
                 //Tuple<LocationPoint, LocationPoint> key = new Tuple<LocationPoint, LocationPoint>(model.Way.Points[0], model.Way.Points[model.Way.Points.Count - 1]);
                 Tuple<LocationPoint, LocationPoint> key = new Tuple<LocationPoint, LocationPoint>(model.Way.Points.First(), model.Way.Points.Last());
 
+                if (modelDictionary.ContainsKey(key))
+                {
+                    RoadPointModel xx = modelDictionary[key];
+                }
+
                 modelDictionary.Add(key, model);
             }
 
@@ -84,6 +89,7 @@ namespace CoreLibrary.RoadSectionHandling
         // Function creates a dictionary of connected points
         // Key -- GPS location of point
         // Value -- point definition w/ curviture
+        // Function needs to determine all separate connected roads
         public List<AbstractRoadModel> GetConnectedWays()
         {
             Dictionary<Tuple<LocationPoint, LocationPoint>, RoadPointModel> modelDict = CreateModelDictionary();

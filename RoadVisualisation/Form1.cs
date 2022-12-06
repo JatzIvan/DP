@@ -40,6 +40,7 @@ namespace RoadVisualisation
 
         private static Tuple<double, double> topPointXY;
         private static Tuple<double, double> bottomPointXY;
+        private static long numberOfPoints = 0;
         private readonly double EarthRadius = MapParserUtils.rEarth;      //Earth Radius in Km
 
         //## Now I can calculate the global X and Y for each reference point ##\\
@@ -119,7 +120,7 @@ namespace RoadVisualisation
             regionSizeVal = int.Parse(LangRange.Text, CultureInfo.InvariantCulture);
             x_cent = Canvas.Width / 2;
             y_cent = Canvas.Height / 2;
-
+            numberOfPoints = 0;
             Canvas.Refresh();
 
             ApiHelper.InitializeClient();
@@ -166,6 +167,7 @@ namespace RoadVisualisation
 
             foreach (AbstractRoadModel entry in roadHandler.GetParsedRoadDataList(new HandlerSetupConfig(model, curv)))
             {
+                numberOfPoints++;
                 AddPoint(entry.CurrentLocation, entry.MaxSpeed);
                 if (entry.Next != null)
                 {
@@ -173,6 +175,7 @@ namespace RoadVisualisation
                 }
             }
             Console.WriteLine("HEREE");
+            numOfPoints.Text = numberOfPoints + "";
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -219,6 +222,11 @@ namespace RoadVisualisation
         }
 
         private void panel2_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
         {
 
         }

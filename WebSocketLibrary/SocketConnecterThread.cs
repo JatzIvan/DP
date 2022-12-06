@@ -9,7 +9,7 @@ namespace WebSocketLibrary
      * Define methods that will be executed in separate thread
      * Thread will handle all pending connections (it will send subscribe until acknowledgement was recieved)
      */
-    public class SocketConnecterThread
+    /*public class SocketConnecterThread
     {
 
         public void HandlePending()
@@ -38,5 +38,5 @@ namespace WebSocketLibrary
             }
         }
 
-    }
+    }*/
 }

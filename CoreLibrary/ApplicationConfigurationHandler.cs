@@ -10,6 +10,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using WebSocketLibrary.Models;
 
 namespace CoreLibrary
 {
@@ -17,6 +18,8 @@ namespace CoreLibrary
     {
 
         public static string DataServerHost { get; set; }
+
+        public static string EnvType { get; set; }
 
         public static string DataServerPort { get; set; }
         public static string DatabaseConnection { get; set; }
@@ -104,10 +107,20 @@ namespace CoreLibrary
             Console.WriteLine("Factory init took " + sw.ElapsedMilliseconds);
         }
 
+        public static void RecalculateTestRoadQuery(bool skipRef, AreaMessage msg)
+        {
+            TestRoadQuery = (!skipRef ? $"?ref={RoadRef}&" : "?") +
+                $"long1={msg.TopLeft.Lon.ToString().Replace(",",".")}" +
+                $"&lat1={msg.TopLeft.Lat.ToString().Replace(",", ".")}" +
+                $"&long2={msg.BottomRight.Lon.ToString().Replace(",", ".")}" +
+                $"&lat2={msg.BottomRight.Lat.ToString().Replace(",", ".")}";
+        }
+
         public static void LoadConfiguration()
         {
             try
             {
+                EnvType = ConfigurationManager.AppSettings.Get("EnvType");
                 DataServerHost = ConfigurationManager.AppSettings.Get("DataServerHost");
                 DataServerPort = ConfigurationManager.AppSettings.Get("DataServerPort");
                 DatabaseConnection = ConfigurationManager.AppSettings.Get("DatabaseConnection");

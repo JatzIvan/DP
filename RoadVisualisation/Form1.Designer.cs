@@ -40,12 +40,15 @@ namespace RoadVisualisation
             this.LangRange = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.SimplificationMethod = new System.Windows.Forms.ComboBox();
+            this.numOfPoints = new System.Windows.Forms.TextBox();
+            this.Canvas.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // Canvas
             // 
             this.Canvas.BackColor = System.Drawing.Color.White;
+            this.Canvas.Controls.Add(this.numOfPoints);
             this.Canvas.Dock = System.Windows.Forms.DockStyle.Fill;
             this.Canvas.Location = new System.Drawing.Point(0, 0);
             this.Canvas.Name = "Canvas";
@@ -155,6 +158,15 @@ namespace RoadVisualisation
             this.SimplificationMethod.TabIndex = 3;
             this.SimplificationMethod.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
+            // numOfPoints
+            // 
+            this.numOfPoints.Enabled = false;
+            this.numOfPoints.Location = new System.Drawing.Point(709, 54);
+            this.numOfPoints.Name = "numOfPoints";
+            this.numOfPoints.Size = new System.Drawing.Size(79, 23);
+            this.numOfPoints.TabIndex = 10;
+            this.numOfPoints.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -165,6 +177,8 @@ namespace RoadVisualisation
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.Canvas.ResumeLayout(false);
+            this.Canvas.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             this.ResumeLayout(false);
@@ -184,6 +198,7 @@ namespace RoadVisualisation
         private System.Windows.Forms.ComboBox CurvatureCalcMethod;
         private System.Windows.Forms.TextBox CurveTolerance;
         private System.Windows.Forms.TextBox Max_Speed_fld;
+        private System.Windows.Forms.TextBox numOfPoints;
     }
 }
 

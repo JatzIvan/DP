@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using WebSocketLibrary.Models;
 using WebSocketSharp.NetCore;
 
@@ -18,8 +19,13 @@ namespace WebSocketLibrary
      * Because UDP sockets are connectionless, we need to create a custom overhead to connect(handshake), keepalive, acknowledge and close connection
      * 
      */
-    public class UdpSocketClientImplementation : AbstractSocket
-    { 
+    public abstract class UdpSocketClientImplementation<T> : AbstractSocket, IObservable<T> where T: ObserverWrapper
+    {
+
+        /**
+         * All data observers attached to this socket
+         */
+        protected List<IObserver<T>> registeredMessageHandlers = new List<IObserver<T>>();
 
         public struct UdpState
         {
@@ -32,7 +38,7 @@ namespace WebSocketLibrary
 
         private IPEndPoint EP;
 
-        public UdpSocketClientImplementation(string host, string port, int id)
+        public UdpSocketClientImplementation(string host, string port, int id, List<IObserver<T>> observers) : base(host, port, id)
         {
             if (host is null)
             {
@@ -44,12 +50,42 @@ namespace WebSocketLibrary
                 throw new ArgumentNullException(nameof(port));
             }
 
+            observers.ForEach(h =>
+            {
+                Subscribe(h);
+            });
             this.Id = id;
-            EP = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); // endpoint where server is listening
-            
-            //IPAddress ip = Dns.GetHostEntry("integration_module").AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork);
-            //EP = new IPEndPoint(ip, Int32.Parse(port));
-            this.Client = CreateSocket(new IPEndPoint(IPAddress.Any, 1111));
+            //EP = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); // endpoint where server is listening
+
+            IPAddress ip = Dns.GetHostEntry(host).AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork);
+            EP = new IPEndPoint(ip, Int32.Parse(port));
+            this.Client = CreateSocket(new IPEndPoint(IPAddress.Any, 0));
+            //this.Client.Connect(EP);
+            StartListening();
+        }
+
+        // Add unique observers to socket
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            if (!registeredMessageHandlers.Contains(observer))
+            {
+                registeredMessageHandlers.Add(observer);
+            }
+            return new Unsubscriber<T>(registeredMessageHandlers, observer);
+        }
+
+        // Wait until socket is connected
+        protected override bool Connect()
+        {
+            if (!isAlive)
+            {
+                Console.WriteLine("Trying to connect socket " + Id);
+                HandleHandShake();
+                //throw new Exception("Not connected yet");
+            }
+
+            return isAlive;
+
         }
 
         /**
@@ -59,10 +95,12 @@ namespace WebSocketLibrary
         {
             try
             {
+
                 //Create Subscribe Message (for now it is hardcoded)
                 //SubscribeMessage firstMsg = new SubscribeMessage();
                 //firstMsg.Interval = 200;
                 //firstMsg.Content = SubscribeContent.vehicles;
+
 
 
                 // Setup connection with data server
@@ -114,37 +152,6 @@ namespace WebSocketLibrary
         }
         
 
-        // Wait for acknowledgement
-        // It is a synchronous wait so thread will wait until it is finished
-        // We do not care about the content so we just return bool depending if ack arrived
-        public override bool GetACK()
-        {
-            // Wait for 5 secs
-            Client.Client.ReceiveTimeout = 5000;
-
-            Byte[] data = Client.Receive(ref EP);
-
-            string receiveString = Encoding.ASCII.GetString(data);
-            AcknowledgeMessage parsedObject = null;
-            try
-            {
-                parsedObject = JsonConvert.DeserializeObject<AcknowledgeMessage>(receiveString);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Error occured while parsing Incomming message");
-                Console.WriteLine(e.ToString());
-                //TODO setup log with all incidents
-            }
-
-            if (parsedObject != null)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         /**
          * Function handles incomming messages
          */
@@ -154,6 +161,11 @@ namespace WebSocketLibrary
             UdpClient client = ((UdpState)(ar.AsyncState)).client;
             IPEndPoint endpoint = ((UdpState)(ar.AsyncState)).endpoint;
 
+            if(client.Client == null)
+            {
+                return;
+            }
+
             byte[] receiveBytes = new byte[0];
             try
             {
@@ -161,14 +173,16 @@ namespace WebSocketLibrary
             }
             catch(Exception e)
             {
-                Console.WriteLine(e);
+                //Console.WriteLine(e);
             }
+
+
 
             //Console.WriteLine("Socket " + Id + " has recieved data");
 
             //if (receiveBytes.Length >= 4)
             //{
-                string receiveString = Encoding.ASCII.GetString(receiveBytes);
+            string receiveString = Encoding.ASCII.GetString(receiveBytes);
                 ResolveMessageType(receiveString);
             //}
 
@@ -176,16 +190,35 @@ namespace WebSocketLibrary
             UdpState state = new UdpState();
             state.client = client;
             state.endpoint = endpoint;
-            client.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
+
+            if (client == null || client.Client == null)
+            {
+                return;
+            }
+
+            try
+            {
+                client.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
         }
 
-        public override void SendMessage(Byte[] msg)
+        public override AbstractMessage SendMessage(AbstractMessage msg)
         {
+            msg.Index = GetMessageIndex();
             if (checkIfAlive())
             {
-                Client.Send(msg, msg.Length, EP);
+                Byte[] msgInBytes = ConvertMesssageToBytes(msg);
+                Client.Send(msgInBytes, msgInBytes.Length, EP);
             }
-            
+
+            return msg;
+
         }
         
         public override void CloseConnection()
@@ -198,6 +231,7 @@ namespace WebSocketLibrary
             registeredMessageHandlers.Clear();
 
             SendCloseMessage();
+            //Client.Client.Shutdown(SocketShutdown.Both);
             Client.Close();
 
         }                                                      
@@ -207,43 +241,30 @@ namespace WebSocketLibrary
         {
             UnsubscribeMessage msg = new UnsubscribeMessage();
 
-            Byte[] sendBytes = ConvertMesssageToBytes(msg);
+            //Byte[] sendBytes = ConvertMesssageToBytes(msg);
 
-            SendMessage(sendBytes);
+            SendMessage(msg);
         }
 
         public void HandleHandShake()
         {
             //Create Subscribe Message (for now it is hardcoded)
-            SubscribeMessage firstMsg = GetSubscribeMessage();
+            ConnectMessage firstMsg = GetConnectMessage();
 
-            //do
-            //{
-              //  Console.WriteLine("Trying to Connect, total retries = " + totalWait);
-              //  Thread.Sleep(wait);
-                Byte[] sendBytes = ConvertMesssageToBytes(firstMsg);
-                Client.Send(sendBytes, sendBytes.Length, EP);
-            //  wait = 10000;
-            //  totalWait++;
+            AddToMessageQueue(firstMsg.Index, firstMsg);
+            Byte[] sendBytes = ConvertMesssageToBytes(firstMsg);
+            Client.Send(sendBytes, sendBytes.Length, EP);
 
-            //} while (GetACK());
-
-            //return GetACK();
         }
 
         public bool checkIfAlive()
         {
             return isAlive;
+        }
 
-           /* if (!isAlive)
-            {
-
-
-                HandleHandShake(firstMsg);
-
-            }
-
-            return isAlive;*/
+        protected override void HandleCustomAckMessageLogic(AbstractMessage msg)
+        {
+            return;
         }
     }
 }

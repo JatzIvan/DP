@@ -23,14 +23,15 @@ namespace CollisionDetector
             this.dataStorage = roadHandler;
         }
 
-        public override void PerformCalculations(ObserverWrapper data)
+        public override void PerformActions(VehicleObserverWrapper data)
         {
 
             Stopwatch sw = Stopwatch.StartNew();
-
-            if(data.Data.Count >= 2)
+            List<VehicleData> vehicles = data.Data.Vehicles;
+            //Console.WriteLine("Num of vehicles recieved " + vehicles.Count);
+            if (vehicles.Count >= 2)
             {
-                IEnumerable<IEnumerable<VehicleData>> pairsToCalc = CreateVehiclePairs(data.Data);
+                IEnumerable<IEnumerable<VehicleData>> pairsToCalc = CreateVehiclePairs(vehicles);
 
                 // Try threading or something, right now I need to ensure that this concept can work
                 foreach (var pair in pairsToCalc)
@@ -49,9 +50,13 @@ namespace CollisionDetector
                             // If collision occured, check if one or both cars go above speed limit
                             if(collisionPoint != null)
                             {
-                                double maxAllowedSpeed = dataStorage.GatherCurvaturesBetweenVehicles().Where(pair => pair.Item1.ContainsKey(collisionPoint.CurrentLocation))
-                                                                    .First().Item2;
-                                
+                                //double maxAllowedSpeed = dataStorage.GatherCurvaturesBetweenVehicles().Where(pair => pair.Item1.ContainsKey(collisionPoint.CurrentLocation))
+                                //                                    .FirstOrDefault().Item2;
+
+                                double maxAllowedSpeed = collisionPoint.MaxSpeed;
+
+                                Console.WriteLine("Max speed " + maxAllowedSpeed);
+
                                 if(pair.ElementAt(0).Speed > maxAllowedSpeed)
                                 {
                                     msgVeh1.CollisionSeverity = ICollisionCalculatorImplementation.CollisionSeverity.SEVERE.ToString();
@@ -63,12 +68,12 @@ namespace CollisionDetector
                                 }
                             }
 
-                            UdpSocketClientImplementation socket = WebSocketManagerFactory.GetInstance().GetConnection(data.SocketId);
+                            AbstractSocket socket = WebSocketManagerFactory.GetInstance().GetConnection(data.SocketId);
 
 
 
-                            socket.SendMessage(AbstractSocket.ConvertMesssageToBytes(msgVeh1));
-                            socket.SendMessage(AbstractSocket.ConvertMesssageToBytes(msgVeh2));
+                            socket.SendMessage(msgVeh1);
+                            socket.SendMessage(msgVeh2);
                         
                             // Validate this
                             //socket.AddToMessageQueue(msgVeh1.Index ,msgVeh1);
@@ -78,7 +83,7 @@ namespace CollisionDetector
                 }
             }
 
-            Console.WriteLine("Elapsed time " + sw.ElapsedMilliseconds);
+            //Console.WriteLine("Elapsed time " + sw.ElapsedMilliseconds);
         }
     }
 }

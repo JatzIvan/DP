@@ -3,7 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using WebSocketLibrary.Models;
 
 namespace WebSocketLibrary
@@ -11,17 +14,21 @@ namespace WebSocketLibrary
     /**
      * Socket blueprint, that contains all the necessary variables and methods to construct correct custom sockets
      */
-    public abstract class AbstractSocket : IObservable<ObserverWrapper>
+    public abstract class AbstractSocket
     {
-        /**
-         * All data observers attached to this socket
-         */ 
-        protected List<IObserver<ObserverWrapper>> registeredMessageHandlers = new List<IObserver<ObserverWrapper>>();
+
         protected bool isAlive = false;
         // Messages that need to be acknowledged
         protected Dictionary<int, AbstractMessage> messageQueue = new Dictionary<int, AbstractMessage>();
         public int Id { get; set; }
         public int keepAliveFailedAttempts = 0;
+
+        private int MessageIndex = 0;
+
+        public AbstractSocket(string host, string port, int id)
+        {
+
+        }
 
         // Return keep alive message. If message already present in queue (not acknowledged), then we have most likely lost connection.
         public KeepAliveMessage GetKeepAliveMessage()
@@ -34,8 +41,9 @@ namespace WebSocketLibrary
             if (msg == null)
             {
                 msg = new KeepAliveMessage();
-                msg.Index = new Random().Next();
-                AddToMessageQueue(msg.Index, msg);
+                keepAliveFailedAttempts = 0;
+                //msg.Index = GetMessageIndex();
+                //AddToMessageQueue(msg.Index, msg);
             }
             else
             {
@@ -47,26 +55,24 @@ namespace WebSocketLibrary
 
         /**
          * Method returns all messages that need to be (and were not) acknowledged
+         * This method will skip KeepAlive And ConnectMessages.
          */ 
         public List<AbstractMessage> GetAllUnconfirmedMessages()
         {
-            List<AbstractMessage> msg = messageQueue.Values.Where(a => typeof(KeepAliveMessage) == a.GetType()).ToList();
+            List<AbstractMessage> msg = messageQueue.Values.Where(a => typeof(KeepAliveMessage) != a.GetType()
+            && typeof(ConnectMessage) != a.GetType()).ToList();
 
             return msg;
 
         }
 
-        public SubscribeMessage GetSubscribeMessage()
+        public ConnectMessage GetConnectMessage()
         {
-            SubscribeMessage msg = (SubscribeMessage)messageQueue.Values.FirstOrDefault(a => typeof(SubscribeMessage) == a.GetType());
+            ConnectMessage msg = (ConnectMessage)messageQueue.Values.FirstOrDefault(a => typeof(ConnectMessage) == a.GetType());
 
             if (msg == null)
             {
-                msg = new SubscribeMessage();
-                msg.Index = new Random().Next();
-                msg.Interval = 2;
-                msg.Content = SubscribeContent.vehicles;
-                AddToMessageQueue(msg.Index, msg);
+                msg = new ConnectMessage();
             }
 
             return msg;
@@ -74,17 +80,10 @@ namespace WebSocketLibrary
 
         public void AddToMessageQueue(int index, AbstractMessage msg)
         {
-            messageQueue.Add(index, msg);
-        }
-
-        // Add unique observers to socket
-        public IDisposable Subscribe(IObserver<ObserverWrapper> observer)
-        {
-            if (!registeredMessageHandlers.Contains(observer))
+            if (!messageQueue.ContainsKey(index))
             {
-                registeredMessageHandlers.Add(observer);
+                messageQueue.Add(index, msg);
             }
-            return new Unsubscriber<ObserverWrapper>(registeredMessageHandlers, observer);
         }
 
         public static string GetStringFromObject(object objectToSerialize)
@@ -97,7 +96,7 @@ namespace WebSocketLibrary
             return Encoding.ASCII.GetBytes(GetStringFromObject(objectToConvert));
         }
 
-        private T DeserializeObject<T>(string msg)
+        protected T DeserializeObject<T>(string msg)
         {
             try
             {
@@ -114,7 +113,7 @@ namespace WebSocketLibrary
 
         }
 
-        protected void ResolveMessageType(string receiveString)
+        protected virtual void ResolveMessageType(string receiveString)
         {
 
             AbstractMessage parsedObject = DeserializeObject<AbstractMessage>(receiveString);
@@ -131,9 +130,6 @@ namespace WebSocketLibrary
                 case "acknowledge":
                     ResolveAckMessage(DeserializeObject<AcknowledgeMessage>(receiveString));
                     break;
-                case "update_vehicles":
-                    ResolveDataMessage(DeserializeObject<CarUpdateInfo>(receiveString));
-                    break;
                 default:
                     Console.WriteLine("Unknown message, ignoring");
                     break;
@@ -149,41 +145,93 @@ namespace WebSocketLibrary
                 return;
             }
 
-            if (messageQueue[msg.AcknowledgingIndex].GetType().Equals(typeof(SubscribeMessage)))
+
+            if (messageQueue[msg.AcknowledgingIndex].GetType().Equals(typeof(ConnectMessage)))
             {
                 Console.WriteLine("Socket " + Id + " has established a connection");
-                isAlive = true;
+                ActivateConnection();
             }
 
+            //Handle Custom Logic if necessary
+            HandleCustomAckMessageLogic(messageQueue[msg.AcknowledgingIndex]);
+            
             messageQueue.Remove(msg.AcknowledgingIndex); 
         }
 
-        protected void ResolveDataMessage(CarUpdateInfo data)
-        {
-            if (data != null)
-            {
+        protected abstract void HandleCustomAckMessageLogic(AbstractMessage msg);
 
-                foreach (IObserver<ObserverWrapper> handler in registeredMessageHandlers)
-                {
-                    handler.OnNext(new ObserverWrapper(data.Vehicles, this.Id));
-                }
-
-                //Console.WriteLine(sw.ElapsedMilliseconds);
-            }
-        }
-
-        public void DropConnection()
+        public virtual void DropConnection()
         {
             this.isAlive = false;
             this.keepAliveFailedAttempts = 0;
             messageQueue.Clear();
-
+            // Try to establish connection again
+            Task.Run(this.EstablishConnection);
         }
         
-        public abstract void SendMessage(Byte[] msg);
+        public int GetMessageIndex()
+        {
+            lock (this)
+            {
+                return MessageIndex++;
+            }
+        }
+
+        public virtual void ActivateConnection()
+        {
+            WebSocketManagerFactory.GetInstance().ActivatePendingConnection(this);
+            isAlive = true;
+            MessageIndex = 1;
+        }
+
+        protected abstract bool Connect();
+
+        public bool Do(Func<bool> connect)
+        {
+            while (true)
+            {
+                bool val = connect();
+
+                if (val)
+                {
+                    break;
+                }
+                Thread.Sleep(1000);
+            }
+
+            return true;
+
+        } 
+
+        public async Task<bool> EstablishConnection()
+        {
+
+            if (isAlive)
+            {
+                return true;
+            }
+
+            return await Task.Run(() => Do(Connect));
+        }
+
+        public abstract AbstractMessage SendMessage(AbstractMessage msg);
+
+        public AbstractMessage SendMessageWithAck(AbstractMessage msg)
+        {
+
+            // Remap message from queue
+            if (messageQueue.ContainsKey(msg.Index))
+            {
+                messageQueue.Remove(msg.Index);
+            }
+
+            AbstractMessage sendMessage = SendMessage(msg);
+
+            AddToMessageQueue(sendMessage.Index, sendMessage);
+
+            return sendMessage;
+        }
 
         public abstract void CloseConnection();
-
-        public abstract bool GetACK();
     }
 }

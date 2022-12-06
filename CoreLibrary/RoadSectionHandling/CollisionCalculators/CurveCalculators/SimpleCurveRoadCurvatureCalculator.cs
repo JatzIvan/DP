@@ -60,11 +60,17 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
 
             TTC = distance / (vehicle1.Speed + vehicle2.Speed);
 
+            if(TTC < 1)
+            {
+                return null;
+            }
+
             double distanceToCollision = TTC * vehicle1.Speed;
 
             // Find closest road point to calculated distance and determine if it is in curvature region
 
             double smallestCumDistance = Double.PositiveInfinity;
+            AbstractRoadModel pointWithSmallestCumDistance = null;
             AbstractRoadModel v1NextPoint = AbstractCollisionDetector.DetermineDirection(vehicle1.Heading, v1Point) ? v1Point.Next.Point : v1Point.Previous.Point;
 
             while (true)
@@ -78,6 +84,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
                 }
                 else
                 {
+                    pointWithSmallestCumDistance = v1NextPoint;
                     smallestCumDistance = Math.Abs(currentCumDistance - distanceToCollision);
                 }
 
@@ -85,21 +92,32 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
 
             }
 
-            if(distanceToCollision < AbstractCollisionDetector.GetDistanceBetweenMapPoints(v1NextPoint, v1Point))
+            if(distanceToCollision < AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point))
             {
-                CollisionWillHappen = v1NextPoint.Previous.RadiusOfCurvature > ApplicationConfigurationHandler.CurvatureTreshold;
+                CollisionWillHappen = pointWithSmallestCumDistance.Previous.RadiusOfCurvature > ApplicationConfigurationHandler.CurvatureTreshold;
             }
             else
             {
-                CollisionWillHappen = v1NextPoint.Next.RadiusOfCurvature > ApplicationConfigurationHandler.CurvatureTreshold;
+                CollisionWillHappen = pointWithSmallestCumDistance.Next.RadiusOfCurvature > ApplicationConfigurationHandler.CurvatureTreshold;
             }
 
             if (CollisionWillHappen)
             {
-                Console.WriteLine("Collision between " + vehicle1.Id + " and " + vehicle2.Id + " At point " + v1NextPoint.CurrentLocation.Longitude + "/" + v1NextPoint.CurrentLocation.Latitude);
+
+                Console.WriteLine("-------------------------------------------");
+
+                Console.WriteLine("Collision between " + vehicle1.Position.Lat.ToString().Replace(",", ".") + "," + vehicle1.Position.Lon.ToString().Replace(",", ".") + "/" + vehicle1.Heading +
+                    " and " + vehicle2.Position.Lat.ToString().Replace(",", ".") + "," + vehicle2.Position.Lon.ToString().Replace(",", ".") + "/" + vehicle2.Heading
+                    + " At point " + pointWithSmallestCumDistance.CurrentLocation.Latitude.ToString().Replace(",",".") + "," + pointWithSmallestCumDistance.CurrentLocation.Longitude.ToString().Replace(",", "."));
+
+                Console.WriteLine("TTC " + TTC + " Distance to coll " + distanceToCollision + " Distance between points " + AbstractCollisionDetector.GetDistanceBetweenMapPoints(v1NextPoint, v1Point)
+                    + " Correct Point heading " + ((distanceToCollision < AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point))
+                    ? pointWithSmallestCumDistance.Previous.Heading + "-Prev" : pointWithSmallestCumDistance.Next.Heading + "-Next"));
+
+                Console.WriteLine("-------------------------------------------");
             }
 
-            return v1NextPoint;
+            return pointWithSmallestCumDistance;
 
         }
 

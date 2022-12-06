@@ -10,13 +10,19 @@ namespace CollisionDetector
 {
     public class JustPrintCollisionDataHandler : AbstractCollisionDetector
     {
-        public JustPrintCollisionDataHandler(KdTree<AbstractRoadModel> currectRoadModel) : base(currectRoadModel)
+        public JustPrintCollisionDataHandler() : base(null)
         {
+
         }
 
-        public override void PerformCalculations(ObserverWrapper data)
+        public override void PerformActions(VehicleObserverWrapper data)
         {
-            foreach(VehicleData veh in data.Data)
+
+            List<VehicleData> vehicles = data.Data.Vehicles;
+
+            Console.WriteLine(vehicles.Count);
+
+            foreach (VehicleData veh in vehicles)
             {
                 Console.WriteLine("Vehicle with Id: " + veh.Id + ", Long: " + veh.Position.Lon + ", Lat: " + veh.Position.Lat);
             }
