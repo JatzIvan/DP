@@ -47,7 +47,6 @@ namespace WebSocketLibrary.SocketImplementations
         {
             if (data != null)
             {
-
                 msg = data;
             }
         }

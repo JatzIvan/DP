@@ -13,6 +13,7 @@ using System.Threading;
 using WebSocketLibrary;
 using WebSocketLibrary.Models;
 using WebSocketLibrary.SocketImplementations;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace CollisionDetector
 {
@@ -21,22 +22,8 @@ namespace CollisionDetector
         static void Main(string[] args)
         {
             ApplicationConfigurationHandler.LoadConfiguration();
-
-            string mapAddr = "";
-
-            if (ApplicationConfigurationHandler.EnvType.Equals("docker"))
-            {
-                mapAddr = "http://" + Dns.GetHostEntry("host.docker.internal").AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork) + ":8000";
-
-            }
-            else
-            {
-                mapAddr = ApplicationConfigurationHandler.DigitalMapConnection;
-            }
-
-            Console.WriteLine(mapAddr);
-
-            ApiHelper.InitializeClient(mapAddr);
+            
+            ApiHelper.InitializeClient(ApplicationConfigurationHandler.DigitalMapConnection);
 
             //Thread td = new Thread(new SocketConnecterThread().HandlePending);
             //td.Start();
@@ -46,6 +33,10 @@ namespace CollisionDetector
 
             Thread td3 = new Thread(new UnacknowledgedMessagesThread().HandleUnresolved);
             td3.Start();
+
+            Console.WriteLine("Simplification tolerance" + ApplicationConfigurationHandler.DPTolerance);
+            Console.WriteLine("Curvature treshold" + ApplicationConfigurationHandler.CurvatureTreshold);
+            Console.WriteLine("Car skip distance" + ApplicationConfigurationHandler.CarDistanceSkipTreshold);
 
             // Test
 
@@ -67,8 +58,27 @@ namespace CollisionDetector
             ApplicationConfigurationHandler.RecalculateTestRoadQuery(false, ws2.AreaFetched());
 
             WebSocketManagerFactory.GetInstance().CloseConnection(ws2);
+            
+            Dictionary<string, List<RoadPointModel>> sections = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByRef();
+            
+            foreach(KeyValuePair<string, List<RoadPointModel>> section in sections)
+            {
 
-            RoadDataHandler roadHandler = new RoadDataHandler("a", "a");
+                RoadDataHandler roadHandler = new RoadDataHandler(section.Key, section.Key);
+
+
+                IObserver<VehicleObserverWrapper> observer = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDataHandler(roadHandler));
+
+                // IObserver<VehicleObserverWrapper> observer = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new JustPrintCollisionDataHandler());
+
+                WebSocketManagerFactory.GetInstance()
+                    .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer });
+
+            }   
+
+
+/*            RoadDataHandler roadHandler = new RoadDataHandler("a", "a");
+
 
             IObserver<VehicleObserverWrapper> observer = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDataHandler(roadHandler));
 
@@ -77,7 +87,7 @@ namespace CollisionDetector
 
             UdpSocketForCarConnection ws = WebSocketManagerFactory.GetInstance()
                 .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer });
-
+*/
    /*         IObserver<VehicleObserverWrapper> observer3 = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDataHandler(roadHandler));
             UdpSocketForCarConnection ws3 = WebSocketManagerFactory.GetInstance()
                 .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer3 });
@@ -109,13 +119,13 @@ namespace CollisionDetector
             Thread td2 = new Thread(new SocketKeepAlive().KeepAliveActiveConnections);
             td2.Start();*/
 
+            Console.Read();
 
-
-            while (true)
+            /*while (true)
             {
                // Console.WriteLine("Blabla");
-                //Thread.Sleep(1000);
-            }
+                Thread.Sleep(10000);
+            }*/
         }
     }
 }

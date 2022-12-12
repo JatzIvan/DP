@@ -82,8 +82,10 @@ namespace CollisionDetector
                     }
                 }
             }
-
-            //Console.WriteLine("Elapsed time " + sw.ElapsedMilliseconds);
+            if(sw.ElapsedMilliseconds > 100)
+            {
+                Console.WriteLine("Elapsed time " + sw.ElapsedMilliseconds + " for number of cars " + vehicles.Count);
+            }
         }
     }
 }

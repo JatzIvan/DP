@@ -104,11 +104,15 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
             if (CollisionWillHappen)
             {
 
+                LocationPoint realCollisionPoint = MapParserUtils.CalculatedPointFromPoint(pointWithSmallestCumDistance.CurrentLocation, ((distanceToCollision < AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point))
+                    ? pointWithSmallestCumDistance.Previous.Heading : pointWithSmallestCumDistance.Next.Heading), Math.Abs(distanceToCollision - AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point)));
+
                 Console.WriteLine("-------------------------------------------");
 
                 Console.WriteLine("Collision between " + vehicle1.Position.Lat.ToString().Replace(",", ".") + "," + vehicle1.Position.Lon.ToString().Replace(",", ".") + "/" + vehicle1.Heading +
                     " and " + vehicle2.Position.Lat.ToString().Replace(",", ".") + "," + vehicle2.Position.Lon.ToString().Replace(",", ".") + "/" + vehicle2.Heading
-                    + " At point " + pointWithSmallestCumDistance.CurrentLocation.Latitude.ToString().Replace(",",".") + "," + pointWithSmallestCumDistance.CurrentLocation.Longitude.ToString().Replace(",", "."));
+                    + " At Real point " + realCollisionPoint.Latitude.ToString().Replace(",", ".") + "," + realCollisionPoint.Longitude.ToString().Replace(",", ".")
+                    + " At Mapped point " + pointWithSmallestCumDistance.CurrentLocation.Latitude.ToString().Replace(",",".") + "," + pointWithSmallestCumDistance.CurrentLocation.Longitude.ToString().Replace(",", "."));
 
                 Console.WriteLine("TTC " + TTC + " Distance to coll " + distanceToCollision + " Distance between points " + AbstractCollisionDetector.GetDistanceBetweenMapPoints(v1NextPoint, v1Point)
                     + " Correct Point heading " + ((distanceToCollision < AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point))

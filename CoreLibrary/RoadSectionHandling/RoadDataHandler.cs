@@ -56,7 +56,7 @@ namespace CoreLibrary.RoadSectionHandling
                 // TODO implement later
 
                 // Get Data from API
-                List<RoadPointModel> fetchedModel = new RoadDataFetcher().GetRoadFromAPI();
+                List<RoadPointModel> fetchedModel = RoadDataFetcher.GetInstance().GetRoadDataForRef(SectionRef);
                 this.RoadInfoRaw = fetchedModel;
             }
 

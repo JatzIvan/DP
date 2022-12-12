@@ -9,29 +9,37 @@ using WebSocketLibrary;
 
 namespace CoreLibrary.RoadSectionHandling
 {
-    public class RoadDataFetcher: IObserver<AreaObserverWrapper>
+    public class RoadDataFetcher
     {
         private ApiCallsHandler Handler { get; set; }
-
-        private int SocketID { get; set; }
 
         private List<RoadPointModel> RawFetchedData { get; set; }
 
         private Dictionary<string, List<RoadPointModel>> RoadSegmentsByRef { get; set; }
 
-        private bool Finished = false;
+        private static RoadDataFetcher INSTANCE;
 
-        private bool Failed = false;
-
-        public RoadDataFetcher()
+        private RoadDataFetcher()
         {
             this.Handler = ApiCallsHandler.GetHandler();
+        }
+
+        public static RoadDataFetcher GetInstance()
+        {
+
+            if(INSTANCE == null)
+            {
+                INSTANCE = new RoadDataFetcher();
+            }
+
+            return INSTANCE;
+
         }
 
         /**
          * TODO: Do more generic implementation
          */
-        public List<RoadPointModel> GetRoadFromAPI()
+        protected List<RoadPointModel> GetRoadFromAPI()
         {
 
             List<RoadPointModel> output = Handler.Get<List<RoadPointModel>>("roads/" + ApplicationConfigurationHandler.TestRoadQuery);
@@ -50,52 +58,56 @@ namespace CoreLibrary.RoadSectionHandling
             return output;
         }
 
-        protected Dictionary<string, List<RoadPointModel>> SplitRawDataByRoadRef()
+        public Dictionary<string, List<RoadPointModel>> GetRoadFromAPIGroupedByRef()
         {
+
             if(RawFetchedData == null)
             {
-                throw new Exception("Missing Road Data");
+                GetRoadFromAPI();
             }
 
-            return null;
+            if(RoadSegmentsByRef == null)
+            {
+
+                RoadSegmentsByRef = new Dictionary<string, List<RoadPointModel>>();
+
+                foreach (RoadPointModel segment in RawFetchedData)
+                {
+                    if (segment.Ref != null && !segment.Ref.Equals(""))
+                    {
+
+                        if (!RoadSegmentsByRef.ContainsKey(segment.Ref))
+                        {
+                            RoadSegmentsByRef.Add(segment.Ref, new List<RoadPointModel>());
+                        }
+
+                        RoadSegmentsByRef[segment.Ref].Add(segment);
+                    }
+                }
+
+            }
+
+
+            return RoadSegmentsByRef;
 
         }
 
-        public List<RoadPointModel> GetSpecifiedRoadSegmentFromAPI()
+        public List<RoadPointModel> GetRoadDataForRef(string roadRef)
         {
 
-            List<RoadPointModel> output = Handler.Get<List<RoadPointModel>>("roads/" + ApplicationConfigurationHandler.TestRoadQuery);
+            Dictionary<string, List<RoadPointModel>> localData = GetRoadFromAPIGroupedByRef();
 
-            // When no road data could be fetched, repeat 3 times and then default with empty list
-            // TODO: Implement repeat
-            if (output == null)
+            if (localData.ContainsKey(roadRef))
             {
+                return localData[roadRef];
+            }
+            else
+            {
+                Console.WriteLine("No data found for ref " + roadRef);
                 return new List<RoadPointModel>();
             }
 
-            output.Sort((RoadPointModel model1, RoadPointModel model2) => model1.OsmId.CompareTo(model2.OsmId));
-
-            return output;
         }
 
-        public void OnCompleted()
-        {
-            Console.WriteLine("Completed");
-            Finished = true;
-        }
-
-        public void OnError(Exception error)
-        {
-            Console.WriteLine("Error occured during exception handling");
-        }
-
-        // Handle Recieved Area info from
-        public void OnNext(AreaObserverWrapper value)
-        {
-            Console.WriteLine("On Next");
-            SocketID = value.SocketId;
-            Thread.Sleep(2000);
-            OnCompleted();
-        }
     }
 }

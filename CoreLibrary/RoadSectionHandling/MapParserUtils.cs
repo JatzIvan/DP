@@ -117,6 +117,19 @@ namespace CoreLibrary.RoadSectionHandling
             return new LocationPoint(longitude, latitude);
         }
 
+        // https://gis.stackexchange.com/questions/340567/formula-to-calculate-the-next-coordinate-given-a-coordinate-distance-direction
+        public static LocationPoint CalculatedPointFromPoint(LocationPoint start, double heading, double distance)
+        {
+            double cLat1 = ConvertDegreesToRadians(start.Latitude);
+            double cLon1 = ConvertDegreesToRadians(start.Longitude);
+
+            double lat2 = Math.Asin(Math.Sin(cLat1) * Math.Cos(distance / rEarth) +
+                  Math.Cos(cLat1) * Math.Sin(distance / rEarth) * Math.Cos(heading));
+            double lon2 = cLon1 + Math.Atan2(Math.Sin(heading) * Math.Sin(distance / rEarth) * Math.Cos(cLat1),
+                         Math.Cos(distance / rEarth) - Math.Sin(cLat1) * Math.Sin(lat2));
+            return new LocationPoint(ConvertRadiansToDegrees(lon2), ConvertRadiansToDegrees(lat2));
+
+        }
 
         // Basic functions
         /*

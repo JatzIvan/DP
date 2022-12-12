@@ -124,7 +124,7 @@ namespace RoadVisualisation
             Canvas.Refresh();
 
             ApiHelper.InitializeClient();
-            RoadDataHandler roadHandler = new RoadDataHandler("a", "a");
+            RoadDataHandler roadHandler = new RoadDataHandler("503", "503");
             speedBasedOnPoint = new Dictionary<Tuple<int, int>, double>();
             string model = (string)SimplificationMethod.SelectedItem;
             string curv = (string)CurvatureCalcMethod.SelectedItem;

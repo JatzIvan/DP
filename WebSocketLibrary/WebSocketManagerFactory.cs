@@ -45,7 +45,9 @@ namespace WebSocketLibrary
            return this.CreateConnection<T,G>(url, port, new Random().Next(), handler);
         }
 
-
+        /**
+         * Create new connection to host and port based on T {SocketType} and G {Message Type}
+         */
         public T CreateConnection<T,G>(string host, string port, int id, List<IObserver<G>> handler) 
             where T: AbstractSocket
             where G: ObserverWrapper

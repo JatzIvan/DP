@@ -12,7 +12,6 @@ namespace WebSocketLibrary
     {
 
         private string Name;
-        private IDisposable Unsubscriber;
         private IMessageHandler<T> CollisionDetector;
 
         // TODO: add calculation templates
@@ -46,23 +45,9 @@ namespace WebSocketLibrary
         public virtual void OnNext(T value)
         {
 
-            Stopwatch sw = Stopwatch.StartNew();
             Task task = Task.Run(() => CollisionDetector.PerformActions(value));
-            //Thread td = new Thread(() => CollisionDetector.PerformCalculations(value));
-            //td.Start();
-            //Console.WriteLine("Latitude: " + value.RecievedData[0].Lat + " ,Longitude:" + value.RecievedData[0].Lon + " ,Velocity:" + value.RecievedData[0].Vel + " ,Orientation:" + value.RecievedData[0].Orientation);
-            //CollisionDetector.PerformCalculations(value);
-            //Console.WriteLine("Time elapsed for thread creation " + sw.ElapsedMilliseconds);
-        }
-        /*public virtual void Subscribe(AbstractSocket provider)
-        {
-            Unsubscriber = provider.Subscribe(this);
-        }*/
 
-        /*public virtual void Unsubscribe()
-        {
-            Unsubscriber.Dispose();
         }
-        */
+
     }
 }

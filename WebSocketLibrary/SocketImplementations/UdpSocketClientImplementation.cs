@@ -57,7 +57,9 @@ namespace WebSocketLibrary
             this.Id = id;
             //EP = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); // endpoint where server is listening
 
-            IPAddress ip = Dns.GetHostEntry(host).AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork);
+            IPAddress ip = Uri.CheckHostName(host).Equals(UriHostNameType.Dns) ? 
+                Dns.GetHostEntry(host).AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork) :
+                IPAddress.Parse(host);
             EP = new IPEndPoint(ip, Int32.Parse(port));
             this.Client = CreateSocket(new IPEndPoint(IPAddress.Any, 0));
             //this.Client.Connect(EP);
@@ -203,7 +205,7 @@ namespace WebSocketLibrary
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine("Socket was closed, stopping receive");
             }
 
         }

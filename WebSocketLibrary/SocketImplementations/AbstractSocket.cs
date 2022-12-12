@@ -30,7 +30,9 @@ namespace WebSocketLibrary
 
         }
 
-        // Return keep alive message. If message already present in queue (not acknowledged), then we have most likely lost connection.
+        /**
+         * Return keep alive message. If message already present in queue (not acknowledged), then we have most likely lost connection.
+         */
         public KeepAliveMessage GetKeepAliveMessage()
         {
 
@@ -66,6 +68,9 @@ namespace WebSocketLibrary
 
         }
 
+        /**
+         * Create or get connect message from queue
+         */
         public ConnectMessage GetConnectMessage()
         {
             ConnectMessage msg = (ConnectMessage)messageQueue.Values.FirstOrDefault(a => typeof(ConnectMessage) == a.GetType());
@@ -78,6 +83,9 @@ namespace WebSocketLibrary
             return msg;
         }
 
+        /**
+         * Add message to queue to be acknowledged
+         */
         public void AddToMessageQueue(int index, AbstractMessage msg)
         {
             if (!messageQueue.ContainsKey(index))
@@ -113,6 +121,9 @@ namespace WebSocketLibrary
 
         }
 
+        /**
+         * Method determines which type of message was recieved and handles it accordingly
+         */
         protected virtual void ResolveMessageType(string receiveString)
         {
 
@@ -136,7 +147,9 @@ namespace WebSocketLibrary
             }
         }
 
-        // Remove message from queue that was acknowledged
+        /**
+         * Remove message from queue that was acknowledged
+         */
         protected void ResolveAckMessage(AcknowledgeMessage msg)
         {
 
@@ -145,21 +158,25 @@ namespace WebSocketLibrary
                 return;
             }
 
+            AbstractMessage queueMessage = messageQueue[msg.AcknowledgingIndex];
+            messageQueue.Remove(msg.AcknowledgingIndex); 
 
-            if (messageQueue[msg.AcknowledgingIndex].GetType().Equals(typeof(ConnectMessage)))
+            if (queueMessage.GetType().Equals(typeof(ConnectMessage)))
             {
                 Console.WriteLine("Socket " + Id + " has established a connection");
                 ActivateConnection();
             }
 
             //Handle Custom Logic if necessary
-            HandleCustomAckMessageLogic(messageQueue[msg.AcknowledgingIndex]);
+            HandleCustomAckMessageLogic(queueMessage);
             
-            messageQueue.Remove(msg.AcknowledgingIndex); 
         }
 
         protected abstract void HandleCustomAckMessageLogic(AbstractMessage msg);
 
+        /**
+         * Connection is dropped when keep alive messages are not ack
+         */
         public virtual void DropConnection()
         {
             this.isAlive = false;
