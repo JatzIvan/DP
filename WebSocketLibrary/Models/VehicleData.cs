@@ -16,11 +16,20 @@ namespace WebSocketLibrary.Models
         public float Speed { get; set; }
         public float Acceleration { get; set; }
         public float Heading { get; set; }
+
+        public float SteeringAngle { get; set; }
         public PositionWrapper Position { get; set; }
     }
 
     public class PositionWrapper
     {
+
+        public PositionWrapper(float Lat, float Lon)
+        {
+            this.Lat = Lat;
+            this.Lon = Lon;
+        }
+
         public float Lat { get; set; }
         public float Lon { get; set; }
     }

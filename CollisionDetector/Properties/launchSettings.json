@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "CollisionDetector": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

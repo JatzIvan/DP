@@ -18,6 +18,7 @@ namespace ConsoleApp1.Api
             {
                 // Basic Api client setup
                 ApiClient = new HttpClient();
+
                 ApiClient.BaseAddress = new Uri(baseAddr);
                 ApiClient.DefaultRequestHeaders.Accept.Clear();
                 // Header defines json input type from API

@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using WebSocketLibrary.Models;
 
 namespace WebSocketLibrary
 {
-    public class WebSocketMessageHandler<T> : IObserver<CarUpdateInfoWrapper> where T: ICollisionDetector 
+    public class WebSocketMessageHandler<T> : IObserver<T> where T: ObserverWrapper
     {
 
         private string Name;
-        private IDisposable Unsubscriber;
-        private T CollisionDetector;
+        private IMessageHandler<T> CollisionDetector;
 
         // TODO: add calculation templates
-        public WebSocketMessageHandler(string name, T collisionDetector)
+        public WebSocketMessageHandler(string name, IMessageHandler<T> collisionDetector)
         {
             if (String.IsNullOrEmpty(name))
             {
@@ -24,30 +26,27 @@ namespace WebSocketLibrary
             this.Name = name;
         }
 
+        /**
+         * Handle socket finish without application crash
+         */
         public virtual void OnCompleted()
         {
             throw new NotImplementedException();
         }
 
+        /**
+         * Handle errors without application crash
+         */
         public virtual void OnError(Exception error)
         {
-            throw new NotImplementedException();
+            Console.WriteLine("Error occured during data handling");
         }
 
-        public virtual void OnNext(CarUpdateInfoWrapper value)
+        public virtual void OnNext(T value)
         {
 
-            //Console.WriteLine("Latitude: " + value.RecievedData[0].Lat + " ,Longitude:" + value.RecievedData[0].Lon + " ,Velocity:" + value.RecievedData[0].Vel + " ,Orientation:" + value.RecievedData[0].Orientation);
-            CollisionDetector.PerformCalculations(value.RecievedData);
-        }
-        public virtual void Subscribe(UdpSocketClientImplementation provider)
-        {
-            Unsubscriber = provider.Subscribe(this);
-        }
+            Task task = Task.Run(() => CollisionDetector.PerformActions(value));
 
-        public virtual void Unsubscribe()
-        {
-            Unsubscriber.Dispose();
         }
 
     }
