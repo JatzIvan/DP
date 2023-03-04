@@ -172,6 +172,9 @@ namespace CoreLibrary
 
         public static string LoadVariable(string variable)
         {
+
+            string val = LoadEnvironmentVariable(variable) ?? LoadConfigurationVariable(variable);
+            Console.WriteLine("Loaded variable " + variable + " with value " + val);
             return LoadEnvironmentVariable(variable) ?? LoadConfigurationVariable(variable);
         }
 

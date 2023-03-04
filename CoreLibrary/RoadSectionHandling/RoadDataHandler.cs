@@ -104,7 +104,7 @@ namespace CoreLibrary.RoadSectionHandling
                 List<AbstractRoadModel> simplifiedModel = simplificator.GetSimplifiedModel();
                 ICurvesResolver curvesResolver = RoadCurvitureCalculatorFactory.getInstance().GetResolverImplementation(config.CurvitureResolver, simplifiedModel);
                 RoadInfoTransformed = curvesResolver.CalculateCurvesForWays();
-                MaxSpeedCalculatorFactory.GetInstance().GetImplementation().CalcMaxSpeedsForRoadSegment(RoadInfoTransformed);
+                MaxSpeedCalculatorFactory.GetInstance().GetImplementation().CalcMaxSpeedsForRoadSegment(RoadInfoTransformed, SectionRef);
                 GatherCurvaturesBetweenVehicles();
                 RoadInfoInTreeForm = MapParserUtils.CreateKdTreeWithCoordinates(RoadInfoTransformed);
             }

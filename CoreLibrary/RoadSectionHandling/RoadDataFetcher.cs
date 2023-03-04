@@ -66,7 +66,7 @@ namespace CoreLibrary.RoadSectionHandling
                 GetRoadFromAPI();
             }
 
-            if(RoadSegmentsByRef == null)
+            if(RoadSegmentsByRef == null && RawFetchedData != null)
             {
 
                 RoadSegmentsByRef = new Dictionary<string, List<RoadPointModel>>();
