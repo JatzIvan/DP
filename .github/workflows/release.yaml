@@ -4,9 +4,12 @@ on:
   pull_request:
     types: ['closed']
     branches: ['main']
+  push:
+    branches: ['main']
 
 jobs:
   release:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
