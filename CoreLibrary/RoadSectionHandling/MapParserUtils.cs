@@ -210,7 +210,11 @@ namespace CoreLibrary.RoadSectionHandling
 
             foreach (AbstractRoadModel point in points)
             {
-                finalTree.Insert(new GeoAPI.Geometries.Coordinate(point.CurrentLocation.Longitude, point.CurrentLocation.Latitude), point);
+                (double, double, double) converted = ConvertGPStoCartsian(point.CurrentLocation);
+                //finalTree.Insert(
+                //    new GeoAPI.Geometries.Coordinate(point.CurrentLocation.Longitude, point.CurrentLocation.Latitude), point);
+                finalTree.Insert(
+                    new GeoAPI.Geometries.Coordinate(converted.Item1, converted.Item2, converted.Item3), point);
             }
 
             return finalTree;

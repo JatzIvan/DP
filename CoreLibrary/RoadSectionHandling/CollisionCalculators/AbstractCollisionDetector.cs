@@ -27,7 +27,7 @@ namespace WebSocketLibrary
          * This is a long shot but the only possible way is to compare heading of car and road (closer value means the correct direction)
          * return true -> forward / false -> back
          */
-        public static bool DetermineDirection(float heading, AbstractRoadModel carPoint)
+        public static bool DetermineDirection(double heading, AbstractRoadModel carPoint)
         {
 
             if(carPoint.Previous == null)
@@ -40,9 +40,25 @@ namespace WebSocketLibrary
                 return false;
             }
 
-            return Math.Abs(carPoint.Next.Heading - heading) < Math.Abs(carPoint.Previous.Heading - heading);
+            //return Math.Abs(carPoint.Next.Heading - heading) < Math.Abs(carPoint.Previous.Heading - heading);
+
+            return CalcClosestHeading(carPoint.Next.Heading, heading) < CalcClosestHeading(carPoint.Previous.Heading, heading);
 
             //return heading >= 180 && heading < 360;
+        }
+
+        // Take into account 360/0 transformation
+        private static double CalcClosestHeading(double heading1, double heading2)
+        {
+
+            double transformedHeading1 = heading1 < 30 && heading2 > 270 ? heading1 + 360 : heading1;
+            double transformedHeading2 = heading2 < 30 && heading1 > 270 ? heading2 + 360 : heading2;
+
+            double originalSub = Math.Abs(heading1 - heading2);
+            double transformedSub = Math.Abs(transformedHeading1 - transformedHeading2);
+
+            return transformedSub < originalSub ? transformedSub : originalSub;
+
         }
 
         // true -> forward / false -> back
@@ -78,12 +94,23 @@ namespace WebSocketLibrary
             // TODO: figure out the best possible way
             //AbstractRoadModel v1Point = currectRoadModel[findClosestRoadLocationPoint(currectRoadModel.Keys.ToList(), new LocationPoint(vehicle1.Position.Lon, vehicle1.Position.Lat), 0, currectRoadModel.Count, currectRoadModel.Keys.First())];
             //AbstractRoadModel v2Point = currectRoadModel[findClosestRoadLocationPoint(currectRoadModel.Keys.ToList(), new LocationPoint(vehicle2.Position.Lon, vehicle2.Position.Lat), 0, currectRoadModel.Count, currectRoadModel.Keys.First())];
-            AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle1.Position.Lon, vehicle1.Position.Lat)).Data;
-            AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle2.Position.Lon, vehicle2.Position.Lat)).Data;
+
+            (double, double, double) convertedVehicle1 = MapParserUtils.ConvertGPStoCartsian(
+                new LocationPoint(vehicle1.Position.Lon, vehicle1.Position.Lat));
+            (double, double, double) convertedVehicle2 = MapParserUtils.ConvertGPStoCartsian(
+                new LocationPoint(vehicle2.Position.Lon, vehicle2.Position.Lat));
+
+            //AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle1.Position.Lon, vehicle1.Position.Lat)).Data;
+            //AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle2.Position.Lon, vehicle2.Position.Lat)).Data;
+
+            AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(convertedVehicle1.Item1, convertedVehicle1.Item2, convertedVehicle1.Item3)).Data;
+            AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(convertedVehicle2.Item1, convertedVehicle2.Item2, convertedVehicle2.Item3)).Data;
+
 
             // Calculate only if they go against each other
             if (DetermineDirection(vehicle1.Heading, v1Point) == DetermineDirection(vehicle2.Heading, v2Point))
             {
+                //Console.WriteLine("Skip: Wrong direction");
                 return true;
             }
 
@@ -92,13 +119,16 @@ namespace WebSocketLibrary
             // We need to take into account, if car is closer to second vehicle than point or vice versa
             double distance = CalcOffsetBetweenCarAndMapPoint(vehicle1, v1Point) + CalcOffsetBetweenCarAndMapPoint(vehicle2, v2Point);
             distance += GetDistanceBetweenMapPoints(v2Point, v1Point);
-            if(distance > ApplicationConfigurationHandler.CarDistanceSkipTreshold)
+            if(distance > ApplicationConfigurationHandler.CarDistanceSkipTreshold || distance < 10)
             {
+                //Console.WriteLine("Skip: Distance");
                 return true;
             }
 
             double checkDistance = CalcOffsetBetweenCarAndMapPoint(vehicle1, v1Point) + CalcOffsetBetweenCarAndMapPoint(vehicle2, v2Point);
-            
+
+            bool direction = DetermineDirection(vehicle1.Heading, v1Point);
+
             // Loop until vehicle 1 does not meet position of vehicle 2
             // This is to check if cars did not pass eachother
             while (true)
@@ -112,17 +142,21 @@ namespace WebSocketLibrary
                // We should be able to find the target vehicle in the distance treshold
                 if(checkDistance > distance)
                 {
+                    //Console.WriteLine("Skip: Could not find in said distance passed eachother");
                     return true;
                 }
 
                 // If this happens that means they already passed eachother
                 // This signals that this pair can be skipped
-                if ((DetermineDirection(vehicle1.Heading, v1Point) ? v1Point.Next.Point : v1Point.Previous.Point) == null)
+                if ((direction ? v1Point.Next.Point : v1Point.Previous.Point) == null)
                 {
+                    //Console.WriteLine("Skip: Could not find in said distance passed eachother");
                     return true;
                 }
 
-               AbstractRoadModel v1NextPoint = DetermineDirection(vehicle1.Heading, v1Point) ? v1Point.Next.Point : v1Point.Previous.Point;
+                //Console.WriteLine("Direction: " + DetermineDirection(vehicle1.Heading, v1Point) + " Heading: " + vehicle1.Heading + "-" + v1Point.Next.Heading + "/" + v1Point.Previous.Heading);
+
+               AbstractRoadModel v1NextPoint = direction ? v1Point.Next.Point : v1Point.Previous.Point;
             // Calculate Distance between found points (fast and simple)   
                checkDistance += GetDistanceBetweenMapPoints(v1NextPoint, v1Point);
                v1Point = v1NextPoint;
@@ -180,8 +214,18 @@ namespace WebSocketLibrary
             // First transform datawrapper to LocationPoints
             // Need to find the closest road segment and then approximate
             // TODO: figure out the best possible way
-            AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle1.Position.Lon, vehicle1.Position.Lat)).Data;
-            AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle2.Position.Lon, vehicle2.Position.Lat)).Data;
+
+            (double, double, double) convertedVehicle1 = MapParserUtils.ConvertGPStoCartsian(
+    new LocationPoint(vehicle1.Position.Lon, vehicle1.Position.Lat));
+            (double, double, double) convertedVehicle2 = MapParserUtils.ConvertGPStoCartsian(
+                new LocationPoint(vehicle2.Position.Lon, vehicle2.Position.Lat));
+
+            //AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle1.Position.Lon, vehicle1.Position.Lat)).Data;
+            //AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle2.Position.Lon, vehicle2.Position.Lat)).Data;
+
+            AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(convertedVehicle1.Item1, convertedVehicle1.Item2, convertedVehicle1.Item3)).Data;
+            AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(convertedVehicle2.Item1, convertedVehicle2.Item2, convertedVehicle2.Item3)).Data;
+
             //AbstractRoadModel v1Point = currectRoadModel[findClosestRoadLocationPoint(currectRoadModel.Keys.ToList(), new LocationPoint(vehicle1.Position.Lon, vehicle1.Position.Lat), 0, currectRoadModel.Count, currectRoadModel.Keys.First())];
             //AbstractRoadModel v2Point = currectRoadModel[findClosestRoadLocationPoint(currectRoadModel.Keys.ToList(), new LocationPoint(vehicle2.Position.Lon, vehicle2.Position.Lat), 0, currectRoadModel.Count, currectRoadModel.Keys.First())];
             //AbstractRoadModel v1Point = currectRoadModel[new LocationPoint(vehicle1.Position.Lon, vehicle1.Position.Lat)];
@@ -234,7 +278,7 @@ namespace WebSocketLibrary
         }
 
         // https://stackoverflow.com/questions/12249051/unique-combinations-of-list
-        IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> items, int count)
+        public static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> items, int count)
         {
             int i = 0;
             foreach (var item in items)

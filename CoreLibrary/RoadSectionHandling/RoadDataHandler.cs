@@ -28,6 +28,9 @@ namespace CoreLibrary.RoadSectionHandling
 
         private KdTree<AbstractRoadModel> RoadInfoInTreeForm { get; set; }
 
+        public RoadDataFetcher roadDataFether { get; set; }
+
+
         // Implement with config Object
         public RoadDataHandler(string sectionName, string sectionRef)
         {
@@ -44,6 +47,7 @@ namespace CoreLibrary.RoadSectionHandling
             this.SectionName = sectionName;
             this.SectionRef = sectionRef;
             this.Initialized = false;
+            this.roadDataFether = RoadDataFetcher.GetInstance();
 
         }
 
@@ -56,7 +60,7 @@ namespace CoreLibrary.RoadSectionHandling
                 // TODO implement later
 
                 // Get Data from API
-                List<RoadPointModel> fetchedModel = RoadDataFetcher.GetInstance().GetRoadDataForRef(SectionRef);
+                List<RoadPointModel> fetchedModel = roadDataFether.GetRoadDataForRef(SectionRef);
                 this.RoadInfoRaw = fetchedModel;
             }
 
@@ -104,7 +108,7 @@ namespace CoreLibrary.RoadSectionHandling
                 List<AbstractRoadModel> simplifiedModel = simplificator.GetSimplifiedModel();
                 ICurvesResolver curvesResolver = RoadCurvitureCalculatorFactory.getInstance().GetResolverImplementation(config.CurvitureResolver, simplifiedModel);
                 RoadInfoTransformed = curvesResolver.CalculateCurvesForWays();
-                MaxSpeedCalculatorFactory.GetInstance().GetImplementation().CalcMaxSpeedsForRoadSegment(RoadInfoTransformed);
+                MaxSpeedCalculatorFactory.GetInstance().GetImplementation().CalcMaxSpeedsForRoadSegment(RoadInfoTransformed, SectionRef);
                 GatherCurvaturesBetweenVehicles();
                 RoadInfoInTreeForm = MapParserUtils.CreateKdTreeWithCoordinates(RoadInfoTransformed);
             }

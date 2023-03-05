@@ -8,8 +8,8 @@ namespace CoreLibrary.RoadSectionHandling.MaxSpeedCalculations
     public interface ISpeedCalculator
     {
 
-        public double GetMaxSpeed(AbstractRoadModel point);
+        public double GetMaxSpeed(AbstractRoadModel point, string roadRef);
 
-        public void CalcMaxSpeedsForRoadSegment(List<AbstractRoadModel> points);
+        public void CalcMaxSpeedsForRoadSegment(List<AbstractRoadModel> points, string roadRef);
     }
 }

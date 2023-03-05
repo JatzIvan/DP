@@ -19,7 +19,7 @@ namespace CoreLibrary.RoadSectionHandling
 
         private static RoadDataFetcher INSTANCE;
 
-        private RoadDataFetcher()
+        public RoadDataFetcher()
         {
             this.Handler = ApiCallsHandler.GetHandler();
         }
@@ -39,7 +39,7 @@ namespace CoreLibrary.RoadSectionHandling
         /**
          * TODO: Do more generic implementation
          */
-        protected List<RoadPointModel> GetRoadFromAPI()
+        public virtual List<RoadPointModel> GetRoadFromAPI()
         {
 
             List<RoadPointModel> output = Handler.Get<List<RoadPointModel>>("roads/" + ApplicationConfigurationHandler.TestRoadQuery);
@@ -63,10 +63,10 @@ namespace CoreLibrary.RoadSectionHandling
 
             if(RawFetchedData == null)
             {
-                GetRoadFromAPI();
+                RawFetchedData = GetRoadFromAPI();
             }
 
-            if(RoadSegmentsByRef == null)
+            if(RoadSegmentsByRef == null && RawFetchedData != null)
             {
 
                 RoadSegmentsByRef = new Dictionary<string, List<RoadPointModel>>();

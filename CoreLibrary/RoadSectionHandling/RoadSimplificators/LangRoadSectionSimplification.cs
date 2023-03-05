@@ -82,7 +82,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadSimplificators
             {
                 if(ApplicationConfigurationHandler.LangRegionSize == 0)
                 {
-                    regionSize = int.Parse(ConfigurationManager.AppSettings.Get("LangRegionSize"), CultureInfo.InvariantCulture);
+                    regionSize = int.Parse(ConfigurationManager.AppSettings.Get("LANG_REGION_SIZE"), CultureInfo.InvariantCulture);
                 }
                 else
                 {

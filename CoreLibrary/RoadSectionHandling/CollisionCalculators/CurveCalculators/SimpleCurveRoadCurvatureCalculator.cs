@@ -50,9 +50,22 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
 
             //AbstractRoadModel v1Point = currectRoadModel[AbstractCollisionDetector.findClosestRoadLocationPoint(currectRoadModel.Keys.ToList(), new LocationPoint(vehicle1.Position.Lon, vehicle1.Position.Lat), 0, currectRoadModel.Count, currectRoadModel.Keys.First())];
             //AbstractRoadModel v2Point = currectRoadModel[AbstractCollisionDetector.findClosestRoadLocationPoint(currectRoadModel.Keys.ToList(), new LocationPoint(vehicle2.Position.Lon, vehicle2.Position.Lat), 0, currectRoadModel.Count, currectRoadModel.Keys.First())];
-            AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle1.Position.Lon, vehicle1.Position.Lat)).Data;
-            AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle2.Position.Lon, vehicle2.Position.Lat)).Data;
 
+            (double, double, double) convertedVehicle1 = MapParserUtils.ConvertGPStoCartsian(
+    new LocationPoint(vehicle1.Position.Lon, vehicle1.Position.Lat));
+            (double, double, double) convertedVehicle2 = MapParserUtils.ConvertGPStoCartsian(
+                new LocationPoint(vehicle2.Position.Lon, vehicle2.Position.Lat));
+
+            //AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle1.Position.Lon, vehicle1.Position.Lat)).Data;
+            //AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle2.Position.Lon, vehicle2.Position.Lat)).Data;
+
+            AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(convertedVehicle1.Item1, convertedVehicle1.Item2, convertedVehicle1.Item3)).Data;
+            AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(convertedVehicle2.Item1, convertedVehicle2.Item2, convertedVehicle2.Item3)).Data;
+
+
+            /*AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle1.Position.Lon, vehicle1.Position.Lat)).Data;
+            AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle2.Position.Lon, vehicle2.Position.Lat)).Data;
+            */
             // First calculate road distance between vehicles
             // Take points and vehicle offsets into account
             double distance = AbstractCollisionDetector.GetDistanceBetweenMapPoints(v1Point, v2Point)
@@ -109,8 +122,8 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
 
                 Console.WriteLine("-------------------------------------------");
 
-                Console.WriteLine("Collision between " + vehicle1.Position.Lat.ToString().Replace(",", ".") + "," + vehicle1.Position.Lon.ToString().Replace(",", ".") + "/" + vehicle1.Heading +
-                    " and " + vehicle2.Position.Lat.ToString().Replace(",", ".") + "," + vehicle2.Position.Lon.ToString().Replace(",", ".") + "/" + vehicle2.Heading
+                Console.WriteLine("Collision between " + vehicle1.Position.Lat.ToString().Replace(",", ".") + "," + vehicle1.Position.Lon.ToString().Replace(",", ".") + "/" + vehicle1.Heading + "/" + vehicle1.Speed +
+                    " and " + vehicle2.Position.Lat.ToString().Replace(",", ".") + "," + vehicle2.Position.Lon.ToString().Replace(",", ".") + "/" + vehicle2.Heading + "/" + vehicle2.Speed
                     + " At Real point " + realCollisionPoint.Latitude.ToString().Replace(",", ".") + "," + realCollisionPoint.Longitude.ToString().Replace(",", ".")
                     + " At Mapped point " + pointWithSmallestCumDistance.CurrentLocation.Latitude.ToString().Replace(",",".") + "," + pointWithSmallestCumDistance.CurrentLocation.Longitude.ToString().Replace(",", "."));
 
