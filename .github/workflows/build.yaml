@@ -2,7 +2,7 @@ name: Publish Docker Image to Docker Hub
 
 on:
   push:
-    branches: ['main']
+    branches: ['main', 'refactor']
   pull_request:
     branches: ['main']
 
@@ -17,9 +17,11 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.x
-      - name: Install dependencies
+      - name: Remove reference for windows form
+        run: rm -rf RoadVisualisation
+      - name: Install dependencies for tests
         run: dotnet restore
-      - name: Build
+      - name: Build test
         run: dotnet build --configuration Release --no-restore
       - name: Test
         run: dotnet test --no-restore --verbosity normal
