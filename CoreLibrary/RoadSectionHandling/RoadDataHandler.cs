@@ -72,9 +72,11 @@ namespace CoreLibrary.RoadSectionHandling
          */
         public KdTree<AbstractRoadModel> GetParsedRoadData()
         {
-            return this.GetParsedRoadData(new HandlerSetupConfig(
+
+            return this.GetParsedRoadData(ApplicationConfigurationHandler.GenerateHandlerSetupConfig());
+/*            return this.GetParsedRoadData(new HandlerSetupConfig(
                 typeof(DouglasPeuckerRoadSectionSimplification).Name,
-                typeof(CircumcircleRoadCircleCurvesResolver).Name));
+                typeof(CircumcircleRoadCircleCurvesResolver).Name));*/
         }
 
         /**
@@ -204,9 +206,10 @@ namespace CoreLibrary.RoadSectionHandling
 
         public List<AbstractRoadModel> GetParsedRoadDataList()
         {
-            return this.GetParsedRoadDataList(new HandlerSetupConfig(
-                typeof(DouglasPeuckerRoadSectionSimplification).Name,
-                typeof(CircumcircleRoadCircleCurvesResolver).Name));
+            return this.GetParsedRoadDataList(ApplicationConfigurationHandler.GenerateHandlerSetupConfig());
+    /*            return this.GetParsedRoadDataList(new HandlerSetupConfig(
+                    typeof(DouglasPeuckerRoadSectionSimplification).Name,
+                    typeof(CircumcircleRoadCircleCurvesResolver).Name));*/
         }
 
         public List<AbstractRoadModel> GetParsedRoadDataList(HandlerSetupConfig config)
@@ -223,13 +226,22 @@ namespace CoreLibrary.RoadSectionHandling
 
     public class HandlerSetupConfig
     {
-        public string Simplificator { get; set; }
-        public string CurvitureResolver { get; set; }
+        public string Simplificator { get; set; } = typeof(DouglasPeuckerRoadSectionSimplification).Name;
+        public string CurvitureResolver { get; set; } = typeof(CircumcircleRoadCircleCurvesResolver).Name;
 
         public HandlerSetupConfig(string simplificator, string curvitureResolver)
         {
-            this.Simplificator = simplificator;
-            this.CurvitureResolver = curvitureResolver;
+
+            if(simplificator != null)
+            {
+                this.Simplificator = simplificator;
+            }
+
+            if(curvitureResolver  != null)
+            {
+                this.CurvitureResolver = curvitureResolver;
+            }
+
         }
     }
 
