@@ -196,8 +196,8 @@ namespace SumoTraceParser
 
                 KdTree<AbstractRoadModel> model = RoadHandlers["503"].GetParsedRoadData();
 
-                AbstractRoadModel v1Point = model.NearestNeighbor(new GeoAPI.Geometries.Coordinate(convertedVehicle1.Item1, convertedVehicle1.Item2, convertedVehicle1.Item3)).Data;
-                AbstractRoadModel v2Point = model.NearestNeighbor(new GeoAPI.Geometries.Coordinate(convertedVehicle2.Item1, convertedVehicle2.Item2, convertedVehicle2.Item3)).Data;
+                AbstractRoadModel v1Point = model.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle1.Item1, convertedVehicle1.Item2, convertedVehicle1.Item3)).Data;
+                AbstractRoadModel v2Point = model.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle2.Item1, convertedVehicle2.Item2, convertedVehicle2.Item3)).Data;
 
                 // Skip when vehicles are not going against eachother
                 if (AbstractCollisionDetector.DetermineDirection(veh1.Angle, v1Point) == AbstractCollisionDetector.DetermineDirection(veh2.Angle, v2Point))

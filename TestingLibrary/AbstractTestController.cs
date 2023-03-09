@@ -19,7 +19,7 @@ namespace TestingLibrary
 
         public AbstractTestController() 
         {
-            ApplicationConfigurationHandler.LoadConfiguration();
+            //ApplicationConfigurationHandler.LoadConfiguration();
             roadDataFetcher = new Mock<RoadDataFetcher>();
             roadDataFetcher.Setup(x => x.GetRoadFromAPI()).Returns(ParseModel());
         }
