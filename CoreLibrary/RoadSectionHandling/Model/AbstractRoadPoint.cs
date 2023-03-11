@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling.Model
 {
-    public class AbstractRoadModel
+    public class AbstractRoadModel: IClonable<AbstractRoadModel>
     {
         public LocationPoint CurrentLocation { get; set; }
 
@@ -35,6 +35,21 @@ namespace CoreLibrary.RoadSectionHandling.Model
             return (T)this;
         }
 
+
+
+        public AbstractRoadModel Clone()
+        {
+            AbstractRoadModel modelCopy = new AbstractRoadModel(CurrentLocation);
+            modelCopy.RadiusOfCircle = RadiusOfCircle;
+            modelCopy.Angle = Angle;
+            modelCopy.RadiusAccountedForByAngle = RadiusAccountedForByAngle;
+            modelCopy.MaxSpeed = MaxSpeed;
+            modelCopy.TangentOfPoint = TangentOfPoint;
+            modelCopy.Distance = Distance;
+            modelCopy.Previous = Previous.Clone(modelCopy);
+            modelCopy.Next = Next.Clone(modelCopy);
+            return modelCopy;
+        }
     }
 
     public class SegmentCurvitureChain
@@ -52,6 +67,16 @@ namespace CoreLibrary.RoadSectionHandling.Model
         public SegmentCurvitureChain(AbstractRoadModel point)
         {
             this.Point = point;
+        }
+
+        public SegmentCurvitureChain Clone(AbstractRoadModel newPoint)
+        {
+            SegmentCurvitureChain copy = new SegmentCurvitureChain(newPoint);
+            copy.CurveSharpness = CurveSharpness;
+            copy.Heading = Heading;
+            copy.MaxSpeed = MaxSpeed;
+            copy.RadiusOfCurvature = RadiusOfCurvature;
+            return copy;
         }
 
     }

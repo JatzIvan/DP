@@ -18,7 +18,7 @@ namespace CoreLibrary.RoadSectionHandling
         private bool Initialized { get; set; } = false;
         private string SectionName { get; set; }
 
-        private string SectionRef { get; set; }
+        public string SectionRef { get; set; }
 
         private List<RoadPointModel> RoadInfoRaw { get; set; }
 
@@ -32,6 +32,7 @@ namespace CoreLibrary.RoadSectionHandling
 
 
         // Implement with config Object
+        // Do not instantiate with constructor. Use RoadDataManager.GetInstance().AddDataHandler()
         public RoadDataHandler(string sectionName, string sectionRef)
         {
             if (String.IsNullOrEmpty(sectionName))
@@ -114,6 +115,27 @@ namespace CoreLibrary.RoadSectionHandling
             }
 
             return this.RoadInfoInTreeForm;
+
+        }
+
+        public void RecalculateRoadModelBasedOnCurrentRoadState()
+        {
+            List<AbstractRoadModel> modelCopy = RoadInfoTransformed.ConvertAll(roadPoint => roadPoint.Clone());
+            
+            MaxSpeedCalculations.ISpeedCalculator calculator = MaxSpeedCalculatorFactory.GetInstance().GetImplementation();
+            
+            foreach(AbstractRoadModel model in modelCopy)
+            {
+                model.MaxSpeed = calculator.GetMaxSpeed(model, SectionRef);
+            }
+
+            KdTree<AbstractRoadModel> roadTreeFormCopy = MapParserUtils.CreateKdTreeWithCoordinates(RoadInfoTransformed);
+
+            lock (RoadInfoTransformed) lock(RoadInfoInTreeForm)
+            {
+                RoadInfoTransformed = modelCopy;
+                RoadInfoInTreeForm= roadTreeFormCopy;
+            }
 
         }
 

@@ -64,7 +64,8 @@ namespace CollisionDetector
             foreach(KeyValuePair<string, List<RoadPointModel>> section in sections)
             {
 
-                RoadDataHandler roadHandler = new RoadDataHandler(section.Key, section.Key);
+                //RoadDataHandler roadHandler = new RoadDataHandler(section.Key, section.Key);
+                RoadDataHandler roadHandler = RoadDataManager.GetInstance().AddDataHandler(section.Key, section.Key);
 
 
                 IObserver<VehicleObserverWrapper> observer = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDataHandler(roadHandler));

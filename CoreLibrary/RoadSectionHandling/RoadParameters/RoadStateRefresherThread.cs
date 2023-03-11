@@ -26,6 +26,8 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
 
                 }
 
+                RoadDataManager.GetInstance().RecalculateAllHandlers();
+
                 // Recalculate all the necessary calculations
 
                 // TODO: Wait for 10 minutes for now
