@@ -59,8 +59,8 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
             //AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle1.Position.Lon, vehicle1.Position.Lat)).Data;
             //AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle2.Position.Lon, vehicle2.Position.Lat)).Data;
 
-            AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(convertedVehicle1.Item1, convertedVehicle1.Item2, convertedVehicle1.Item3)).Data;
-            AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(convertedVehicle2.Item1, convertedVehicle2.Item2, convertedVehicle2.Item3)).Data;
+            AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle1.Item1, convertedVehicle1.Item2, convertedVehicle1.Item3)).Data;
+            AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle2.Item1, convertedVehicle2.Item2, convertedVehicle2.Item3)).Data;
 
 
             /*AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new GeoAPI.Geometries.Coordinate(vehicle1.Position.Lon, vehicle1.Position.Lat)).Data;

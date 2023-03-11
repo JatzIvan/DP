@@ -9,7 +9,7 @@ using System.Text;
 namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 {
     [CurvatureResolver]
-    class CircumcircleRoadCircleCurvesResolver : ICurvesResolver
+    public class CircumcircleRoadCircleCurvesResolver : ICurvesResolver
     {
 
         private List<AbstractRoadModel> ConnectedWays { get; set; }

@@ -1,5 +1,6 @@
 ﻿using CoreLibrary.RoadSectionHandling.Model;
 using NetTopologySuite.Index.KdTree;
+using NetTopologySuite.Index.Quadtree;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -198,7 +199,7 @@ namespace CoreLibrary.RoadSectionHandling
 
             foreach(LocationPoint point in points)
             {
-                finalTree.Insert(new GeoAPI.Geometries.Coordinate(point.Longitude, point.Latitude), point);
+                finalTree.Insert(new NetTopologySuite.Geometries.CoordinateZ(point.Longitude, point.Latitude), point);
             }
 
             return finalTree;
@@ -213,12 +214,27 @@ namespace CoreLibrary.RoadSectionHandling
                 (double, double, double) converted = ConvertGPStoCartsian(point.CurrentLocation);
                 //finalTree.Insert(
                 //    new GeoAPI.Geometries.Coordinate(point.CurrentLocation.Longitude, point.CurrentLocation.Latitude), point);
-                finalTree.Insert(
-                    new GeoAPI.Geometries.Coordinate(converted.Item1, converted.Item2, converted.Item3), point);
+                finalTree.Insert(new NetTopologySuite.Geometries.CoordinateZ(converted.Item1, converted.Item2, converted.Item3), point);
             }
 
             return finalTree;
         }
+
+/*        public static Quadtree<AbstractRoadModel> CreateQuadTreeWithCoordinates(List<AbstractRoadModel> points)
+        {
+            Quadtree<AbstractRoadModel> finalTree = new KdTree<AbstractRoadModel>();
+
+            foreach (AbstractRoadModel point in points)
+            {
+                (double, double, double) converted = ConvertGPStoCartsian(point.CurrentLocation);
+                //finalTree.Insert(
+                //    new GeoAPI.Geometries.Coordinate(point.CurrentLocation.Longitude, point.CurrentLocation.Latitude), point);
+                finalTree.Insert(
+                    new NetTopologySuite.Geometries.Coordinate(converted.Item1, converted.Item2, converted.Item3), point);
+            }
+
+            return finalTree;
+        }*/
 
     }
 }
