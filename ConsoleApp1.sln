@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CollisionDetector", "Collis
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SumoTraceParser", "SumoTraceParser\SumoTraceParser.csproj", "{6083B3A6-07BA-4B1D-A327-BB9E67FEF3FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingLibrary", "TestingLibrary\TestingLibrary.csproj", "{808A2AC7-D62D-48AF-AA9A-AB9F96B51887}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestingLibrary", "TestingLibrary\TestingLibrary.csproj", "{808A2AC7-D62D-48AF-AA9A-AB9F96B51887}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +41,10 @@ Global
 		{3A2AD079-F70A-4890-8939-B5CA4D4D2BB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A2AD079-F70A-4890-8939-B5CA4D4D2BB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A2AD079-F70A-4890-8939-B5CA4D4D2BB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC0A6CE9-06D5-4728-96F7-0DBA7808C191}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC0A6CE9-06D5-4728-96F7-0DBA7808C191}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC0A6CE9-06D5-4728-96F7-0DBA7808C191}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC0A6CE9-06D5-4728-96F7-0DBA7808C191}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3C5DA719-E1AD-4D2D-ACFD-5C974EABD00C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3C5DA719-E1AD-4D2D-ACFD-5C974EABD00C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C5DA719-E1AD-4D2D-ACFD-5C974EABD00C}.Release|Any CPU.ActiveCfg = Release|Any CPU

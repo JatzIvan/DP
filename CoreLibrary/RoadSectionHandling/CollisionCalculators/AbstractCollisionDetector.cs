@@ -117,7 +117,9 @@ namespace WebSocketLibrary
             // Point on road wont be perfectly on the car position, start with the offset distance
             // Calc ofset of both vehicles for better accuracy
             // We need to take into account, if car is closer to second vehicle than point or vice versa
-            double distance = CalcOffsetBetweenCarAndMapPoint(vehicle1, v1Point) + CalcOffsetBetweenCarAndMapPoint(vehicle2, v2Point);
+            double v1Offset = CalcOffsetBetweenCarAndMapPoint(vehicle1, v1Point);
+            double v2Offset = CalcOffsetBetweenCarAndMapPoint(vehicle2, v2Point);
+            double distance = v1Offset + v2Offset;
             distance += GetDistanceBetweenMapPoints(v2Point, v1Point);
             if(distance > ApplicationConfigurationHandler.CarDistanceSkipTreshold || distance < 10)
             {
@@ -125,7 +127,7 @@ namespace WebSocketLibrary
                 return true;
             }
 
-            double checkDistance = CalcOffsetBetweenCarAndMapPoint(vehicle1, v1Point) + CalcOffsetBetweenCarAndMapPoint(vehicle2, v2Point);
+            double checkDistance = v1Offset + v2Offset;
 
             bool direction = DetermineDirection(vehicle1.Heading, v1Point);
 
