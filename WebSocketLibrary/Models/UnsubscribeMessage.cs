@@ -8,7 +8,7 @@ namespace WebSocketLibrary.Models
 {
     public class UnsubscribeMessage: AbstractMessage
     {
-
+        [JsonProperty("type")]
         public new string Type = "unsubscribe";
 
     }
