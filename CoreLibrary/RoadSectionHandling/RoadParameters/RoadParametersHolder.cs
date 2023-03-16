@@ -1,4 +1,5 @@
 ﻿using ApiLibrary.Api;
+using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,7 +11,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
 
         private static RoadParametersHolder INSTANCE;
 
-        private Dictionary<string, RoadParameters> parameters;
+        private Dictionary<string, RoadParameters> parameters = new Dictionary<string, RoadParameters>();
 
         private ApiCallsHandler handler { get; set; }
 
@@ -31,12 +32,6 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
 
         }
 
-        // TODO: this is just a placeholder, change when the specification is available
-        private string createRequest(string roadRef)
-        {
-            return $"road/{roadRef}/state";
-        }
-
         // This method locks parameters variable (it is slow, so use with caution!)
         public void SetParametersForRoadThreadSafe(Dictionary<string, RoadParameters> newParameters )
         {
@@ -53,7 +48,11 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
         {
             if (!parameters.ContainsKey(roadRef) || parameters[roadRef] == null || refetch)
             {
-                RoadParameters output = handler.Get<RoadParameters>(createRequest(roadRef));
+
+                LocationPoint point = RoadDataFetcher.GetInstance().ResolveRefToLocation(roadRef);
+
+                // TODO: change this, this is just for testing purposes
+                RoadParameters output = new OpenWeatherMapFetcher((float) point.Longitude, (float) point.Latitude).FetchRoadParameters();
 
                 if(output == null)
                 {

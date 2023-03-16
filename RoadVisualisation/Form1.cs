@@ -84,7 +84,7 @@ namespace RoadVisualisation
             topPoint = new LocationPoint(ApplicationConfigurationHandler.Longitude1, ApplicationConfigurationHandler.Latitude1);
             bottomPoint = new LocationPoint(ApplicationConfigurationHandler.Longitude2, ApplicationConfigurationHandler.Latitude2);
 
-            ApiHelper.InitializeClient(ApplicationConfigurationHandler.DigitalMapConnection);
+            ApiHelper.InitializeClient();
             topPointXY = latlngToGlobalXY(topPoint);
             bottomPointXY = latlngToGlobalXY(bottomPoint);
             SimplificationMethod.DataSource = ((AbstractCalculatorFactory) SectionSimplificationFactory.getInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
@@ -103,7 +103,7 @@ namespace RoadVisualisation
             //speedBasedOnPoint.Add(new Tuple<int, int>((int)pointLoc.Item1 - 5, (int)pointLoc.Item2 - 5), speed);
             //g.DrawString(Math.Round(speed, 2) + "", new System.Drawing.Font("Arial", 10), new SolidBrush(Color.Black), (int)pointLoc.Item1 - 10, (int)pointLoc.Item2 - 10, new System.Drawing.StringFormat());
 
-            //g.FillEllipse(new SolidBrush(Color.Black), (int)pointLoc.Item1 - 5, (int)pointLoc.Item2 - 5 , 5, 5);
+            //g.FillEllipse(new SolidBrush(Color.Black), (int)pointLoc.Item1 - 4, (int)pointLoc.Item2 - 4 , 4, 4);
         }
 
         private void DrawLine(LocationPoint point1, LocationPoint point2, double radius)
@@ -227,6 +227,11 @@ namespace RoadVisualisation
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void LangRange_TextChanged(object sender, EventArgs e)
         {
 
         }

@@ -18,7 +18,7 @@ namespace CoreLibrary
 
             ApplicationConfigurationHandler.LoadConfiguration();
 
-            ApiHelper.InitializeClient(ApplicationConfigurationHandler.DigitalMapConnection);
+            ApiHelper.InitializeClient();
 
             RoadDataHandler roadHandler = new RoadDataHandler("a", "a");
             //WebSocketMessageHandler<VehicleObserverWrapper> observer = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDetector(null));

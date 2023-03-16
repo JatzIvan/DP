@@ -43,7 +43,27 @@ namespace CollisionDetector
                         
                         if (calcMethod.CollisionOccured())
                         {
-                            
+
+                            // TODO: find a better spot for braking distance calcs
+                            // --------------------------------------------------------------------------------
+
+                            double breakingDistance1 = BrakingDistanceCalculatorUtils.CalculateBrakingDistance(pair.ElementAt(0), dataStorage.SectionRef);
+                            double breakingDistance2 = BrakingDistanceCalculatorUtils.CalculateBrakingDistance(pair.ElementAt(1), dataStorage.SectionRef);
+
+                            if (breakingDistance1 > pair.ElementAt(0).Speed * calcMethod.CalculateTTC())
+                            {
+                                Console.WriteLine("Vehicle 1 breaking distance was higher than distance to collision");
+                                Console.WriteLine("Distance to coll " + pair.ElementAt(0).Speed * calcMethod.CalculateTTC() + " - breaking distance " + breakingDistance1);
+                            }
+
+                            if (breakingDistance2 > pair.ElementAt(1).Speed * calcMethod.CalculateTTC())
+                            {
+                                Console.WriteLine("Vehicle 2 breaking distance was higher than distance to collision");
+                                Console.WriteLine("Distance to coll " + pair.ElementAt(1).Speed * calcMethod.CalculateTTC() + " - breaking distance " + breakingDistance2);
+                            }
+
+                            // --------------------------------------------------------------------------------
+
                             WarningMessage msgVeh1 = calcMethod.CreateWarningMessage(pair.ElementAt(0));
                             WarningMessage msgVeh2 = calcMethod.CreateWarningMessage(pair.ElementAt(1));
                             
@@ -82,7 +102,8 @@ namespace CollisionDetector
                     }
                 }
             }
-            if(sw.ElapsedMilliseconds > 100)
+
+            if (sw.ElapsedMilliseconds > 100)
             {
                 Console.WriteLine("Elapsed time " + sw.ElapsedMilliseconds + " for number of cars " + vehicles.Count);
             }

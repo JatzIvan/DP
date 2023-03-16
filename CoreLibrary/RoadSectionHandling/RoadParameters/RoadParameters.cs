@@ -8,10 +8,12 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
     public class RoadParameters
     {
 
-        float Humidity { get; set; }
-        float Temperature { get; set; }
+        public float Humidity { get; set; }
+        public float Temperature { get; set; }
 
-        RoadType Type { get; set; }
+        public float Pressure { get; set; }
+
+        RoadType Type { get; set; } = RoadType.Asphalt;
 
         // https://www.researchgate.net/figure/Friction-coefficients-for-varying-types-of-road-surfaces-in-satisfactory-condition_tbl1_330012787
         public double GetFriction()

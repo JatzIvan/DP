@@ -19,7 +19,7 @@ namespace RoadVisualisation
 
             ApplicationConfigurationHandler.LoadConfiguration();
 
-            ApiHelper.InitializeClient(ApplicationConfigurationHandler.DigitalMapConnection);
+            ApiHelper.InitializeClient();
             
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();

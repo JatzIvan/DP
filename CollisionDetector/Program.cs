@@ -23,7 +23,7 @@ namespace CollisionDetector
         {
             ApplicationConfigurationHandler.LoadConfiguration();
             
-            ApiHelper.InitializeClient(ApplicationConfigurationHandler.DigitalMapConnection);
+            ApiHelper.InitializeClient();
 
             //Thread td = new Thread(new SocketConnecterThread().HandlePending);
             //td.Start();

@@ -2,6 +2,7 @@
 using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,7 +43,8 @@ namespace CoreLibrary.RoadSectionHandling
         public virtual List<RoadPointModel> GetRoadFromAPI()
         {
 
-            List<RoadPointModel> output = Handler.Get<List<RoadPointModel>>("roads/" + ApplicationConfigurationHandler.TestRoadQuery);
+            List<RoadPointModel> output = Handler.Get<List<RoadPointModel>>(
+                ApplicationConfigurationHandler.DigitalMapConnection + "/roads/" + ApplicationConfigurationHandler.TestRoadQuery);
 
             // When no road data could be fetched, repeat 3 times and then default with empty list
             // TODO: Implement repeat
@@ -89,6 +91,18 @@ namespace CoreLibrary.RoadSectionHandling
 
 
             return RoadSegmentsByRef;
+
+        }
+
+        public LocationPoint ResolveRefToLocation(string roadRef)
+        {
+            Dictionary<string, List<RoadPointModel>> roadPoints = GetRoadFromAPIGroupedByRef();
+            if (!roadPoints.ContainsKey(roadRef))
+            {
+                return null;
+            }
+
+            return roadPoints[roadRef].First().Way.Points.First();
 
         }
 
