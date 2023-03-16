@@ -3,6 +3,7 @@ using CoreLibrary;
 using CoreLibrary.RoadSectionHandling;
 using CoreLibrary.RoadSectionHandling.Model;
 using NetTopologySuite.Index.KdTree;
+using NetTopologySuite.Operation.Distance;
 using SumoTraceParser.Models;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace SumoTraceParser
 
             ApplicationConfigurationHandler.LoadConfiguration();
 
-            ApiHelper.InitializeClient(ApplicationConfigurationHandler.DigitalMapConnection);
+            ApiHelper.InitializeClient();
 
 
             Dictionary<string, List<RoadPointModel>> sections = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByRef();
@@ -198,14 +199,14 @@ namespace SumoTraceParser
 
                 AbstractRoadModel v1Point = model.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle1.Item1, convertedVehicle1.Item2, convertedVehicle1.Item3)).Data;
                 AbstractRoadModel v2Point = model.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle2.Item1, convertedVehicle2.Item2, convertedVehicle2.Item3)).Data;
-
+            
                 // Skip when vehicles are not going against eachother
                 if (AbstractCollisionDetector.DetermineDirection(veh1.Angle, v1Point) == AbstractCollisionDetector.DetermineDirection(veh2.Angle, v2Point))
                 {
                     continue;
                 }
 
-                bool dangerZone = (1 / v1Point.RadiusOfCircle) > ApplicationConfigurationHandler.CurvatureTreshold;
+                bool dangerZone = IsMeetInDangerZone(veh1, veh2, v1Point, v2Point);
 
                 WrapperInstance.ResolvedIdPairs.Add(new Tuple<string, string>(veh1.Id, veh2.Id));
 
@@ -223,110 +224,69 @@ namespace SumoTraceParser
 
         }
 
+        private bool IsMeetInDangerZone(Vehicle veh1, Vehicle veh2, AbstractRoadModel v1Point, AbstractRoadModel v2Point)
+        {
+            double v1Offset = CalcOffsetBetweenCarAndMapPoint(veh1, v1Point);
+            double v2Offset = CalcOffsetBetweenCarAndMapPoint(veh2, v2Point);
+            double distance = AbstractCollisionDetector.GetDistanceBetweenMapPoints(v1Point, v2Point) + v1Offset + v2Offset;
+
+            double TTC = distance / (veh1.Speed + veh1.Speed);
+
+            if (TTC is double.NaN || double.IsInfinity(TTC)) 
+            {
+                return false;
+            }
+
+            double distanceToCollision = TTC * veh1.Speed;
+
+            bool v1Direction = AbstractCollisionDetector.DetermineDirection(veh1.Angle, v1Point);
+
+            double smallestCumDistance = Double.PositiveInfinity;
+            AbstractRoadModel pointWithSmallestCumDistance = null;
+            AbstractRoadModel v1NextPoint = v1Point;
+            //AbstractRoadModel v1NextPoint = v1Direction ? v1Point.Next.Point : v1Point.Previous.Point;
+
+            while (true)
+            {
+
+                double currentCumDistance = AbstractCollisionDetector.GetDistanceBetweenMapPoints(v1NextPoint, v1Point) + v1Offset;
+
+                if (smallestCumDistance < Math.Abs(currentCumDistance - distanceToCollision))
+                {
+                    //Console.WriteLine("cum distance -- " + smallestCumDistance + " and distance to col - " + distanceToCollision);
+                    break;
+                }
+                else
+                {
+                    pointWithSmallestCumDistance = v1NextPoint;
+                    smallestCumDistance = Math.Abs(currentCumDistance - distanceToCollision);
+                }
+
+                v1NextPoint = v1Direction ? v1NextPoint.Next.Point : v1NextPoint.Previous.Point;
+
+            }
+
+            bool CollisionWillHappen;
+
+            if (distanceToCollision < (AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point) + v1Offset))
+            {
+                CollisionWillHappen = (v1Direction ? pointWithSmallestCumDistance.Previous.RadiusOfCurvature : pointWithSmallestCumDistance.Next.RadiusOfCurvature) > ApplicationConfigurationHandler.CurvatureTreshold;
+            }
+            else
+            {
+                CollisionWillHappen = (v1Direction ? pointWithSmallestCumDistance.Next.RadiusOfCurvature : pointWithSmallestCumDistance.Previous.RadiusOfCurvature) > ApplicationConfigurationHandler.CurvatureTreshold;
+            }
+
+            Console.WriteLine("Coll will happen " + CollisionWillHappen);
+            return CollisionWillHappen;
+
+        }
+
         public override CustomWrapper CreateVehiclePairs()
         {
 
             ResolveVehicleMeetPoint(SumoExport.Timestemps);
-/*            foreach (Timestep timestep in SumoExport.Timestemps)
-            {
-                var pairs = CreateVehiclePairs(timestep.Vehicles);
 
-                Console.WriteLine("---------------------------------------------");
-                Console.WriteLine("Processing timestep - " + timestep.Time);
-                Console.WriteLine("Number of pairs - " + pairs.Count());
-
-                foreach (var pair in pairs)
-                {
-
-                    Vehicle vehicle1 = pair.ElementAt(0);
-                    Vehicle vehicle2 = pair.ElementAt(1);
-
-                    (double, double, double) convertedVehicle1 = MapParserUtils.ConvertGPStoCartsian(
-                        new LocationPoint(vehicle1.X, vehicle1.Y));
-                    (double, double, double) convertedVehicle2 = MapParserUtils.ConvertGPStoCartsian(
-                        new LocationPoint(vehicle2.X, vehicle2.Y));
-
-                    KdTree<AbstractRoadModel> model = RoadHandlers["503"].GetParsedRoadData();
-
-                    AbstractRoadModel v1Point = model.NearestNeighbor(new GeoAPI.Geometries.Coordinate(convertedVehicle1.Item1, convertedVehicle1.Item2, convertedVehicle1.Item3)).Data;
-                    AbstractRoadModel v2Point = model.NearestNeighbor(new GeoAPI.Geometries.Coordinate(convertedVehicle2.Item1, convertedVehicle2.Item2, convertedVehicle2.Item3)).Data;
-
-
-                    // Calculate only if they go against each other
-
-                    if (SkipPair(vehicle1, v1Point, vehicle2, v2Point))
-                    {
-                        continue;
-                    }
-
-                    double distance = CalcOffsetBetweenCarAndMapPoint(veh1, veh1MappedPoint) + CalcOffsetBetweenCarAndMapPoint(veh2, veh2MappedPoint);
-                    distance += AbstractCollisionDetector.GetDistanceBetweenMapPoints(veh1MappedPoint, veh2MappedPoint);
-
-                    if(distance > 20)
-
-                    double TTC = distance / (vehicle1.Speed + vehicle2.Speed);
-
-                    double distanceToCollision = TTC * vehicle1.Speed;
-
-                    if(distanceToCollision is double.NaN)
-                    {
-                        continue;
-                    }
-
-                    // Find closest road point to calculated distance and determine if it is in curvature region
-
-                    double smallestCumDistance = Double.PositiveInfinity;
-                    AbstractRoadModel pointWithSmallestCumDistance = null;
-                    AbstractRoadModel v1Next = AbstractCollisionDetector.DetermineDirection(vehicle1.Angle, v1Point) ? v1Point.Next.Point : v1Point.Previous.Point;
-
-                    while (true)
-                    {
-
-                        double currentCumDistance = AbstractCollisionDetector.GetDistanceBetweenMapPoints(v1Next, v1Point);
-
-                        if (smallestCumDistance < Math.Abs(currentCumDistance - distanceToCollision))
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            pointWithSmallestCumDistance = v1Next;
-                            smallestCumDistance = Math.Abs(currentCumDistance - distanceToCollision);
-                        }
-
-                        v1Next = AbstractCollisionDetector.DetermineDirection(vehicle1.Angle, v1Next) ? v1Next.Next.Point : v1Next.Previous.Point;
-
-                    }
-
-                    bool dangerZone;
-
-                    if (distanceToCollision < AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point))
-                    {
-                        dangerZone = pointWithSmallestCumDistance.Previous.RadiusOfCurvature > ApplicationConfigurationHandler.CurvatureTreshold;
-                    }
-                    else
-                    {
-                        dangerZone = pointWithSmallestCumDistance.Next.RadiusOfCurvature > ApplicationConfigurationHandler.CurvatureTreshold;
-                    }
-
-                    WrapperInstance.ResolvedIdPairs.Add(new Tuple<string, string>(vehicle1.Id, vehicle2.Id));
-
-                    if (dangerZone)
-                    {
-                        WrapperInstance.MeetInDangerousArea.Add(new Tuple<Tuple<string, string>, LocationPoint>(
-                            new Tuple<string, string>(vehicle1.Id, vehicle2.Id), v1Next.CurrentLocation));
-                    }
-                    else
-                    {
-                        WrapperInstance.MeetInNonDangerousArea.Add(new Tuple<Tuple<string, string>, LocationPoint>(
-                            new Tuple<string, string>(vehicle1.Id, vehicle2.Id), v1Next.CurrentLocation));
-                    }
-
-                }
-
-                Console.WriteLine("---------------------------------------------");
-
-            }*/
             return WrapperInstance;
         }
     }
