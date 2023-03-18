@@ -103,6 +103,10 @@ namespace CollisionDetector
                 }
             }
 
+            Console.WriteLine("Elapsed time (ms) " + sw.ElapsedMilliseconds + " for number of cars " + vehicles.Count);
+            Console.WriteLine("Elapsed time (ms) " + (sw.ElapsedTicks / 10000) + " for number of cars " + vehicles.Count);
+            Console.WriteLine("Elapsed time (mikro) " + (sw.ElapsedTicks / 10) + " for number of cars " + vehicles.Count);
+
             if (sw.ElapsedMilliseconds > 100)
             {
                 Console.WriteLine("Elapsed time " + sw.ElapsedMilliseconds + " for number of cars " + vehicles.Count);
