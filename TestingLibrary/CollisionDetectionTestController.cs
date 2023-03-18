@@ -14,6 +14,7 @@ using CoreLibrary.RoadSectionHandling.RoadSimplificators;
 using CoreLibrary;
 using System.Reflection;
 using Xunit;
+using System.Diagnostics;
 
 namespace TestingLibrary
 {
@@ -64,6 +65,7 @@ namespace TestingLibrary
 
             public override void PerformActions(VehicleObserverWrapper data)
             {
+                Stopwatch sw = Stopwatch.StartNew();
                 List<VehicleData> vehicles = data.Data.Vehicles;
                 //Console.WriteLine("Num of vehicles recieved " + vehicles.Count);
                 if (vehicles.Count >= 2)
@@ -81,6 +83,10 @@ namespace TestingLibrary
                             Xunit.Assert.Equal(collisionOccured, calcMethod.CollisionOccured());
                         }
                     }
+
+                    Console.WriteLine("Elapsed time (ms) " + (sw.ElapsedTicks / 10000) + " for number of cars " + vehicles.Count);
+                    Console.WriteLine("Elapsed time (mikro) " + (sw.ElapsedTicks / 10) + " for number of cars " + vehicles.Count);
+
                 }
             }
 
