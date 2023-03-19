@@ -42,5 +42,11 @@ namespace WebSocketLibrary.Models
         
         [JsonProperty("targetVehicleId")]
         public int TargetVehicleId { get; set; }
+
+        public HeadCollisionContent(double timeToCollision, int targetVehicleId)
+        {
+            TimeToCollision = timeToCollision;
+            TargetVehicleId = targetVehicleId;
+        }
     }
 }

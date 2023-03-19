@@ -31,6 +31,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
             return Severity;
         }
 
+
         public AbstractRoadModel PerformCollisionCalculations(VehicleData vehicle1, VehicleData vehicle2, KdTree<AbstractRoadModel> currectRoadModel)
         {
 

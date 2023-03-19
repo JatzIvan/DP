@@ -10,7 +10,7 @@ namespace CoreLibrary.RoadSectionHandling.Data
         /**
          * Method is used to calculate "curvature" between points on map
          */
-        public List<AbstractRoadModel> CalculateCurvesForWays();
+        public List<AbstractRoadModel> CalculateCurvesForWays(List<AbstractRoadModel> ConnectedWays);
 
     }
 }

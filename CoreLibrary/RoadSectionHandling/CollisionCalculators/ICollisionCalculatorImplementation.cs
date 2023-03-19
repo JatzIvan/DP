@@ -51,6 +51,33 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
         }
 
 
+        public NotifyMessage CreateNotificationMessage(VehicleData host, VehicleData target)
+        {
+            NotifyMessage msg = new NotifyMessage();
 
+            //msg.Index = new Random().Next();
+            msg.VehicleId = host.Id;
+            msg.Level = GetCollisionSeverity().Equals(CollisionSeverity.MEDIUM) ? NotificationLevel.warning : NotificationLevel.danger;
+            msg.Content = new HeadCollisionContent(CalculateTTC(), target.Id);
+
+            return msg;
+        }
+
+        public bool IsVehicleAbleToBrake(VehicleData vehicle, string roadRef)
+        {
+
+            double breakingDistance = BrakingDistanceCalculatorUtils.CalculateBrakingDistance(vehicle, roadRef);
+            double distanceToColl = vehicle.Speed * CalculateTTC();
+
+            if(distanceToColl < breakingDistance)
+            {
+                Console.WriteLine($"Vehicle {vehicle.Id} breaking distance was higher than distance to collision");
+                Console.WriteLine("Distance to coll " + distanceToColl + " - breaking distance " + breakingDistance);
+            }
+
+
+            return breakingDistance < distanceToColl;
+
+        }
     }
 }

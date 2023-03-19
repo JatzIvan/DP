@@ -43,32 +43,16 @@ namespace CollisionDetector
                         
                         if (calcMethod.CollisionOccured())
                         {
+                            Console.WriteLine("--------------------Start of collision warning handling------------------------");
 
-                            // TODO: find a better spot for braking distance calcs
-                            // --------------------------------------------------------------------------------
+                            //WarningMessage msgVeh1 = calcMethod.CreateWarningMessage(pair.ElementAt(0));
+                            //WarningMessage msgVeh2 = calcMethod.CreateWarningMessage(pair.ElementAt(1));
 
-                            double breakingDistance1 = BrakingDistanceCalculatorUtils.CalculateBrakingDistance(pair.ElementAt(0), dataStorage.SectionRef);
-                            double breakingDistance2 = BrakingDistanceCalculatorUtils.CalculateBrakingDistance(pair.ElementAt(1), dataStorage.SectionRef);
+                            NotifyMessage msgVeh1 = calcMethod.CreateNotificationMessage(pair.ElementAt(0), pair.ElementAt(1));
+                            NotifyMessage msgVeh2 = calcMethod.CreateNotificationMessage(pair.ElementAt(1), pair.ElementAt(0));
 
-                            if (breakingDistance1 > pair.ElementAt(0).Speed * calcMethod.CalculateTTC())
-                            {
-                                Console.WriteLine("Vehicle 1 breaking distance was higher than distance to collision");
-                                Console.WriteLine("Distance to coll " + pair.ElementAt(0).Speed * calcMethod.CalculateTTC() + " - breaking distance " + breakingDistance1);
-                            }
-
-                            if (breakingDistance2 > pair.ElementAt(1).Speed * calcMethod.CalculateTTC())
-                            {
-                                Console.WriteLine("Vehicle 2 breaking distance was higher than distance to collision");
-                                Console.WriteLine("Distance to coll " + pair.ElementAt(1).Speed * calcMethod.CalculateTTC() + " - breaking distance " + breakingDistance2);
-                            }
-
-                            // --------------------------------------------------------------------------------
-
-                            WarningMessage msgVeh1 = calcMethod.CreateWarningMessage(pair.ElementAt(0));
-                            WarningMessage msgVeh2 = calcMethod.CreateWarningMessage(pair.ElementAt(1));
-                            
                             // If collision occured, check if one or both cars go above speed limit
-                            if(collisionPoint != null)
+                            if (collisionPoint != null)
                             {
                                 //double maxAllowedSpeed = dataStorage.GatherCurvaturesBetweenVehicles().Where(pair => pair.Item1.ContainsKey(collisionPoint.CurrentLocation))
                                 //                                    .FirstOrDefault().Item2;
@@ -77,35 +61,33 @@ namespace CollisionDetector
 
                                 Console.WriteLine("Max speed " + maxAllowedSpeed);
 
-                                if(pair.ElementAt(0).Speed > maxAllowedSpeed)
+                                //TODO: This is a bad idea, think it through
+
+                                if((pair.ElementAt(0).Speed > maxAllowedSpeed) || (calcMethod.IsVehicleAbleToBrake(pair.ElementAt(0), dataStorage.SectionRef)))
                                 {
-                                    msgVeh1.CollisionSeverity = ICollisionCalculatorImplementation.CollisionSeverity.SEVERE.ToString();
+                                    msgVeh1.Level = NotificationLevel.danger;
                                 }
 
-                                if (pair.ElementAt(1).Speed > maxAllowedSpeed)
+                                if ((pair.ElementAt(1).Speed > maxAllowedSpeed) || calcMethod.IsVehicleAbleToBrake(pair.ElementAt(1), dataStorage.SectionRef))
                                 {
-                                    msgVeh2.CollisionSeverity = ICollisionCalculatorImplementation.CollisionSeverity.SEVERE.ToString();
+                                    msgVeh2.Level = NotificationLevel.danger;
                                 }
                             }
 
                             AbstractSocket socket = WebSocketManagerFactory.GetInstance().GetConnection(data.SocketId);
 
-
-
                             socket.SendMessage(msgVeh1);
                             socket.SendMessage(msgVeh2);
-                        
+
                             // Validate this
                             //socket.AddToMessageQueue(msgVeh1.Index ,msgVeh1);
                             //socket.AddToMessageQueue(msgVeh2.Index, msgVeh2);
+
+                            Console.WriteLine("--------------------End of collision warinng handling------------------------");
                         }
                     }
                 }
             }
-
-            Console.WriteLine("Elapsed time (ms) " + sw.ElapsedMilliseconds + " for number of cars " + vehicles.Count);
-            Console.WriteLine("Elapsed time (ms) " + (sw.ElapsedTicks / 10000) + " for number of cars " + vehicles.Count);
-            Console.WriteLine("Elapsed time (mikro) " + (sw.ElapsedTicks / 10) + " for number of cars " + vehicles.Count);
 
             if (sw.ElapsedMilliseconds > 100)
             {

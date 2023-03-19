@@ -112,46 +112,33 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
 
             }
 
-            Console.WriteLine("cum distance calculated from point " + (AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point) + v1Offset) + " and distance to coll " + distanceToCollision);
-            Console.WriteLine("Vehicle1 speed " + vehicle1.Speed + " and Vehicle2 speed " + vehicle2.Speed);
-            Console.WriteLine("TTC " + TTC);
+            //Console.WriteLine("cum distance calculated from point " + (AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point) + v1Offset) + " and distance to coll " + distanceToCollision);
+            //Console.WriteLine("Vehicle1 speed " + vehicle1.Speed + " and Vehicle2 speed " + vehicle2.Speed);
+            //Console.WriteLine("TTC " + TTC);
             if (distanceToCollision < (AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point) + v1Offset))
             {
-                Console.WriteLine((v1Direction ? "Previous" : "Next") + " with radius of curv " + (v1Direction ? pointWithSmallestCumDistance.Previous.RadiusOfCurvature : pointWithSmallestCumDistance.Next.RadiusOfCurvature));
+                //Console.WriteLine((v1Direction ? "Previous" : "Next") + " with radius of curv " + (v1Direction ? pointWithSmallestCumDistance.Previous.RadiusOfCurvature : pointWithSmallestCumDistance.Next.RadiusOfCurvature));
                 CollisionWillHappen = (v1Direction ? pointWithSmallestCumDistance.Previous.RadiusOfCurvature : pointWithSmallestCumDistance.Next.RadiusOfCurvature) > ApplicationConfigurationHandler.CurvatureTreshold;
             }
             else
             {
-                Console.WriteLine((v1Direction ? "Next" : "Previous") + " with radius of curv " + (v1Direction ? pointWithSmallestCumDistance.Next.RadiusOfCurvature : pointWithSmallestCumDistance.Previous.RadiusOfCurvature));
+                //Console.WriteLine((v1Direction ? "Next" : "Previous") + " with radius of curv " + (v1Direction ? pointWithSmallestCumDistance.Next.RadiusOfCurvature : pointWithSmallestCumDistance.Previous.RadiusOfCurvature));
                 CollisionWillHappen = (v1Direction ? pointWithSmallestCumDistance.Next.RadiusOfCurvature : pointWithSmallestCumDistance.Previous.RadiusOfCurvature) > ApplicationConfigurationHandler.CurvatureTreshold;
             }
 
-            Console.WriteLine("will happen - " + CollisionWillHappen + " at mapped point " + pointWithSmallestCumDistance.CurrentLocation.Latitude + "," + pointWithSmallestCumDistance.CurrentLocation.Longitude);
+            //Console.WriteLine("will happen - " + CollisionWillHappen + " at mapped point " + pointWithSmallestCumDistance.CurrentLocation.Latitude + "," + pointWithSmallestCumDistance.CurrentLocation.Longitude);
 
-            LocationPoint realCollisionPoint = MapParserUtils.CalculatedPointFromPoint(pointWithSmallestCumDistance.CurrentLocation,
-                ((distanceToCollision < (AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point) + v1Offset))
-                ? (v1Direction ? pointWithSmallestCumDistance.Previous.Heading : pointWithSmallestCumDistance.Next.Heading) :
-                (v1Direction ? pointWithSmallestCumDistance.Next.Heading : pointWithSmallestCumDistance.Previous.Heading)),
-                Math.Abs(distanceToCollision - (AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point) + v1Offset)));
-
-            Console.WriteLine("----------------------This is always shit--------------------------------");
-            Console.WriteLine("Collision between " + vehicle1.Position.Lat.ToString().Replace(",", ".") + "," + vehicle1.Position.Lon.ToString().Replace(",", ".") + "/" + vehicle1.Heading + "/" + vehicle1.Speed +
-                    " and " + vehicle2.Position.Lat.ToString().Replace(",", ".") + "," + vehicle2.Position.Lon.ToString().Replace(",", ".") + "/" + vehicle2.Heading + "/" + vehicle2.Speed
-                    + " At Real point " + realCollisionPoint.Latitude.ToString().Replace(",", ".") + "," + realCollisionPoint.Longitude.ToString().Replace(",", ".")
-                    + " At Mapped point " + pointWithSmallestCumDistance.CurrentLocation.Latitude.ToString().Replace(",", ".") + "," + pointWithSmallestCumDistance.CurrentLocation.Longitude.ToString().Replace(",", "."));
-
-            Console.WriteLine("------------------------------------------------------");
 
             if (CollisionWillHappen)
             {
 
-/*                LocationPoint realCollisionPoint = MapParserUtils.CalculatedPointFromPoint(pointWithSmallestCumDistance.CurrentLocation, 
-                    ((distanceToCollision < AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point))
-                    ? (v1Direction ? pointWithSmallestCumDistance.Previous.Heading : pointWithSmallestCumDistance.Next.Heading) :
-                    (v1Direction ? pointWithSmallestCumDistance.Next.Heading : pointWithSmallestCumDistance.Previous.Heading)), 
-                    Math.Abs(distanceToCollision - AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point)));*/
+                LocationPoint realCollisionPoint = MapParserUtils.CalculatedPointFromPoint(pointWithSmallestCumDistance.CurrentLocation,
+                ((distanceToCollision < (AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point) + v1Offset))
+    ?           (v1Direction ? pointWithSmallestCumDistance.Previous.Heading : pointWithSmallestCumDistance.Next.Heading) :
+                (v1Direction ? pointWithSmallestCumDistance.Next.Heading : pointWithSmallestCumDistance.Previous.Heading)),
+                Math.Abs(distanceToCollision - (AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point) + v1Offset)));
 
-                Console.WriteLine("--------------------Real shit-----------------------");
+                Console.WriteLine("-------------------------------------------");
 
                 Console.WriteLine("Collision between " + vehicle1.Position.Lat.ToString().Replace(",", ".") + "," + vehicle1.Position.Lon.ToString().Replace(",", ".") + "/" + vehicle1.Heading + "/" + vehicle1.Speed +
                     " and " + vehicle2.Position.Lat.ToString().Replace(",", ".") + "," + vehicle2.Position.Lon.ToString().Replace(",", ".") + "/" + vehicle2.Heading + "/" + vehicle2.Speed

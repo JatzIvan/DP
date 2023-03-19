@@ -4,6 +4,7 @@ using CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators;
 using CoreLibrary.RoadSectionHandling.CurvatureCalculations;
 using CoreLibrary.RoadSectionHandling.Data;
 using CoreLibrary.RoadSectionHandling.MaxSpeedCalculations;
+using CoreLibrary.RoadSectionHandling.RoadParameters;
 using CoreLibrary.RoadSectionHandling.RoadSimplificators;
 using System;
 using System.Configuration;
@@ -51,6 +52,8 @@ namespace CoreLibrary
 
         public static string MaxSpeedCalcMethod { get; set; } = typeof(SimpleSpeedCalculatorBasedOnCurvature).Name;
 
+        public static string RoadStateFetcherImplementation { get; set; } = typeof(DummyRoadStateFetcher).Name;
+
         public static float CurvatureTreshold { get; set; }
 
         public static float CarDistanceSkipTreshold { get; set; }
@@ -91,6 +94,19 @@ namespace CoreLibrary
 
         }*/
 
+        private static bool IsFactory(Type t)
+        {
+            while (t != null)
+            {
+                if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(AbstractCalculatorFactory<,>))
+                {
+                    return true;
+                }
+                t = t.BaseType;
+            }
+            return false;
+        }
+
         public static HandlerSetupConfig GenerateHandlerSetupConfig()
         {
             return new HandlerSetupConfig(SimplificationMethod , CurvetureCalcMethod);
@@ -100,9 +116,12 @@ namespace CoreLibrary
         public static void InitConstructors()
         {
             Stopwatch sw = Stopwatch.StartNew();
-            System.Collections.Generic.List<Type> factoriesToInit = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(p => typeof(AbstractCalculatorFactory).IsAssignableFrom(p)).ToList();
-            
-            foreach(Type factory in factoriesToInit)
+            //System.Collections.Generic.List<Type> factoriesToInit = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(p => typeof(AbstractCalculatorFactory<,>).IsAssignableFrom(p)).ToList();
+
+            System.Collections.Generic.List<Type> factoriesToInit = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(p => IsFactory(p)).ToList();
+
+
+            foreach (Type factory in factoriesToInit)
             {
                 System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(factory.TypeHandle);
             }
@@ -161,6 +180,7 @@ namespace CoreLibrary
                 SimplificationMethod = LoadVariable("SIMPLIFICATION_METHOD");
                 CurvetureCalcMethod = LoadVariable("CURVETURE_CALC_METHOD");
                 MaxSpeedCalcMethod = LoadVariable("MAX_SPEED_CALC_METHOD");
+                RoadStateFetcherImplementation = LoadVariable("ROAD_STATE_FETCHER");
                 InitConstructors();
             }
             catch (Exception e)

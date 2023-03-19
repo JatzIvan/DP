@@ -19,13 +19,17 @@ namespace CoreLibrary.RoadSectionHandling.MaxSpeedCalculations
             {
 
                 point.MaxSpeed = GetMaxSpeed(point, roadRef);
-
+                if(point.MaxSpeed < 10)
+                {
+                    Console.WriteLine(point.MaxSpeed + " -- " + point.CurrentLocation.Longitude + "," + point.CurrentLocation.Latitude);
+                }
             }
         }
 
         public double GetMaxSpeed(AbstractRoadModel point, string roadRef)
         {
-            return Math.Sqrt(point.RadiusOfCircle * g * RoadParametersHolder.GetInstance().GetParametersForRoad(roadRef, false).GetFriction());
+            //return Math.Sqrt(point.RadiusOfCircle * g * RoadParametersHolder.GetInstance().GetParametersForRoad(roadRef, false).GetFriction());
+            return Math.Sqrt(point.RadiusOfCircle * g * 0.5);
         }
     }
 }

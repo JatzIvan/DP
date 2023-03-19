@@ -52,7 +52,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
                 LocationPoint point = RoadDataFetcher.GetInstance().ResolveRefToLocation(roadRef);
 
                 // TODO: change this, this is just for testing purposes
-                RoadParameters output = new OpenWeatherMapFetcher((float) point.Longitude, (float) point.Latitude).FetchRoadParameters();
+                RoadParameters output = RoadDataFetcherFactory.getInstance().GetResolverImplementation("dummy").FetchRoadParameters(point);
 
                 if(output == null)
                 {

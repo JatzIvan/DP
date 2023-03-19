@@ -16,14 +16,14 @@ namespace CoreLibrary.RoadSectionHandling.Data
 
         protected AbstractSimplificationModel Config { get; set; }
 
-        public ISectionSimplificator(List<AbstractRoadModel> connectedWays)
+        public ISectionSimplificator()
         {
-            if (connectedWays is null)
+/*            if (connectedWays is null)
             {
                 throw new ArgumentNullException(nameof(connectedWays));
             }
 
-            this.ConnectedWays = connectedWays;
+            this.ConnectedWays = connectedWays;*/
             this.Config = CreateConfig();
         }
 
@@ -77,8 +77,16 @@ namespace CoreLibrary.RoadSectionHandling.Data
          * Generic implementation to get Simplified road model. 
          * This function performs all necessary steps so implementing new "Algorithms" should be easy
          */
-        public List<AbstractRoadModel> GetSimplifiedModel()
+        public List<AbstractRoadModel> GetSimplifiedModel(List<AbstractRoadModel> connectedWays)
         {
+
+            if (connectedWays is null)
+            {
+                throw new ArgumentNullException(nameof(connectedWays));
+            }
+
+            this.ConnectedWays = connectedWays;
+
             if (SimplifiedModel != null && SimplifiedModel.Count > 0)
             {
                 return SimplifiedModel;

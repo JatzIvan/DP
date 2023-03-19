@@ -98,7 +98,7 @@ namespace TestingLibrary
         [MemberData(nameof(VehicleWrapperData.TestData), MemberType = typeof(VehicleWrapperData))]
         public void TestCollisionSituations(VehicleObserverWrapper wrapper, bool collision)
         {
-
+            ApplicationConfigurationHandler.InitConstructors();
             ApplicationConfigurationHandler.CurvetureCalcMethod = typeof(CircumcircleRoadCircleCurvesResolver).Name;
             ApplicationConfigurationHandler.SimplificationMethod = typeof(DouglasPeuckerRoadSectionSimplification).Name;
             ApplicationConfigurationHandler.DPTolerance = 0.3f;

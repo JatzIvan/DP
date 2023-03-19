@@ -8,35 +8,17 @@ using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling.Data
 {
-    public class RoadCurvitureCalculatorFactory: AbstractCalculatorFactory
+    public class RoadCurvitureCalculatorFactory: AbstractCalculatorFactory<ICurvesResolver, CurvatureResolverAttribute>
     {
 
-        //private static List<Type> loadedCalculators;
-
-        private static List<ValueTuple<Type, Func<List<AbstractRoadModel>, object>>> loadedCalculators = new List<ValueTuple<Type, Func<List<AbstractRoadModel>, object>>>();
-        private static ValueTuple<Type, Func<List<AbstractRoadModel>, object>> defaultConstructor;
-
-        private RoadCurvitureCalculatorFactory()
+        private RoadCurvitureCalculatorFactory(): base(new CurvatureResolverAttribute())
         {
 
         }
 
         static RoadCurvitureCalculatorFactory()
         {
-            //loadedCalculators = LoadImplementations(new CurvatureResolverAttribute(), typeof(ICurvesResolver));
-            List<Type> calculators = LoadImplementations(new CurvatureResolverAttribute(), typeof(ICurvesResolver));
-            foreach (Type calculator in calculators)
-            {
-                loadedCalculators.Add((calculator, CreateCreator<List<AbstractRoadModel>>(calculator)));
-            }
-
-            defaultConstructor = (typeof(CircumcircleRoadCircleCurvesResolver), CreateCreator<List<AbstractRoadModel>>(typeof(CircumcircleRoadCircleCurvesResolver)));
-
-        }
-
-        public override List<Type> GetLoadedTypes()
-        {
-            return loadedCalculators.Select(_ => _.Item1).ToList();
+            getInstance();
         }
 
         private static RoadCurvitureCalculatorFactory INSTANCE;
@@ -51,22 +33,9 @@ namespace CoreLibrary.RoadSectionHandling.Data
             return INSTANCE;
         }
 
-        /**
-         * TODO: Try something like annotations later
-         */
-        public ICurvesResolver GetResolverImplementation(string type, List<AbstractRoadModel> connectedWays)
+        public override (Type, Func<object>) GetDefaultInstance()
         {
-
-            ValueTuple<Type, Func<List<AbstractRoadModel>, object>> foundType = loadedCalculators.Where(i => i.Item1.Name.Equals(type))
-                .FirstOrDefault();
-
-            if (foundType.Equals(default(ValueTuple<Type, Func<object[], object>>)))
-            {
-                foundType = defaultConstructor;
-            }
-
-            return (ICurvesResolver)foundType.Item2(connectedWays);
-
+            return (typeof(CircumcircleRoadCircleCurvesResolver), CreateCreator(typeof(CircumcircleRoadCircleCurvesResolver)));
         }
 
     }

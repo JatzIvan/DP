@@ -7,13 +7,10 @@ using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling.Data
 {
-    public class SectionSimplificationFactory: AbstractCalculatorFactory
+    public class SectionSimplificationFactory: AbstractCalculatorFactory<ISectionSimplificator, RoadSimplificatorAttribute>
     {
 
-        private static List<ValueTuple<Type, Func<List<AbstractRoadModel>, object>>> loadedSimplificators = new List<ValueTuple<Type, Func<List<AbstractRoadModel>, object>>>();
-        private static ValueTuple<Type, Func<List<AbstractRoadModel>, object>> defaultConstructor;
-
-        private SectionSimplificationFactory()
+        private SectionSimplificationFactory() : base(new RoadSimplificatorAttribute())
         {
 
         }
@@ -21,19 +18,12 @@ namespace CoreLibrary.RoadSectionHandling.Data
         static SectionSimplificationFactory()
         {
 
-            List<Type> simplificators = LoadImplementations(new RoadSimplificatorAttribute(), typeof(ISectionSimplificator));
-            foreach(Type simplificator in simplificators)
-            {
-                loadedSimplificators.Add((simplificator, CreateCreator<List<AbstractRoadModel>>(simplificator)));
-            }
-
-            defaultConstructor = (typeof(DouglasPeuckerRoadSectionSimplification), CreateCreator<List<AbstractRoadModel>>(typeof(DouglasPeuckerRoadSectionSimplification)));
-
+            GetInstance();
         }
 
         private static SectionSimplificationFactory INSTANCE;
 
-        public static SectionSimplificationFactory getInstance()
+        public static SectionSimplificationFactory GetInstance()
         {
             if(INSTANCE == null)
             {
@@ -62,7 +52,7 @@ namespace CoreLibrary.RoadSectionHandling.Data
         /**
          *  Return simplification method based on config Type.
          */
-        public ISectionSimplificator GetSimplificatiorImplementation(List<AbstractRoadModel> connectedWays, string simplType)
+/*        public ISectionSimplificator GetSimplificatiorImplementation(List<AbstractRoadModel> connectedWays, string simplType)
         {
 
             ValueTuple<Type, Func<List<AbstractRoadModel>, object>> foundType = loadedSimplificators.Where(i => i.Item1.Name.Equals(simplType))
@@ -77,11 +67,11 @@ namespace CoreLibrary.RoadSectionHandling.Data
 
             //return (ISectionSimplificator)Activator.CreateInstance(foundType, connectedWays);
 
-        }
+        }*/
 
-        public override List<Type> GetLoadedTypes()
+        public override (Type, Func<object>) GetDefaultInstance()
         {
-            return loadedSimplificators.Select(_ => _.Item1).ToList();
+            return (typeof(DouglasPeuckerRoadSectionSimplification), CreateCreator(typeof(DouglasPeuckerRoadSectionSimplification)));
         }
     }
     public enum SimplMethods

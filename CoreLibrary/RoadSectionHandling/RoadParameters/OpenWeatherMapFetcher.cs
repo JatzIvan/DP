@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CoreLibrary.RoadSectionHandling.Model;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,21 +9,22 @@ using static System.Net.WebRequestMethods;
 
 namespace CoreLibrary.RoadSectionHandling.RoadParameters
 {
+    [RoadDataFetcher]
     internal class OpenWeatherMapFetcher : GenericRoadStateFetcher
     {
 
         private string APIKey { get; set; }
 
-        public OpenWeatherMapFetcher(float lon, float lat) : base(lon, lat)
+        public OpenWeatherMapFetcher() : base()
         {
 
             this.APIKey = ApplicationConfigurationHandler.LoadVariable("OpenWeatherAPIKey");
 
         }
 
-        public override RoadParameters FetchRoadParameters()
+        public override RoadParameters FetchRoadParameters(LocationPoint point)
         {
-            string url = GenerateUrl();
+            string url = GenerateUrl(point);
             WeatherAppDataWrapper fetchedData = APIHandler.Get<WeatherAppDataWrapper>(url);
 
             RoadParameters output = new RoadParameters();
@@ -34,9 +36,9 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
             
         }
 
-        public override string GenerateUrl()
+        public override string GenerateUrl(LocationPoint point)
         {
-            return $"https://api.openweathermap.org/data/2.5/weather?lat={this.Lat}&lon={this.Long}&units=metric&exclude=minutely,hourly,daily,alerts&appid={this.APIKey}";
+            return $"https://api.openweathermap.org/data/2.5/weather?lat={point.Latitude}&lon={point.Longitude}&units=metric&exclude=minutely,hourly,daily,alerts&appid={this.APIKey}";
         }
 
 

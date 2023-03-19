@@ -1,4 +1,5 @@
 ﻿using ApiLibrary.Api;
+using CoreLibrary.RoadSectionHandling.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,24 +8,18 @@ using System.Threading.Tasks;
 
 namespace CoreLibrary.RoadSectionHandling.RoadParameters
 {
-    abstract class GenericRoadStateFetcher
+    public abstract class GenericRoadStateFetcher
     {
-
-        protected float Long;
-        protected float Lat;
-
         protected ApiCallsHandler APIHandler { get; set; }
 
-        public GenericRoadStateFetcher(float lon, float lat) 
+        public GenericRoadStateFetcher() 
         {
             this.APIHandler = ApiCallsHandler.GetHandler();
-            this.Long = lon;
-            this.Lat = lat;
         }
 
-        public abstract RoadParameters FetchRoadParameters();
+        public abstract RoadParameters FetchRoadParameters(LocationPoint point);
 
-        public abstract string GenerateUrl();
+        public abstract string GenerateUrl(LocationPoint point);
 
 
     }

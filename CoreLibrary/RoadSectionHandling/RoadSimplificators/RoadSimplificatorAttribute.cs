@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling.RoadSimplificators
 {
-    class RoadSimplificatorAttribute: AbstractCalculatorAttribute
+    public class RoadSimplificatorAttribute: AbstractCalculatorAttribute
     {
 
         public RoadSimplificatorAttribute(): base("ROAD_SIMPLIFICATOR")

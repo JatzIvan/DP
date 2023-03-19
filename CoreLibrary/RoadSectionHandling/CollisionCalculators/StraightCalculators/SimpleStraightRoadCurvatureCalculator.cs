@@ -30,5 +30,6 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
         {
             throw new NotImplementedException();
         }
+
     }
 }

@@ -8,10 +8,10 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
     public class RoadParameters
     {
 
-        public float Humidity { get; set; }
-        public float Temperature { get; set; }
+        public float Humidity { get; set; } = 0;
+        public float Temperature { get; set; } = 0;
 
-        public float Pressure { get; set; }
+        public float Pressure { get; set; } = 0;
 
         RoadType Type { get; set; } = RoadType.Asphalt;
 
@@ -20,6 +20,8 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
         {
 
             //if(Temperature < 0 && Humidity > )
+
+            return 0.5;
 
             switch (Type)
             {
