@@ -18,12 +18,12 @@ namespace CoreLibrary.RoadSectionHandling.Data
 
         static RoadCurvitureCalculatorFactory()
         {
-            getInstance();
+            GetInstance();
         }
 
         private static RoadCurvitureCalculatorFactory INSTANCE;
 
-        public static RoadCurvitureCalculatorFactory getInstance()
+        public static RoadCurvitureCalculatorFactory GetInstance()
         {
             if (INSTANCE == null)
             {

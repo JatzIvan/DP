@@ -109,7 +109,7 @@ namespace CoreLibrary.RoadSectionHandling
 
                 ISectionSimplificator simplificator = SectionSimplificationFactory.GetInstance().GetResolverImplementation(config.Simplificator);
                 List<AbstractRoadModel> simplifiedModel = simplificator.GetSimplifiedModel(connectedWays);
-                ICurvesResolver curvesResolver = RoadCurvitureCalculatorFactory.getInstance().GetResolverImplementation(config.CurvitureResolver);
+                ICurvesResolver curvesResolver = RoadCurvitureCalculatorFactory.GetInstance().GetResolverImplementation(config.CurvitureResolver);
                 RoadInfoTransformed = curvesResolver.CalculateCurvesForWays(simplifiedModel);
                 MaxSpeedCalculatorFactory.GetInstance().GetImplementation().CalcMaxSpeedsForRoadSegment(RoadInfoTransformed, SectionRef);
                 GatherCurvaturesBetweenVehicles();
@@ -138,6 +138,8 @@ namespace CoreLibrary.RoadSectionHandling
                 RoadInfoTransformed = modelCopy;
                 RoadInfoInTreeForm= roadTreeFormCopy;
             }
+
+            Console.WriteLine("Recalculated road model for " + this.SectionRef);
 
         }
 

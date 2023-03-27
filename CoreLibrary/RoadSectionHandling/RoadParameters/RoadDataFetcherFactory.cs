@@ -18,12 +18,12 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
 
         static RoadDataFetcherFactory()
         {
-            getInstance();
+            GetInstance();
         }
 
         private static RoadDataFetcherFactory INSTANCE;
 
-        public static RoadDataFetcherFactory getInstance()
+        public static RoadDataFetcherFactory GetInstance()
         {
             if (INSTANCE == null)
             {

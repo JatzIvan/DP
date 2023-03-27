@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using WebSocketLibrary;
 using WebSocketLibrary.Models;
 
@@ -23,6 +24,23 @@ namespace CollisionDetector
             this.dataStorage = roadHandler;
         }
 
+        private bool PushMaxSpeedContent(VehicleData vehicle, NotifyMessage msg, double maxAllowedSpeed)
+        {
+            if (vehicle.Speed > maxAllowedSpeed)
+            {
+                //Console.WriteLine("-----------------------------------------");
+                Console.WriteLine($"Vehicle {vehicle.Id} speed ({vehicle.Speed}) has exceeded the max possible speed ({maxAllowedSpeed}) to traverse curve");
+                //Console.WriteLine("-----------------------------------------");
+                msg.Level = NotificationLevel.danger;
+                //msg.Content.NotificationMessages.Push($"Vehicle speed ({vehicle.Speed}) has exceeded the max possible speed ({maxAllowedSpeed}) to traverse curve");
+                msg.Content.MaxSpeedExceededBy = vehicle.Speed - maxAllowedSpeed;
+
+                return true;
+            }
+
+            return false;
+        }
+
         public override void PerformActions(VehicleObserverWrapper data)
         {
 
@@ -34,16 +52,17 @@ namespace CollisionDetector
                 IEnumerable<IEnumerable<VehicleData>> pairsToCalc = CreateVehiclePairs(vehicles);
 
                 // Try threading or something, right now I need to ensure that this concept can work
-                foreach (var pair in pairsToCalc)
+                //foreach (var pair in pairsToCalc)
+                Parallel.ForEach(pairsToCalc, pair =>
                 {
                     ICollisionCalculatorImplementation calcMethod = ResolveCollisionCalculatorBasedOnCurvature(pair.ElementAt(0), pair.ElementAt(1));
-                    if(calcMethod != null)
+                    if (calcMethod != null)
                     {
+                        Console.WriteLine("--------------------Start of collision warning handling------------------------");
                         AbstractRoadModel collisionPoint = calcMethod.PerformCollisionCalculations(pair.ElementAt(0), pair.ElementAt(1), currectRoadModel);
-                        
+
                         if (calcMethod.CollisionOccured())
                         {
-                            Console.WriteLine("--------------------Start of collision warning handling------------------------");
 
                             //WarningMessage msgVeh1 = calcMethod.CreateWarningMessage(pair.ElementAt(0));
                             //WarningMessage msgVeh2 = calcMethod.CreateWarningMessage(pair.ElementAt(1));
@@ -59,11 +78,22 @@ namespace CollisionDetector
 
                                 double maxAllowedSpeed = collisionPoint.MaxSpeed;
 
-                                Console.WriteLine("Max speed " + maxAllowedSpeed);
+                                //Console.WriteLine("Max speed " + maxAllowedSpeed);
 
                                 //TODO: This is a bad idea, think it through
 
-                                if((pair.ElementAt(0).Speed > maxAllowedSpeed) || (calcMethod.IsVehicleAbleToBrake(pair.ElementAt(0), dataStorage.SectionRef)))
+                                if (PushMaxSpeedContent(pair.ElementAt(0), msgVeh1, maxAllowedSpeed))
+                                {
+                                    calcMethod.IsVehicleAbleToBrake(pair.ElementAt(0), dataStorage.SectionRef, msgVeh1);
+                                }
+
+                                if (PushMaxSpeedContent(pair.ElementAt(1), msgVeh2, maxAllowedSpeed))
+                                {
+                                    calcMethod.IsVehicleAbleToBrake(pair.ElementAt(1), dataStorage.SectionRef, msgVeh2);
+                                }
+
+
+                                /* if((pair.ElementAt(0).Speed > maxAllowedSpeed) || (calcMethod.IsVehicleAbleToBrake(pair.ElementAt(0), dataStorage.SectionRef)))
                                 {
                                     msgVeh1.Level = NotificationLevel.danger;
                                 }
@@ -71,7 +101,7 @@ namespace CollisionDetector
                                 if ((pair.ElementAt(1).Speed > maxAllowedSpeed) || calcMethod.IsVehicleAbleToBrake(pair.ElementAt(1), dataStorage.SectionRef))
                                 {
                                     msgVeh2.Level = NotificationLevel.danger;
-                                }
+                                }*/
                             }
 
                             AbstractSocket socket = WebSocketManagerFactory.GetInstance().GetConnection(data.SocketId);
@@ -83,10 +113,10 @@ namespace CollisionDetector
                             //socket.AddToMessageQueue(msgVeh1.Index ,msgVeh1);
                             //socket.AddToMessageQueue(msgVeh2.Index, msgVeh2);
 
-                            Console.WriteLine("--------------------End of collision warinng handling------------------------");
                         }
+                        Console.WriteLine("--------------------End of collision warinng handling------------------------\n\n");
                     }
-                }
+                });
             }
 
             if (sw.ElapsedMilliseconds > 100)

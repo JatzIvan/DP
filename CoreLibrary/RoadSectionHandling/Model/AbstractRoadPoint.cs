@@ -46,8 +46,8 @@ namespace CoreLibrary.RoadSectionHandling.Model
             modelCopy.MaxSpeed = MaxSpeed;
             modelCopy.TangentOfPoint = TangentOfPoint;
             modelCopy.Distance = Distance;
-            modelCopy.Previous = Previous.Clone(modelCopy);
-            modelCopy.Next = Next.Clone(modelCopy);
+            modelCopy.Previous = Previous != null ? Previous.Clone(modelCopy) : null;
+            modelCopy.Next = Next != null ? Next.Clone(modelCopy) : null;
             return modelCopy;
         }
     }

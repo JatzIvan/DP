@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -27,6 +28,10 @@ namespace WebSocketLibrary
          */
         protected List<IObserver<T>> registeredMessageHandlers = new List<IObserver<T>>();
 
+        private ConcurrentQueue<AbstractMessage> messagesQueue;
+
+        private Thread sendingThread;
+
         public struct UdpState
         {
             public UdpClient client;
@@ -50,6 +55,8 @@ namespace WebSocketLibrary
                 throw new ArgumentNullException(nameof(port));
             }
 
+            messagesQueue = new ConcurrentQueue<AbstractMessage>();
+
             observers.ForEach(h =>
             {
                 Subscribe(h);
@@ -64,6 +71,10 @@ namespace WebSocketLibrary
             this.Client = CreateSocket(new IPEndPoint(IPAddress.Any, 0));
             //this.Client.Connect(EP);
             StartListening();
+
+            sendingThread = new Thread(SendMessages);
+            sendingThread.Start();
+
         }
 
         // Add unique observers to socket
@@ -210,14 +221,21 @@ namespace WebSocketLibrary
 
         }
 
+        /**
+         * Save message into queue and send when possible.
+         * This is necessary because there are multiple threads that send messages
+         */
+
         public override AbstractMessage SendMessage(AbstractMessage msg)
         {
             msg.Index = GetMessageIndex();
-            if (checkIfAlive())
+            messagesQueue.Enqueue(msg);
+            
+            /*if (checkIfAlive())
             {
                 Byte[] msgInBytes = ConvertMesssageToBytes(msg);
                 Client.Send(msgInBytes, msgInBytes.Length, EP);
-            }
+            }*/
 
             return msg;
 
@@ -235,6 +253,8 @@ namespace WebSocketLibrary
             SendCloseMessage();
             //Client.Client.Shutdown(SocketShutdown.Both);
             Client.Close();
+            // Close thread for sending messages
+            sendingThread.Interrupt();
 
         }                                                      
 
@@ -267,6 +287,26 @@ namespace WebSocketLibrary
         protected override void HandleCustomAckMessageLogic(AbstractMessage msg)
         {
             return;
+        }
+
+        private void SendMessages()
+        {
+            try
+            {
+                while (true)
+                {
+                    while (messagesQueue.TryDequeue(out AbstractMessage message))
+                    {
+                        if (checkIfAlive())
+                        {
+                            Byte[] msgInBytes = ConvertMesssageToBytes(message);
+                            Client.Send(msgInBytes, msgInBytes.Length, EP);
+                        }
+                    }
+                    Thread.Sleep(10);
+                }
+            }catch (ThreadInterruptedException e) { 
+            }
         }
     }
 }

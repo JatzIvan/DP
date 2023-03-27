@@ -52,7 +52,9 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
                 LocationPoint point = RoadDataFetcher.GetInstance().ResolveRefToLocation(roadRef);
 
                 // TODO: change this, this is just for testing purposes
-                RoadParameters output = RoadDataFetcherFactory.getInstance().GetResolverImplementation("dummy").FetchRoadParameters(point);
+                RoadParameters output = RoadDataFetcherFactory.GetInstance().GetResolverImplementation(ApplicationConfigurationHandler.RoadStateFetcherImplementation).FetchRoadParameters(point);
+
+                Console.WriteLine("Fetched new road parameters");
 
                 if(output == null)
                 {
@@ -60,7 +62,14 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
                     return parameters.ContainsKey(roadRef) ? parameters[roadRef] : null;
                 }
 
-                parameters.Add(roadRef, output);
+                if (parameters.ContainsKey(roadRef))
+                {
+                    parameters[roadRef] = output;
+                }
+                else
+                {
+                    parameters.Add(roadRef, output);
+                }
 
             }
 

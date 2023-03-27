@@ -150,7 +150,7 @@ namespace WebSocketLibrary
 
                 // If this happens that means they already passed eachother
                 // This signals that this pair can be skipped
-                if ((direction ? v1Point.Next.Point : v1Point.Previous.Point) == null)
+                if ((direction ? v1Point.Next : v1Point.Previous) == null)
                 {
                     //Console.WriteLine("Skip: Could not find in said distance passed eachother");
                     return true;
@@ -307,6 +307,8 @@ namespace WebSocketLibrary
             // Now check if they are not too far away
             if(!SkipCalculations(vehicle1, vehicle2))
             {
+
+                //Console.WriteLine("No filter");
                 // TODO: for now we will just find and resolve parts of road with curvature. This implementation is prepared
                 // to distinguish between "straight"/curve parts
 
@@ -318,7 +320,7 @@ namespace WebSocketLibrary
                 //return UseSpecialCurvatureCalculations(vehicle1, vehicle2) ? CurveCollisionCalculatorFactory.GetInstance().GetImplementation()
                 //    : StraightCollisionCalculatorFactory.GetInstance().GetImplementation();
             }
-
+            //Console.WriteLine("Filtered out");
             return null;
         }
 

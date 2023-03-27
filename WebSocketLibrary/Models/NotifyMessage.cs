@@ -43,6 +43,14 @@ namespace WebSocketLibrary.Models
         [JsonProperty("targetVehicleId")]
         public int TargetVehicleId { get; set; }
 
+        [JsonProperty("maxSpeedExceededBy")]
+        public double MaxSpeedExceededBy { get; set; }
+
+        [JsonProperty("brakingDistanceDiff")]
+        public double BrakingDistanceDiff { get; set; }
+        /*        [JsonProperty("notificationMessages")]
+                public Stack<string> NotificationMessages { get; set; } = new Stack<string> { };*/
+
         public HeadCollisionContent(double timeToCollision, int targetVehicleId)
         {
             TimeToCollision = timeToCollision;

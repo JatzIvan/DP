@@ -28,8 +28,8 @@ namespace CoreLibrary.RoadSectionHandling.MaxSpeedCalculations
 
         public double GetMaxSpeed(AbstractRoadModel point, string roadRef)
         {
-            //return Math.Sqrt(point.RadiusOfCircle * g * RoadParametersHolder.GetInstance().GetParametersForRoad(roadRef, false).GetFriction());
-            return Math.Sqrt(point.RadiusOfCircle * g * 0.5);
+            return Math.Sqrt(point.RadiusOfCircle * g * RoadParametersHolder.GetInstance().GetParametersForRoad(roadRef, false).GetFriction());
+            //return Math.Sqrt(point.RadiusOfCircle * g * 0.5);
         }
     }
 }

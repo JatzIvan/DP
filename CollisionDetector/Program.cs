@@ -3,6 +3,7 @@ using CoreLibrary;
 using CoreLibrary.RoadSectionHandling;
 using CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators;
 using CoreLibrary.RoadSectionHandling.Model;
+using CoreLibrary.RoadSectionHandling.RoadParameters;
 using NetTopologySuite.Index.KdTree;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,7 @@ namespace CollisionDetector
 
             Thread td3 = new Thread(new UnacknowledgedMessagesThread().HandleUnresolved);
             td3.Start();
+
 
             Console.WriteLine("Simplification tolerance" + ApplicationConfigurationHandler.DPTolerance);
             Console.WriteLine("Curvature treshold" + ApplicationConfigurationHandler.CurvatureTreshold);
@@ -77,6 +79,8 @@ namespace CollisionDetector
 
             }   
 
+            Thread td4 = new Thread(new RoadStateRefresherThread().FetchInformation);
+            td4.Start();
 
 /*            RoadDataHandler roadHandler = new RoadDataHandler("a", "a");
 

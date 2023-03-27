@@ -88,7 +88,7 @@ namespace RoadVisualisation
             topPointXY = latlngToGlobalXY(topPoint);
             bottomPointXY = latlngToGlobalXY(bottomPoint);
             SimplificationMethod.DataSource = (SectionSimplificationFactory.GetInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
-            CurvatureCalcMethod.DataSource = (RoadCurvitureCalculatorFactory.getInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
+            CurvatureCalcMethod.DataSource = (RoadCurvitureCalculatorFactory.GetInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
         }
 
         private void Form1_Load(object sender, EventArgs e)

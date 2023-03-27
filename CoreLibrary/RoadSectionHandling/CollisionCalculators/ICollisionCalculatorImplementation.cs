@@ -63,7 +63,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
             return msg;
         }
 
-        public bool IsVehicleAbleToBrake(VehicleData vehicle, string roadRef)
+        public bool IsVehicleAbleToBrake(VehicleData vehicle, string roadRef, NotifyMessage msg)
         {
 
             double breakingDistance = BrakingDistanceCalculatorUtils.CalculateBrakingDistance(vehicle, roadRef);
@@ -71,8 +71,12 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
 
             if(distanceToColl < breakingDistance)
             {
-                Console.WriteLine($"Vehicle {vehicle.Id} breaking distance was higher than distance to collision");
-                Console.WriteLine("Distance to coll " + distanceToColl + " - breaking distance " + breakingDistance);
+                //Console.WriteLine("-----------------------------------------");
+                Console.WriteLine($"Vehicle {vehicle.Id} breaking distance ({breakingDistance}) was higher than distance to collision ({distanceToColl})");
+                //Console.WriteLine("Distance to coll " + distanceToColl + " - breaking distance " + breakingDistance);
+                //Console.WriteLine("-----------------------------------------");
+                //msg.Content.NotificationMessages.Push($"Vehicle breaking distance ({breakingDistance}) was higher than distance to collision ({distanceToColl})");
+                msg.Content.BrakingDistanceDiff = breakingDistance - distanceToColl;
             }
 
 
