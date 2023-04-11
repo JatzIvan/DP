@@ -92,7 +92,9 @@ namespace WebSocketLibrary.SocketImplementations
         {
             Task.WaitAll(Task.Run(() =>
             {
-                while (!isAlive){}
+                while (!isAlive){
+                    Thread.Sleep(1000);
+                }
                 return;
             }));
             Task.WaitAll(Task.Run(() => Repeat(GetArea)));

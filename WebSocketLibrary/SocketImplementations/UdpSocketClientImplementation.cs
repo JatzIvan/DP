@@ -31,6 +31,7 @@ namespace WebSocketLibrary
         private ConcurrentQueue<AbstractMessage> messagesQueue;
 
         private Thread sendingThread;
+        private Thread keepAliveThread;
 
         public struct UdpState
         {
@@ -74,6 +75,9 @@ namespace WebSocketLibrary
 
             sendingThread = new Thread(SendMessages);
             sendingThread.Start();
+
+            keepAliveThread = new Thread(KeepAlive);
+            keepAliveThread.Start();
 
         }
 
@@ -252,9 +256,12 @@ namespace WebSocketLibrary
 
             SendCloseMessage();
             //Client.Client.Shutdown(SocketShutdown.Both);
+            isAlive = false;
             Client.Close();
             // Close thread for sending messages
+            Console.WriteLine("Closing thread");
             sendingThread.Interrupt();
+            keepAliveThread.Interrupt();
 
         }                                                      
 
@@ -305,7 +312,43 @@ namespace WebSocketLibrary
                     }
                     Thread.Sleep(10);
                 }
-            }catch (ThreadInterruptedException e) { 
+            }catch (Exception e) { 
+            }
+        }
+
+        public void KeepAlive()
+        {
+            try
+            {
+                while (true)
+                {
+                    //Dictionary<int, AbstractSocket> activeConnections = WebSocketManagerFactory.GetInstance().GetActiveConnections();
+
+                    //Console.WriteLine(activeConnections.Count);
+
+                    //foreach (KeyValuePair<int, AbstractSocket> entry in activeConnections)
+                    //{
+                    if (checkIfAlive())
+                    {
+                        KeepAliveMessage msg = this.GetKeepAliveMessage();
+
+                        if (this.keepAliveFailedAttempts > 5)
+                        {
+                            Console.WriteLine("Socket " + this.Id + " has lost connection");
+                            WebSocketManagerFactory.GetInstance().DropActiveConnection(this);
+                        }
+                        else
+                        {
+                            this.SendMessageWithAck(msg);
+                        }
+                    }
+                    //}
+
+                    Thread.Sleep(10000);
+                }
+            }
+            catch (Exception e)
+            {
             }
         }
     }
