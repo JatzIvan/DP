@@ -20,7 +20,13 @@ namespace CollisionDetector
 {
     class Program
     {
+
         static void Main(string[] args)
+        {
+            HeadOnCollisionApplicationStarter<SimpleHeadOnApplication>.Run(new SimpleHeadOnApplication());
+        }
+
+       /* static void Main(string[] args)
         {
             ApplicationConfigurationHandler.LoadConfiguration();
             
@@ -29,11 +35,11 @@ namespace CollisionDetector
             //Thread td = new Thread(new SocketConnecterThread().HandlePending);
             //td.Start();
 
-            Thread td2 = new Thread(new SocketKeepAlive().KeepAliveActiveConnections);
-            td2.Start();
+            //Thread td2 = new Thread(new SocketKeepAlive().KeepAliveActiveConnections);
+            //td2.Start();
 
-            Thread td3 = new Thread(new UnacknowledgedMessagesThread().HandleUnresolved);
-            td3.Start();
+            //Thread td3 = new Thread(new UnacknowledgedMessagesThread().HandleUnresolved);
+            //td3.Start();
 
 
             Console.WriteLine("Simplification tolerance" + ApplicationConfigurationHandler.DPTolerance);
@@ -42,7 +48,7 @@ namespace CollisionDetector
 
             // Test
 
-            /*VehicleData veh1 = new VehicleData();
+            *//*VehicleData veh1 = new VehicleData();
             veh1.Heading = 105.1F;
             veh1.Speed = 4.25F;
             veh1.Position = new PositionWrapper(31.25956982F, 121.61139076F);
@@ -52,7 +58,7 @@ namespace CollisionDetector
             veh2.Speed = 3.21F;
             veh2.Position = new PositionWrapper(31.25961488F, 121.61155024F);
 
-            new GPSStraightRoadCurvatureCalculator().PerformCollisionCalculations(veh1, veh2, null);*/
+            new GPSStraightRoadCurvatureCalculator().PerformCollisionCalculations(veh1, veh2, null);*//*
 
             UDPSocketForAreaHandling ws2 = WebSocketManagerFactory.GetInstance()
                 .CreateConnection<UDPSocketForAreaHandling, AreaObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<AreaObserverWrapper>>());
@@ -82,7 +88,7 @@ namespace CollisionDetector
             Thread td4 = new Thread(new RoadStateRefresherThread().FetchInformation);
             td4.Start();
 
-/*            RoadDataHandler roadHandler = new RoadDataHandler("a", "a");
+*//*            RoadDataHandler roadHandler = new RoadDataHandler("a", "a");
 
 
             IObserver<VehicleObserverWrapper> observer = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDataHandler(roadHandler));
@@ -93,44 +99,44 @@ namespace CollisionDetector
             UdpSocketForCarConnection ws = WebSocketManagerFactory.GetInstance()
                 .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer });
 */
-   /*         IObserver<VehicleObserverWrapper> observer3 = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDataHandler(roadHandler));
-            UdpSocketForCarConnection ws3 = WebSocketManagerFactory.GetInstance()
-                .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer3 });
+        /*         IObserver<VehicleObserverWrapper> observer3 = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDataHandler(roadHandler));
+                 UdpSocketForCarConnection ws3 = WebSocketManagerFactory.GetInstance()
+                     .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer3 });
 
-            IObserver<VehicleObserverWrapper> observer4 = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDataHandler(roadHandler));
-            UdpSocketForCarConnection ws4 = WebSocketManagerFactory.GetInstance()
-                .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer4 });
+                 IObserver<VehicleObserverWrapper> observer4 = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDataHandler(roadHandler));
+                 UdpSocketForCarConnection ws4 = WebSocketManagerFactory.GetInstance()
+                     .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer4 });
 
-            IObserver<VehicleObserverWrapper> observer5 = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDataHandler(roadHandler));
-            UdpSocketForCarConnection ws5 = WebSocketManagerFactory.GetInstance()
-                .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer5 });
-   */
+                 IObserver<VehicleObserverWrapper> observer5 = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new CustomCollisionDataHandler(roadHandler));
+                 UdpSocketForCarConnection ws5 = WebSocketManagerFactory.GetInstance()
+                     .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer5 });
+        *//*
 
-            //KdTree<AbstractRoadModel> data = roadHandler.GetParsedRoadData(ApplicationConfigurationHandler.GenerateHandlerSetupConfig());
+                 //KdTree<AbstractRoadModel> data = roadHandler.GetParsedRoadData(ApplicationConfigurationHandler.GenerateHandlerSetupConfig());
 
-            //List<(Dictionary<LocationPoint, AbstractRoadModel>, double)> vvv = roadHandler.GatherCurvaturesBetweenVehicles();
-
-
-            //WebSocketMessageHandler<ICollisionDetector> observer = new WebSocketMessageHandler<ICollisionDetector>("handler1", new JustPrintCollisionDataHandler(null));
-
-            //WebSocketManagerFactory.GetInstance().OpenConnection(ws, new List<IObserver<ObserverWrapper>> { observer });
-
-            Console.WriteLine("Out");
+                 //List<(Dictionary<LocationPoint, AbstractRoadModel>, double)> vvv = roadHandler.GatherCurvaturesBetweenVehicles();
 
 
-            /*Thread td = new Thread(new SocketConnecterThread().HandlePending);
-            td.Start();
+                 //WebSocketMessageHandler<ICollisionDetector> observer = new WebSocketMessageHandler<ICollisionDetector>("handler1", new JustPrintCollisionDataHandler(null));
 
-            Thread td2 = new Thread(new SocketKeepAlive().KeepAliveActiveConnections);
-            td2.Start();*/
+                 //WebSocketManagerFactory.GetInstance().OpenConnection(ws, new List<IObserver<ObserverWrapper>> { observer });
 
-            Console.Read();
+                 Console.WriteLine("Out");
 
-            /*while (true)
-            {
-               // Console.WriteLine("Blabla");
-                Thread.Sleep(10000);
-            }*/
-        }
+
+                 *//*Thread td = new Thread(new SocketConnecterThread().HandlePending);
+                 td.Start();
+
+                 Thread td2 = new Thread(new SocketKeepAlive().KeepAliveActiveConnections);
+                 td2.Start();*//*
+
+                 Console.Read();
+
+                 *//*while (true)
+                 {
+                    // Console.WriteLine("Blabla");
+                     Thread.Sleep(10000);
+                 }*//*
+             }*/
     }
 }
