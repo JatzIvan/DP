@@ -13,7 +13,7 @@ namespace CoreLibrary
     {
 
 
-        List<Thread> CreatedThreads = new List<Thread>();
+        protected List<Thread> CreatedThreads = new List<Thread>();
 
         public virtual void InitializeAPIClient()
         {

@@ -62,6 +62,8 @@ namespace CoreLibrary
 
         public static string StraightCollisionCalculator { get; set; }
 
+        public static string MaxParallelism { get; set; }
+
         /*public static AbstractSimplificationModel GetSimplificationModelFromConfiguration()
         {
 
@@ -181,6 +183,7 @@ namespace CoreLibrary
                 CurvetureCalcMethod = LoadVariable("CURVETURE_CALC_METHOD");
                 MaxSpeedCalcMethod = LoadVariable("MAX_SPEED_CALC_METHOD");
                 RoadStateFetcherImplementation = LoadVariable("ROAD_STATE_FETCHER");
+                MaxParallelism = LoadVariable("MAX_PARALLELISM");
                 InitConstructors();
             }
             catch (Exception e)

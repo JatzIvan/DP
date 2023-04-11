@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebSocketLibrary.SocketImplementations;
 using WebSocketLibrary;
+using System.Threading;
 
 namespace CollisionDetector
 {
@@ -39,6 +40,16 @@ namespace CollisionDetector
                     .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer });
 
             }
+        }
+
+        public override void StartThreads()
+        {
+            base.StartThreads();
+
+            Thread td3 = new Thread(new UnacknowledgedMessagesThread().HandleUnresolved);
+            td3.Start();
+
+            CreatedThreads.Add(td3);
         }
     }
 }

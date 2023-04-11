@@ -1,4 +1,5 @@
-﻿using CoreLibrary.RoadSectionHandling;
+﻿using CoreLibrary;
+using CoreLibrary.RoadSectionHandling;
 using CoreLibrary.RoadSectionHandling.CollisionCalculators;
 using CoreLibrary.RoadSectionHandling.Model;
 using NetTopologySuite.Index.KdTree;
@@ -50,10 +51,15 @@ namespace CollisionDetector
             if (vehicles.Count >= 2)
             {
                 IEnumerable<IEnumerable<VehicleData>> pairsToCalc = CreateVehiclePairs(vehicles);
+                ParallelOptions options = new ParallelOptions
+                                {
+                                    MaxDegreeOfParallelism = ApplicationConfigurationHandler.MaxParallelism is null ? -1 : int.Parse(ApplicationConfigurationHandler.MaxParallelism)
+                                };
 
                 // Try threading or something, right now I need to ensure that this concept can work
                 //foreach (var pair in pairsToCalc)
-                Parallel.ForEach(pairsToCalc, pair =>
+
+                Parallel.ForEach(pairsToCalc, options, pair =>
                 {
                     ICollisionCalculatorImplementation calcMethod = ResolveCollisionCalculatorBasedOnCurvature(pair.ElementAt(0), pair.ElementAt(1));
                     if (calcMethod != null)
