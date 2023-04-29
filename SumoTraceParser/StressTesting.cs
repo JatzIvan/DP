@@ -30,7 +30,9 @@ namespace TestingLibrary
 
         CustomCollisionDataHandler handler;
 
-        public StressTesting(string path)
+        string OutputPath = "stress_test/";
+
+        public StressTesting(string path, string outputPath)
         {
 
             using (var reader = new StreamReader(path))
@@ -43,12 +45,17 @@ namespace TestingLibrary
                 throw new Exception("Parser was unable to open/parse provided file");
             }
 
+            if(outputPath != null && outputPath != "")
+            {
+                OutputPath = outputPath;
+            }
+
             ApplicationConfigurationHandler.LoadConfiguration();
 
             ApiHelper.InitializeClient();
 
 
-            Dictionary<string, List<RoadPointModel>> sections = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByRef();
+            Dictionary<string, List<RoadPointModel>> sections = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByAttr();
 
             foreach (KeyValuePair<string, List<RoadPointModel>> section in sections)
             {
@@ -113,7 +120,7 @@ namespace TestingLibrary
             Environment.NewLine,
                 TimeToCalculateBasedOnNumberOfVehicles.Select(d => $"{d.Key}|{String.Join(";", d.Value.Select(x => x.ToString()).ToArray())}|")
 );
-            System.IO.File.WriteAllText("F:/parser_test/stress_test/out_" + ((DateTimeOffset)DateTime.UtcNow).ToString("yyyyMMddHHmmssfff") + ".csv", csv);
+            System.IO.File.WriteAllText(OutputPath + "out_" + ((DateTimeOffset)DateTime.UtcNow).ToString("yyyyMMddHHmmssfff") + ".csv", csv);
 
         }
 
@@ -155,8 +162,11 @@ namespace TestingLibrary
                     IEnumerable<IEnumerable<VehicleData>> pairsToCalc = CreateVehiclePairs(vehicles);
                     Console.WriteLine("Created all pairs in " + sw.ElapsedMilliseconds);
                     // Try threading or something, right now I need to ensure that this concept can work
-                    //foreach(var pair in pairsToCalc)
-                    Parallel.ForEach(pairsToCalc, pair =>
+                   // foreach(var pair in pairsToCalc)
+                    Parallel.ForEach(pairsToCalc, new ParallelOptions
+                    {
+                        MaxDegreeOfParallelism = 6
+                    } ,pair =>
                     {
                         ICollisionCalculatorImplementation calcMethod = ResolveCollisionCalculatorBasedOnCurvature(pair.ElementAt(0), pair.ElementAt(1));
                         if (calcMethod != null)
@@ -164,31 +174,6 @@ namespace TestingLibrary
 
                             AbstractRoadModel collisionPoint = calcMethod.PerformCollisionCalculations(pair.ElementAt(0), pair.ElementAt(1), currectRoadModel);
 
-                            /*                            if (calcMethod.CollisionOccured())
-                                                        {
-
-                                                            NotifyMessage msgVeh1 = calcMethod.CreateNotificationMessage(pair.ElementAt(0), pair.ElementAt(1));
-                                                            NotifyMessage msgVeh2 = calcMethod.CreateNotificationMessage(pair.ElementAt(1), pair.ElementAt(0));
-
-                                                            // If collision occured, check if one or both cars go above speed limit
-                                                            if (collisionPoint != null)
-                                                            {
-
-                                                                double maxAllowedSpeed = collisionPoint.MaxSpeed;
-
-                                                                if (PushMaxSpeedContent(pair.ElementAt(0), msgVeh1, maxAllowedSpeed))
-                                                                {
-                                                                    calcMethod.IsVehicleAbleToBrake(pair.ElementAt(0), dataStorage.SectionRef, msgVeh1);
-                                                                }
-
-                                                                if (PushMaxSpeedContent(pair.ElementAt(1), msgVeh2, maxAllowedSpeed))
-                                                                {
-                                                                    calcMethod.IsVehicleAbleToBrake(pair.ElementAt(1), dataStorage.SectionRef, msgVeh2);
-                                                                }
-
-                                                            }
-
-                                                        }*/
                         }
                     });
                 }

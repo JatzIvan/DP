@@ -43,7 +43,7 @@ namespace WebSocketLibrary
                 return;
             }
 
-            Console.WriteLine(parsedObject.Type);
+            //Console.WriteLine(parsedObject.Type);
 
             switch (parsedObject.Type)
             {
