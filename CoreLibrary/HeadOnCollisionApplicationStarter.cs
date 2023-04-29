@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace CoreLibrary
 {
+    /**
+     * Utility class that starts the application in the intended way
+     */
     public class HeadOnCollisionApplicationStarter<T> where T : AbstractApplication
     {
 
