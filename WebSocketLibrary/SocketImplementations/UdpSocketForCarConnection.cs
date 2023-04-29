@@ -14,17 +14,24 @@ namespace WebSocketLibrary
         private SubscribeDataWrapper ConnectionData;
         private bool Subscribed = false;
         private float Interval;
+        private DateTime LastReceivedMessageTime;
+        private int KeepAliveTimetout;
+        private Thread SubscriptionAliveThread;
 
-        public UdpSocketForCarConnection(string host, string port, int id, List<IObserver<VehicleObserverWrapper>> observers, float interval) : base(host, port, id, observers)
+        public UdpSocketForCarConnection(string host, string port, int id, List<IObserver<VehicleObserverWrapper>> observers, float interval) : this(host, port, id, observers, 6000, interval)
         {
-            this.Interval = interval;
-
+/*            this.Interval = interval;
+            this.KeepAliveTimetout = 6000;
+            SubscriptionAliveThread = new Thread(CheckLastMessageTime);
+            SubscriptionAliveThread.Start();*/
         }
 
         public UdpSocketForCarConnection(string host, string port, int id, List<IObserver<VehicleObserverWrapper>> observers, int keepAliveTimeout, float interval) : base(host, port, id, observers, keepAliveTimeout)
         {
             this.Interval = interval;
-
+            this.KeepAliveTimetout = keepAliveTimeout;
+            SubscriptionAliveThread = new Thread(CheckLastMessageTime);
+            SubscriptionAliveThread.Start();
         }
 
         protected override void ResolveMessageType(string receiveString)
@@ -36,9 +43,12 @@ namespace WebSocketLibrary
                 return;
             }
 
+            Console.WriteLine(parsedObject.Type);
+
             switch (parsedObject.Type)
             {
                 case "update_vehicles":
+                    LastReceivedMessageTime = DateTime.Now;
                     ResolveDataMessage(DeserializeObject<CarUpdateInfo>(receiveString));
                     break;
                 default:
@@ -86,6 +96,7 @@ namespace WebSocketLibrary
             {
                 Console.WriteLine("Socket " + Id + " starts recieving data");
                 Subscribed = true;
+                LastReceivedMessageTime = DateTime.Now;
             }
         }
 
@@ -113,11 +124,17 @@ namespace WebSocketLibrary
             return Subscribed;
         }
 
+        public void Subscribe()
+        {
+            Task.Run(() => Do(IsSubscribed));
+        }
+
         public override void ActivateConnection()
         {
 
             base.ActivateConnection();
-            Task.Run(() => Do(IsSubscribed));
+            Subscribe();
+            //Task.Run(() => Do(IsSubscribed));
             // Send Subscribe message
             // TODO: This is probably not the best idea, think this through
             /*while (!Subscribed && isAlive)
@@ -125,6 +142,34 @@ namespace WebSocketLibrary
                 SendMessage(GetSubscribeMessage());
                 Thread.Sleep(200);
             }*/
+        }
+
+        private void CheckLastMessageTime()
+        {
+            try
+            {
+                while (true)
+                {
+
+                    if (Subscribed)
+                    {
+
+                        if((DateTime.Now - LastReceivedMessageTime).TotalMilliseconds > 5 * KeepAliveTimetout)
+                        {
+                            Console.WriteLine("Socket " + this.Id + " lost vehicle update subscription");
+                            Subscribed = false;
+                            Subscribe();
+                        }
+
+                    }
+                    //}
+
+                    Thread.Sleep(KeepAliveTimetout);
+                }
+            }
+            catch (Exception)
+            {
+            }
         }
 
     }

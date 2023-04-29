@@ -196,7 +196,7 @@ namespace CoreLibrary
                 MaxParallelism = LoadVariable("MAX_PARALLELISM");
                 KeepAliveFrequency = int.Parse(LoadVariable("KEEP_ALIVE_FREQUENCY") ?? "0", CultureInfo.InvariantCulture);
                 RoadGroupByAttribute = LoadVariable("RoadGroupByAttribute");
-                IntegrationModuleInterval = float.Parse(LoadVariable("INTEGRATION_MODULE_INTERVAL") ?? "200", CultureInfo.InvariantCulture);
+                IntegrationModuleInterval = float.Parse(LoadVariable("INTEGRATION_MODULE_INTERVAL") ?? "0.2", CultureInfo.InvariantCulture);
                 if (String.IsNullOrEmpty(RoadGroupByAttribute))
                 {
                     RoadGroupByAttribute = "Ref";
