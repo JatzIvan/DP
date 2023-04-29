@@ -27,7 +27,7 @@ namespace SumoTraceParser
             ApiHelper.InitializeClient();
 
 
-            Dictionary<string, List<RoadPointModel>> sections = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByRef();
+            Dictionary<string, List<RoadPointModel>> sections = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByAttr();
 
             foreach (KeyValuePair<string, List<RoadPointModel>> section in sections)
             {
@@ -44,24 +44,17 @@ namespace SumoTraceParser
         {
             List<Tuple<string, List<string>>> output = new List<Tuple<string, List<string>>>();
 
-            foreach(Tuple<Tuple<string, string>, LocationPoint> pair in VehiclePairs.MeetInDangerousArea)
+            foreach (Tuple<Tuple<string, string>, LocationPoint> pair in VehiclePairs.MeetInDangerousArea)
             {
                 output.Add(new Tuple<string, List<string>>("danger_" + pair.Item2.Latitude + "-" + pair.Item2.Longitude + "_", new List<string>() { pair.Item1.Item1, pair.Item1.Item2 }));
             }
-            
+
             foreach (Tuple<Tuple<string, string>, LocationPoint> pair in VehiclePairs.MeetInNonDangerousArea)
             {
                 output.Add(new Tuple<string, List<string>>("no_danger" + pair.Item2.Latitude + "-" + pair.Item2.Longitude + "_", new List<string>() { pair.Item1.Item1, pair.Item1.Item2 }));
             }
 
             return output;
-        }
-
-        // We just check if one vehicle has lane with - sign
-        private bool GoingAgainstEachOther(Vehicle veh1, Vehicle veh2)
-        {
-            return ((veh1.Lane.Contains("-") && !veh2.Lane.Contains("-")) || (!veh1.Lane.Contains("-") && veh2.Lane.Contains("-"))
-                && veh1.Lane.Replace("-", "").Equals(veh2.Lane.Replace("-", "")));
         }
 
         // Ofset is caused by gaps between road points
@@ -74,59 +67,6 @@ namespace SumoTraceParser
             double offsetDistance = MapParserUtils.CalculateDistanceBetweenPoints(new LocationPoint(vehicle.X, vehicle.Y), point.CurrentLocation);
 
             return realDistance > AbstractCollisionDetector.GetDistanceBetweenMapPoints(point, nextPoint) ? offsetDistance : -offsetDistance;
-        }
-
-        // Simple method that determines if vehicles are too far apart, not going against eachother or passed eachother
-        private bool SkipPair(Vehicle veh1, AbstractRoadModel veh1MappedPoint, Vehicle veh2, AbstractRoadModel veh2MappedPoint)
-        {
-            if (AbstractCollisionDetector.DetermineDirection(veh1.Angle, veh1MappedPoint) == AbstractCollisionDetector.DetermineDirection(veh2.Angle, veh2MappedPoint))
-            {
-                return true;
-            }
-
-            // Point on road wont be perfectly on the car position, start with the offset distance
-            // Calc ofset of both vehicles for better accuracy
-            // We need to take into account, if car is closer to second vehicle than point or vice versa
-            double distance = CalcOffsetBetweenCarAndMapPoint(veh1, veh1MappedPoint) + CalcOffsetBetweenCarAndMapPoint(veh2, veh2MappedPoint);
-            distance += AbstractCollisionDetector.GetDistanceBetweenMapPoints(veh1MappedPoint, veh2MappedPoint);
-
-            // If distance is smaller than treshold, fetch point and determine where they meet
-            if (distance > 100)
-            {
-                return true;
-            }
-
-            double checkDistance = CalcOffsetBetweenCarAndMapPoint(veh1, veh1MappedPoint) + CalcOffsetBetweenCarAndMapPoint(veh2, veh2MappedPoint);
-
-            // Loop until vehicle 1 does not meet position of vehicle 2
-            // This is to check if cars did not pass eachother
-            while (true)
-            {
-                // We can stop prematurely when distance treshold was exceeded 
-                if (veh1MappedPoint.CurrentLocation.Equals(veh2MappedPoint.CurrentLocation))
-                {
-                    break;
-                }
-
-                // We should be able to find the target vehicle in the distance treshold
-                if (checkDistance > distance)
-                {
-                    return true;
-                }
-
-                // If this happens that means they already passed eachother
-                // This signals that this pair can be skipped
-                if ((AbstractCollisionDetector.DetermineDirection(veh1.Angle, veh1MappedPoint) ? veh1MappedPoint.Next.Point : veh1MappedPoint.Previous.Point) == null)
-                {
-                    return true;
-                }
-
-                AbstractRoadModel v1NextPoint = AbstractCollisionDetector.DetermineDirection(veh1.Angle, veh1MappedPoint) ? veh1MappedPoint.Next.Point : veh1MappedPoint.Previous.Point;  
-                checkDistance += AbstractCollisionDetector.GetDistanceBetweenMapPoints(v1NextPoint, veh1MappedPoint);
-                veh1MappedPoint = v1NextPoint;
-            }
-
-            return false;
         }
 
         private void ResolveVehicleMeetPoint(List<Timestep> timesteps)

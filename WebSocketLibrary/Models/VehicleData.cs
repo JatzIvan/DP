@@ -15,6 +15,10 @@ namespace WebSocketLibrary.Models
         [JsonProperty("type")]
         public VehicleType Type { get; set; }
 
+        [JsonProperty("timestamp")]
+        [JsonConverter(typeof(IsoDateTimeConverter))]
+        public DateTime Timestamp = DateTime.Now;
+
         [JsonProperty("speed")]
         public float Speed { get; set; }
         

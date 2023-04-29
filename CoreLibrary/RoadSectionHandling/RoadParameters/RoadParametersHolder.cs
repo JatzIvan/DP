@@ -11,7 +11,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
 
         private static RoadParametersHolder INSTANCE;
 
-        private Dictionary<string, RoadParameters> parameters = new Dictionary<string, RoadParameters>();
+        private Dictionary<object, RoadParameters> parameters = new Dictionary<object, RoadParameters>();
 
         private ApiCallsHandler handler { get; set; }
 
@@ -44,12 +44,12 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
             }
         }
 
-        public RoadParameters GetParametersForRoad(string roadRef, bool refetch)
+        public RoadParameters GetParametersForRoad(string attr, bool refetch)
         {
-            if (!parameters.ContainsKey(roadRef) || parameters[roadRef] == null || refetch)
+            if (!parameters.ContainsKey(attr) || parameters[attr] == null || refetch)
             {
 
-                LocationPoint point = RoadDataFetcher.GetInstance().ResolveRefToLocation(roadRef);
+                LocationPoint point = RoadDataFetcher.GetInstance().ResolveAttrToLocation(attr);
 
                 // TODO: change this, this is just for testing purposes
                 RoadParameters output = RoadDataFetcherFactory.GetInstance().GetResolverImplementation(ApplicationConfigurationHandler.RoadStateFetcherImplementation).FetchRoadParameters(point);
@@ -59,21 +59,21 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
                 if(output == null)
                 {
                     // If fetch fails (for some reason) and we have old value, use the old value
-                    return parameters.ContainsKey(roadRef) ? parameters[roadRef] : null;
+                    return parameters.ContainsKey(attr) ? parameters[attr] : null;
                 }
 
-                if (parameters.ContainsKey(roadRef))
+                if (parameters.ContainsKey(attr))
                 {
-                    parameters[roadRef] = output;
+                    parameters[attr] = output;
                 }
                 else
                 {
-                    parameters.Add(roadRef, output);
+                    parameters.Add(attr, output);
                 }
 
             }
 
-            return parameters[roadRef];
+            return parameters[attr];
         }
 
     }

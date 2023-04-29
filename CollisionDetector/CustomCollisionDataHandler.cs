@@ -120,7 +120,7 @@ namespace CollisionDetector
                             //socket.AddToMessageQueue(msgVeh2.Index, msgVeh2);
 
                         }
-                        Console.WriteLine("--------------------End of collision warinng handling------------------------\n\n");
+                        Console.WriteLine("--------------------End of collision warning handling------------------------\n\n");
                     }
                 });
             }

@@ -28,12 +28,11 @@ namespace CoreLibrary.RoadSectionHandling
                 //Tuple<LocationPoint, LocationPoint> key = new Tuple<LocationPoint, LocationPoint>(model.Way.Points[0], model.Way.Points[model.Way.Points.Count - 1]);
                 Tuple<LocationPoint, LocationPoint> key = new Tuple<LocationPoint, LocationPoint>(model.Way.Points.First(), model.Way.Points.Last());
 
-                if (modelDictionary.ContainsKey(key))
+                if (!modelDictionary.ContainsKey(key))
                 {
-                    RoadPointModel xx = modelDictionary[key];
+                    modelDictionary.Add(key, model);
                 }
 
-                modelDictionary.Add(key, model);
             }
 
             return modelDictionary;
@@ -175,7 +174,6 @@ namespace CoreLibrary.RoadSectionHandling
 
 
                 }
-
             }
 
             //Dictionary<LocationPoint, AbstractRoadModel> joinedDict = CreateRoadCurvitureModelDictionary(sortedByRoads);

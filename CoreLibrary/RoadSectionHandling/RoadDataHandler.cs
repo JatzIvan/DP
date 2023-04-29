@@ -40,10 +40,10 @@ namespace CoreLibrary.RoadSectionHandling
                 throw new ArgumentNullException("Handler is missing a name");
             }
 
-            if (String.IsNullOrEmpty(sectionRef))
+/*            if (String.IsNullOrEmpty(sectionRef))
             {
                 throw new ArgumentNullException("Missing road refference");
-            }
+            }*/
 
             this.SectionName = sectionName;
             this.SectionRef = sectionRef;
@@ -61,7 +61,7 @@ namespace CoreLibrary.RoadSectionHandling
                 // TODO implement later
 
                 // Get Data from API
-                List<RoadPointModel> fetchedModel = roadDataFether.GetRoadDataForRef(SectionRef);
+                List<RoadPointModel> fetchedModel = roadDataFether.GetRoadDataForAttr(SectionRef);
                 this.RoadInfoRaw = fetchedModel;
             }
 

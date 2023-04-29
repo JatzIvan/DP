@@ -20,7 +20,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
                 // TODO: Wait for 10 minutes for now
                 Thread.Sleep(600000);
 
-                Dictionary<string, List<RoadPointModel>> sections = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByRef();
+                Dictionary<string, List<RoadPointModel>> sections = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByAttr();
 
                 foreach(KeyValuePair<string, List<RoadPointModel>> section in sections)
                 {

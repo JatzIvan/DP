@@ -60,7 +60,7 @@ namespace CoreLibrary.RoadSectionHandling
             return output;
         }
 
-        public Dictionary<string, List<RoadPointModel>> GetRoadFromAPIGroupedByRef()
+        public Dictionary<string, List<RoadPointModel>> GetRoadFromAPIGroupedByAttr()
         {
 
             if(RawFetchedData == null)
@@ -75,15 +75,15 @@ namespace CoreLibrary.RoadSectionHandling
 
                 foreach (RoadPointModel segment in RawFetchedData)
                 {
-                    if (segment.Ref != null && !segment.Ref.Equals(""))
+                    if (segment[ApplicationConfigurationHandler.RoadGroupByAttribute] != null && !segment[ApplicationConfigurationHandler.RoadGroupByAttribute].Equals(""))
                     {
 
-                        if (!RoadSegmentsByRef.ContainsKey(segment.Ref))
+                        if (!RoadSegmentsByRef.ContainsKey(segment[ApplicationConfigurationHandler.RoadGroupByAttribute]))
                         {
-                            RoadSegmentsByRef.Add(segment.Ref, new List<RoadPointModel>());
+                            RoadSegmentsByRef.Add(segment[ApplicationConfigurationHandler.RoadGroupByAttribute], new List<RoadPointModel>());
                         }
 
-                        RoadSegmentsByRef[segment.Ref].Add(segment);
+                        RoadSegmentsByRef[segment[ApplicationConfigurationHandler.RoadGroupByAttribute]].Add(segment);
                     }
                 }
 
@@ -94,30 +94,30 @@ namespace CoreLibrary.RoadSectionHandling
 
         }
 
-        public LocationPoint ResolveRefToLocation(string roadRef)
+        public LocationPoint ResolveAttrToLocation(string attr)
         {
-            Dictionary<string, List<RoadPointModel>> roadPoints = GetRoadFromAPIGroupedByRef();
-            if (!roadPoints.ContainsKey(roadRef))
+            Dictionary<string, List<RoadPointModel>> roadPoints = GetRoadFromAPIGroupedByAttr();
+            if (!roadPoints.ContainsKey(attr))
             {
                 return null;
             }
 
-            return roadPoints[roadRef].First().Way.Points.First();
+            return roadPoints[attr].First().Way.Points.First();
 
         }
 
-        public List<RoadPointModel> GetRoadDataForRef(string roadRef)
+        public List<RoadPointModel> GetRoadDataForAttr(string attr)
         {
 
-            Dictionary<string, List<RoadPointModel>> localData = GetRoadFromAPIGroupedByRef();
+            Dictionary<string, List<RoadPointModel>> localData = GetRoadFromAPIGroupedByAttr();
 
-            if (localData.ContainsKey(roadRef))
+            if (localData.ContainsKey(attr))
             {
-                return localData[roadRef];
+                return localData[attr];
             }
             else
             {
-                Console.WriteLine("No data found for ref " + roadRef);
+                Console.WriteLine($"No data found for {ApplicationConfigurationHandler.RoadGroupByAttribute} " + attr);
                 return new List<RoadPointModel>();
             }
 

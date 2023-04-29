@@ -40,7 +40,9 @@ namespace CoreLibrary
 
         public static double Latitude2 { get; set; }
 
-        public static string RoadRef { get; set; }
+        //public static string RoadRef { get; set; }
+
+        public static string CustomRoadParameters { get; set; }
 
         public static float DPTolerance { get; set; }
 
@@ -63,6 +65,12 @@ namespace CoreLibrary
         public static string StraightCollisionCalculator { get; set; }
 
         public static string MaxParallelism { get; set; }
+
+        public static int KeepAliveFrequency { get; set; }
+
+        public static string RoadGroupByAttribute { get; set; } = "Ref";
+
+        public static float IntegrationModuleInterval { get; set; }
 
         /*public static AbstractSimplificationModel GetSimplificationModelFromConfiguration()
         {
@@ -131,9 +139,9 @@ namespace CoreLibrary
             Console.WriteLine("Factory init took " + sw.ElapsedMilliseconds);
         }
 
-        public static void RecalculateTestRoadQuery(bool skipRef, AreaMessage msg)
+        public static void RecalculateTestRoadQuery(bool skipCustomParams, AreaMessage msg)
         {
-            TestRoadQuery = (!skipRef ? $"?ref={RoadRef}&" : "?") +
+            TestRoadQuery = (skipCustomParams || String.IsNullOrEmpty(CustomRoadParameters) ? "?" : $"?{CustomRoadParameters}&") +
                 $"long1={msg.TopLeft.Lon.ToString().Replace(",",".")}" +
                 $"&lat1={msg.TopLeft.Lat.ToString().Replace(",", ".")}" +
                 $"&long2={msg.BottomRight.Lon.ToString().Replace(",", ".")}" +
@@ -167,8 +175,10 @@ namespace CoreLibrary
                 Latitude1 = float.Parse(LoadVariable("RoadQueryLat1"), CultureInfo.InvariantCulture);
                 Longitude2 = float.Parse(LoadVariable("RoadQueryLong2"), CultureInfo.InvariantCulture);
                 Latitude2 = float.Parse(LoadVariable("RoadQueryLat2"), CultureInfo.InvariantCulture);
-                RoadRef = LoadVariable("RoadQueryRef");
-                TestRoadQuery = $"?ref={RoadRef}&long1={ConfigurationManager.AppSettings.Get("RoadQueryLong1")}" +
+                CustomRoadParameters = LoadVariable("CustomRoadParameters");
+                TestRoadQuery =
+                    (String.IsNullOrEmpty(CustomRoadParameters) ? "?" : $"?{CustomRoadParameters}&") +
+                    $"long1={ConfigurationManager.AppSettings.Get("RoadQueryLong1")}" +
                     $"&lat1={ConfigurationManager.AppSettings.Get("RoadQueryLat1")}" +
                     $"&long2={ConfigurationManager.AppSettings.Get("RoadQueryLong2")}" +
                     $"&lat2={ConfigurationManager.AppSettings.Get("RoadQueryLat2")}";
@@ -184,6 +194,13 @@ namespace CoreLibrary
                 MaxSpeedCalcMethod = LoadVariable("MAX_SPEED_CALC_METHOD");
                 RoadStateFetcherImplementation = LoadVariable("ROAD_STATE_FETCHER");
                 MaxParallelism = LoadVariable("MAX_PARALLELISM");
+                KeepAliveFrequency = int.Parse(LoadVariable("KEEP_ALIVE_FREQUENCY") ?? "0", CultureInfo.InvariantCulture);
+                RoadGroupByAttribute = LoadVariable("RoadGroupByAttribute");
+                IntegrationModuleInterval = float.Parse(LoadVariable("INTEGRATION_MODULE_INTERVAL") ?? "200", CultureInfo.InvariantCulture);
+                if (String.IsNullOrEmpty(RoadGroupByAttribute))
+                {
+                    RoadGroupByAttribute = "Ref";
+                }
                 InitConstructors();
             }
             catch (Exception e)
