@@ -17,13 +17,14 @@ namespace CollisionDetector
         public override void MainLogicStartup()
         {
             UDPSocketForAreaHandling ws2 = WebSocketManagerFactory.GetInstance()
-                .CreateConnection<UDPSocketForAreaHandling, AreaObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<AreaObserverWrapper>>());
+                .CreateConnection<UDPSocketForAreaHandling, AreaObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, 
+                ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<AreaObserverWrapper>>(), ApplicationConfigurationHandler.KeepAliveFrequency);
 
             ApplicationConfigurationHandler.RecalculateTestRoadQuery(false, ws2.AreaFetched());
 
             WebSocketManagerFactory.GetInstance().CloseConnection(ws2);
 
-            Dictionary<string, List<RoadPointModel>> sections = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByRef();
+            Dictionary<string, List<RoadPointModel>> sections = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByAttr();
 
             foreach (KeyValuePair<string, List<RoadPointModel>> section in sections)
             {
@@ -37,7 +38,12 @@ namespace CollisionDetector
                 // IObserver<VehicleObserverWrapper> observer = new WebSocketMessageHandler<VehicleObserverWrapper>("handler1", new JustPrintCollisionDataHandler());
 
                 WebSocketManagerFactory.GetInstance()
-                    .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer });
+                    .CreateConnection<UdpSocketForCarConnection>(new UdpSocketForCarConnection(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(),
+                    new List<IObserver<VehicleObserverWrapper>> { observer }, ApplicationConfigurationHandler.KeepAliveFrequency, ApplicationConfigurationHandler.IntegrationModuleInterval));
+
+/*                WebSocketManagerFactory.GetInstance()
+                    .CreateConnection<UdpSocketForCarConnection, VehicleObserverWrapper>(ApplicationConfigurationHandler.DataServerHost, ApplicationConfigurationHandler.DataServerPort, new Random().Next(), new List<IObserver<VehicleObserverWrapper>> { observer }
+                    , ApplicationConfigurationHandler.KeepAliveFrequency);*/
 
             }
         }

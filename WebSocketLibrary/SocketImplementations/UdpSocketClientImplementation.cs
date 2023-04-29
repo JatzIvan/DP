@@ -11,7 +11,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketLibrary.Models;
-using WebSocketSharp.NetCore;
 
 namespace WebSocketLibrary
 {
@@ -44,7 +43,15 @@ namespace WebSocketLibrary
 
         private IPEndPoint EP;
 
-        public UdpSocketClientImplementation(string host, string port, int id, List<IObserver<T>> observers) : base(host, port, id)
+        private int keepAliveTimeout;
+
+        public UdpSocketClientImplementation(string host, string port, int id, List<IObserver<T>> observers)
+            : this(host, port, id, observers, 10000)
+        {
+
+        }
+
+        public UdpSocketClientImplementation(string host, string port, int id, List<IObserver<T>> observers, int keepAliveTimeout) : base(host, port, id)
         {
             if (host is null)
             {
@@ -56,6 +63,11 @@ namespace WebSocketLibrary
                 throw new ArgumentNullException(nameof(port));
             }
 
+            if(keepAliveTimeout <= 0)
+            {
+                keepAliveTimeout = 10000;
+            }
+
             messagesQueue = new ConcurrentQueue<AbstractMessage>();
 
             observers.ForEach(h =>
@@ -63,6 +75,7 @@ namespace WebSocketLibrary
                 Subscribe(h);
             });
             this.Id = id;
+            this.keepAliveTimeout = keepAliveTimeout;
             //EP = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); // endpoint where server is listening
 
             IPAddress ip = Uri.CheckHostName(host).Equals(UriHostNameType.Dns) ? 
@@ -188,7 +201,7 @@ namespace WebSocketLibrary
             {
                 receiveBytes = client.EndReceive(ar, ref endpoint);
             }
-            catch(Exception e)
+            catch (Exception)
             {
                 //Console.WriteLine(e);
             }
@@ -218,7 +231,7 @@ namespace WebSocketLibrary
                 client.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Console.WriteLine("Socket was closed, stopping receive");
             }
@@ -312,7 +325,7 @@ namespace WebSocketLibrary
                     }
                     Thread.Sleep(10);
                 }
-            }catch (Exception e) { 
+            }catch (Exception) { 
             }
         }
 
@@ -344,10 +357,10 @@ namespace WebSocketLibrary
                     }
                     //}
 
-                    Thread.Sleep(10000);
+                    Thread.Sleep(keepAliveTimeout);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
             }
         }

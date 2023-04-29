@@ -13,10 +13,17 @@ namespace WebSocketLibrary
 
         private SubscribeDataWrapper ConnectionData;
         private bool Subscribed = false;
+        private float Interval;
 
-        public UdpSocketForCarConnection(string host, string port, int id, List<IObserver<VehicleObserverWrapper>> observers) : base(host, port, id, observers)
+        public UdpSocketForCarConnection(string host, string port, int id, List<IObserver<VehicleObserverWrapper>> observers, float interval) : base(host, port, id, observers)
         {
+            this.Interval = interval;
 
+        }
+
+        public UdpSocketForCarConnection(string host, string port, int id, List<IObserver<VehicleObserverWrapper>> observers, int keepAliveTimeout, float interval) : base(host, port, id, observers, keepAliveTimeout)
+        {
+            this.Interval = interval;
 
         }
 
@@ -62,7 +69,7 @@ namespace WebSocketLibrary
             {
                 msg = new SubscribeMessage();
                 //msg.Index = GetMessageIndex();
-                msg.Interval = 0.2f;
+                msg.Interval = Interval;
                 msg.Content = SubscribeContent.vehicles;
                 //msg.Road = "503";
                 //AddToMessageQueue(msg.Index, msg);
