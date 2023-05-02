@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -10,7 +11,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketLibrary.Models;
-using WebSocketSharp.NetCore;
 
 namespace WebSocketLibrary
 {
@@ -27,6 +27,11 @@ namespace WebSocketLibrary
          */
         protected List<IObserver<T>> registeredMessageHandlers = new List<IObserver<T>>();
 
+        private ConcurrentQueue<AbstractMessage> messagesQueue;
+
+        private Thread sendingThread;
+        private Thread keepAliveThread;
+
         public struct UdpState
         {
             public UdpClient client;
@@ -38,7 +43,15 @@ namespace WebSocketLibrary
 
         private IPEndPoint EP;
 
-        public UdpSocketClientImplementation(string host, string port, int id, List<IObserver<T>> observers) : base(host, port, id)
+        private int keepAliveTimeout;
+
+        public UdpSocketClientImplementation(string host, string port, int id, List<IObserver<T>> observers)
+            : this(host, port, id, observers, 10000)
+        {
+
+        }
+
+        public UdpSocketClientImplementation(string host, string port, int id, List<IObserver<T>> observers, int keepAliveTimeout) : base(host, port, id)
         {
             if (host is null)
             {
@@ -50,11 +63,19 @@ namespace WebSocketLibrary
                 throw new ArgumentNullException(nameof(port));
             }
 
+            if(keepAliveTimeout <= 0)
+            {
+                keepAliveTimeout = 10000;
+            }
+
+            messagesQueue = new ConcurrentQueue<AbstractMessage>();
+
             observers.ForEach(h =>
             {
                 Subscribe(h);
             });
             this.Id = id;
+            this.keepAliveTimeout = keepAliveTimeout;
             //EP = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); // endpoint where server is listening
 
             IPAddress ip = Uri.CheckHostName(host).Equals(UriHostNameType.Dns) ? 
@@ -64,6 +85,13 @@ namespace WebSocketLibrary
             this.Client = CreateSocket(new IPEndPoint(IPAddress.Any, 0));
             //this.Client.Connect(EP);
             StartListening();
+
+            sendingThread = new Thread(SendMessages);
+            sendingThread.Start();
+
+            keepAliveThread = new Thread(KeepAlive);
+            keepAliveThread.Start();
+
         }
 
         // Add unique observers to socket
@@ -173,7 +201,7 @@ namespace WebSocketLibrary
             {
                 receiveBytes = client.EndReceive(ar, ref endpoint);
             }
-            catch(Exception e)
+            catch (Exception)
             {
                 //Console.WriteLine(e);
             }
@@ -203,21 +231,28 @@ namespace WebSocketLibrary
                 client.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Console.WriteLine("Socket was closed, stopping receive");
             }
 
         }
 
+        /**
+         * Save message into queue and send when possible.
+         * This is necessary because there are multiple threads that send messages
+         */
+
         public override AbstractMessage SendMessage(AbstractMessage msg)
         {
             msg.Index = GetMessageIndex();
-            if (checkIfAlive())
+            messagesQueue.Enqueue(msg);
+            
+            /*if (checkIfAlive())
             {
                 Byte[] msgInBytes = ConvertMesssageToBytes(msg);
                 Client.Send(msgInBytes, msgInBytes.Length, EP);
-            }
+            }*/
 
             return msg;
 
@@ -234,7 +269,12 @@ namespace WebSocketLibrary
 
             SendCloseMessage();
             //Client.Client.Shutdown(SocketShutdown.Both);
+            isAlive = false;
             Client.Close();
+            // Close thread for sending messages
+            Console.WriteLine("Closing thread");
+            sendingThread.Interrupt();
+            keepAliveThread.Interrupt();
 
         }                                                      
 
@@ -267,6 +307,62 @@ namespace WebSocketLibrary
         protected override void HandleCustomAckMessageLogic(AbstractMessage msg)
         {
             return;
+        }
+
+        private void SendMessages()
+        {
+            try
+            {
+                while (true)
+                {
+                    while (messagesQueue.TryDequeue(out AbstractMessage message))
+                    {
+                        if (checkIfAlive())
+                        {
+                            Byte[] msgInBytes = ConvertMesssageToBytes(message);
+                            Client.Send(msgInBytes, msgInBytes.Length, EP);
+                        }
+                    }
+                    Thread.Sleep(10);
+                }
+            }catch (Exception) { 
+            }
+        }
+
+        public void KeepAlive()
+        {
+            try
+            {
+                while (true)
+                {
+                    //Dictionary<int, AbstractSocket> activeConnections = WebSocketManagerFactory.GetInstance().GetActiveConnections();
+
+                    //Console.WriteLine(activeConnections.Count);
+
+                    //foreach (KeyValuePair<int, AbstractSocket> entry in activeConnections)
+                    //{
+                    if (checkIfAlive())
+                    {
+                        KeepAliveMessage msg = this.GetKeepAliveMessage();
+
+                        if (this.keepAliveFailedAttempts > 5)
+                        {
+                            Console.WriteLine("Socket " + this.Id + " has lost connection");
+                            WebSocketManagerFactory.GetInstance().DropActiveConnection(this);
+                        }
+                        else
+                        {
+                            this.SendMessageWithAck(msg);
+                        }
+                    }
+                    //}
+
+                    Thread.Sleep(keepAliveTimeout);
+                }
+            }
+            catch (Exception)
+            {
+            }
         }
     }
 }

@@ -117,7 +117,9 @@ namespace WebSocketLibrary
             // Point on road wont be perfectly on the car position, start with the offset distance
             // Calc ofset of both vehicles for better accuracy
             // We need to take into account, if car is closer to second vehicle than point or vice versa
-            double distance = CalcOffsetBetweenCarAndMapPoint(vehicle1, v1Point) + CalcOffsetBetweenCarAndMapPoint(vehicle2, v2Point);
+            double v1Offset = CalcOffsetBetweenCarAndMapPoint(vehicle1, v1Point);
+            double v2Offset = CalcOffsetBetweenCarAndMapPoint(vehicle2, v2Point);
+            double distance = v1Offset + v2Offset;
             distance += GetDistanceBetweenMapPoints(v2Point, v1Point);
             if(distance > ApplicationConfigurationHandler.CarDistanceSkipTreshold || distance < 10)
             {
@@ -125,7 +127,7 @@ namespace WebSocketLibrary
                 return true;
             }
 
-            double checkDistance = CalcOffsetBetweenCarAndMapPoint(vehicle1, v1Point) + CalcOffsetBetweenCarAndMapPoint(vehicle2, v2Point);
+            double checkDistance = v1Offset + v2Offset;
 
             bool direction = DetermineDirection(vehicle1.Heading, v1Point);
 
@@ -148,7 +150,7 @@ namespace WebSocketLibrary
 
                 // If this happens that means they already passed eachother
                 // This signals that this pair can be skipped
-                if ((direction ? v1Point.Next.Point : v1Point.Previous.Point) == null)
+                if ((direction ? v1Point.Next : v1Point.Previous) == null)
                 {
                     //Console.WriteLine("Skip: Could not find in said distance passed eachother");
                     return true;
@@ -305,6 +307,8 @@ namespace WebSocketLibrary
             // Now check if they are not too far away
             if(!SkipCalculations(vehicle1, vehicle2))
             {
+
+                //Console.WriteLine("No filter");
                 // TODO: for now we will just find and resolve parts of road with curvature. This implementation is prepared
                 // to distinguish between "straight"/curve parts
 
@@ -316,7 +320,7 @@ namespace WebSocketLibrary
                 //return UseSpecialCurvatureCalculations(vehicle1, vehicle2) ? CurveCollisionCalculatorFactory.GetInstance().GetImplementation()
                 //    : StraightCollisionCalculatorFactory.GetInstance().GetImplementation();
             }
-
+            //Console.WriteLine("Filtered out");
             return null;
         }
 

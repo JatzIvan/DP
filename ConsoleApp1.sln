@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CollisionDetector", "Collis
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SumoTraceParser", "SumoTraceParser\SumoTraceParser.csproj", "{6083B3A6-07BA-4B1D-A327-BB9E67FEF3FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingLibrary", "TestingLibrary\TestingLibrary.csproj", "{808A2AC7-D62D-48AF-AA9A-AB9F96B51887}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestingLibrary", "TestingLibrary\TestingLibrary.csproj", "{808A2AC7-D62D-48AF-AA9A-AB9F96B51887}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

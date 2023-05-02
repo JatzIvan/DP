@@ -13,7 +13,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadSimplificators
     public class LangRoadSectionSimplification : ISectionSimplificator
     {
 
-        public LangRoadSectionSimplification(List<AbstractRoadModel> connectedWays) : base(connectedWays)
+        public LangRoadSectionSimplification() : base()
         {
         }
 

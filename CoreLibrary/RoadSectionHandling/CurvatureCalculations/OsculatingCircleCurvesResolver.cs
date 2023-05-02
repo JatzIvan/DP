@@ -13,15 +13,14 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
     {
         private List<AbstractRoadModel> ConnectedWays { get; set; }
 
-        public OsculatingCircleCurvesResolver(List<AbstractRoadModel> connectedWays)
+        public OsculatingCircleCurvesResolver()
         {
-            this.ConnectedWays = connectedWays;
         }
 
-        public List<AbstractRoadModel> CalculateCurvesForWays()
+        public List<AbstractRoadModel> CalculateCurvesForWays(List<AbstractRoadModel> connectedWays)
         {
 
-
+            this.ConnectedWays = connectedWays;
             // Calculate both ways
 
             // From first to last

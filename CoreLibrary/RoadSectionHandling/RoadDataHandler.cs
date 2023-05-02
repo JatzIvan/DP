@@ -18,7 +18,7 @@ namespace CoreLibrary.RoadSectionHandling
         private bool Initialized { get; set; } = false;
         private string SectionName { get; set; }
 
-        private string SectionRef { get; set; }
+        public string SectionRef { get; set; }
 
         private List<RoadPointModel> RoadInfoRaw { get; set; }
 
@@ -32,6 +32,7 @@ namespace CoreLibrary.RoadSectionHandling
 
 
         // Implement with config Object
+        // Do not instantiate with constructor. Use RoadDataManager.GetInstance().AddDataHandler()
         public RoadDataHandler(string sectionName, string sectionRef)
         {
             if (String.IsNullOrEmpty(sectionName))
@@ -39,10 +40,10 @@ namespace CoreLibrary.RoadSectionHandling
                 throw new ArgumentNullException("Handler is missing a name");
             }
 
-            if (String.IsNullOrEmpty(sectionRef))
+/*            if (String.IsNullOrEmpty(sectionRef))
             {
                 throw new ArgumentNullException("Missing road refference");
-            }
+            }*/
 
             this.SectionName = sectionName;
             this.SectionRef = sectionRef;
@@ -60,7 +61,7 @@ namespace CoreLibrary.RoadSectionHandling
                 // TODO implement later
 
                 // Get Data from API
-                List<RoadPointModel> fetchedModel = roadDataFether.GetRoadDataForRef(SectionRef);
+                List<RoadPointModel> fetchedModel = roadDataFether.GetRoadDataForAttr(SectionRef);
                 this.RoadInfoRaw = fetchedModel;
             }
 
@@ -106,16 +107,39 @@ namespace CoreLibrary.RoadSectionHandling
                 List<AbstractRoadModel> connectedWays = parser.GetConnectedWays();
 
 
-                ISectionSimplificator simplificator = SectionSimplificationFactory.getInstance().GetSimplificatiorImplementation(connectedWays, config.Simplificator);
-                List<AbstractRoadModel> simplifiedModel = simplificator.GetSimplifiedModel();
-                ICurvesResolver curvesResolver = RoadCurvitureCalculatorFactory.getInstance().GetResolverImplementation(config.CurvitureResolver, simplifiedModel);
-                RoadInfoTransformed = curvesResolver.CalculateCurvesForWays();
+                ISectionSimplificator simplificator = SectionSimplificationFactory.GetInstance().GetResolverImplementation(config.Simplificator);
+                List<AbstractRoadModel> simplifiedModel = simplificator.GetSimplifiedModel(connectedWays);
+                ICurvesResolver curvesResolver = RoadCurvitureCalculatorFactory.GetInstance().GetResolverImplementation(config.CurvitureResolver);
+                RoadInfoTransformed = curvesResolver.CalculateCurvesForWays(simplifiedModel);
                 MaxSpeedCalculatorFactory.GetInstance().GetImplementation().CalcMaxSpeedsForRoadSegment(RoadInfoTransformed, SectionRef);
                 GatherCurvaturesBetweenVehicles();
                 RoadInfoInTreeForm = MapParserUtils.CreateKdTreeWithCoordinates(RoadInfoTransformed);
             }
 
             return this.RoadInfoInTreeForm;
+
+        }
+
+        public void RecalculateRoadModelBasedOnCurrentRoadState()
+        {
+            List<AbstractRoadModel> modelCopy = RoadInfoTransformed.ConvertAll(roadPoint => roadPoint.Clone());
+            
+            MaxSpeedCalculations.ISpeedCalculator calculator = MaxSpeedCalculatorFactory.GetInstance().GetImplementation();
+            
+            foreach(AbstractRoadModel model in modelCopy)
+            {
+                model.MaxSpeed = calculator.GetMaxSpeed(model, SectionRef);
+            }
+
+            KdTree<AbstractRoadModel> roadTreeFormCopy = MapParserUtils.CreateKdTreeWithCoordinates(RoadInfoTransformed);
+
+            lock (RoadInfoTransformed) lock(RoadInfoInTreeForm)
+            {
+                RoadInfoTransformed = modelCopy;
+                RoadInfoInTreeForm= roadTreeFormCopy;
+            }
+
+            Console.WriteLine("Recalculated road model for " + this.SectionRef);
 
         }
 

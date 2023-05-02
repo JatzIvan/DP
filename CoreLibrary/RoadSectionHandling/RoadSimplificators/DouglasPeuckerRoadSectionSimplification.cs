@@ -11,12 +11,8 @@ namespace CoreLibrary.RoadSectionHandling.RoadSimplificators
     public class DouglasPeuckerRoadSectionSimplification : ISectionSimplificator{ 
 /*        private float Tolerance { get; set; } = 0.05f;*/
 
-        public DouglasPeuckerRoadSectionSimplification(List<AbstractRoadModel> connectedWays) : base(connectedWays)
+        public DouglasPeuckerRoadSectionSimplification() : base()
         {
-            if (connectedWays is null)
-            {
-                throw new ArgumentNullException(nameof(connectedWays));
-            }
         }
 
         private Tuple<double, int> FindPointWithMaximumDistance(List<AbstractRoadModel> model)

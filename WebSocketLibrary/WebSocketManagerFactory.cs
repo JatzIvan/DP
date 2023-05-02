@@ -45,25 +45,47 @@ namespace WebSocketLibrary
            return this.CreateConnection<T,G>(url, port, new Random().Next(), handler);
         }
 
-        /**
-         * Create new connection to host and port based on T {SocketType} and G {Message Type}
-         */
-        public T CreateConnection<T,G>(string host, string port, int id, List<IObserver<G>> handler) 
-            where T: AbstractSocket
-            where G: ObserverWrapper
+        public T CreateConnection<T>(T ws)
+        where T : AbstractSocket
+        {
+            return StartConnection(ws.Id, ws);
+        }
+
+        private T StartConnection<T>(int id, T ws) where T : AbstractSocket
+        {
+            PendingConnections.Add(id, ws);
+
+            Task.Run(ws.EstablishConnection);
+
+            return ws;
+        }
+
+        public T CreateConnection<T, G>(string host, string port, int id, List<IObserver<G>> handler)
+        where T : AbstractSocket
+        where G : ObserverWrapper
         {
             //string trimmed = ReshapeWebSocketUrl(url);
 
             //T ws = new T(host, port, id);
             T ws = (T)Activator.CreateInstance(typeof(T), new object[] { host, port, id, handler });
 
+            return StartConnection(id, ws);
 
+        }
 
-            PendingConnections.Add(id, ws);
+        /**
+         * Create new connection to host and port based on T {SocketType} and G {Message Type}
+         */
+        public T CreateConnection<T,G>(string host, string port, int id, List<IObserver<G>> handler, int keepAliveTimeout) 
+            where T: AbstractSocket
+            where G: ObserverWrapper
+        {
+            //string trimmed = ReshapeWebSocketUrl(url);
 
-            Task.Run(ws.EstablishConnection);
+            //T ws = new T(host, port, id);
+            T ws = (T)Activator.CreateInstance(typeof(T), new object[] { host, port, id, handler, keepAliveTimeout });
 
-            return ws;
+            return StartConnection(id, ws);
 
         }
 

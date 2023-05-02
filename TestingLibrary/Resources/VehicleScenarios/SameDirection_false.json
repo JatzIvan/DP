@@ -5,7 +5,7 @@
     {
       "Id": 1,
       "Type": "car",
-      "Speed": 5,
+      "Speed": 10,
       "Acceleration": 1,
       "Heading": 260.33,
       "Position": {

@@ -124,9 +124,11 @@ namespace CoreLibrary.RoadSectionHandling
             double cLat1 = ConvertDegreesToRadians(start.Latitude);
             double cLon1 = ConvertDegreesToRadians(start.Longitude);
 
+            double cdeg = ConvertDegreesToRadians(heading);
+
             double lat2 = Math.Asin(Math.Sin(cLat1) * Math.Cos(distance / rEarth) +
-                  Math.Cos(cLat1) * Math.Sin(distance / rEarth) * Math.Cos(heading));
-            double lon2 = cLon1 + Math.Atan2(Math.Sin(heading) * Math.Sin(distance / rEarth) * Math.Cos(cLat1),
+                  Math.Cos(cLat1) * Math.Sin(distance / rEarth) * Math.Cos(cdeg));
+            double lon2 = cLon1 + Math.Atan2(Math.Sin(cdeg) * Math.Sin(distance / rEarth) * Math.Cos(cLat1),
                          Math.Cos(distance / rEarth) - Math.Sin(cLat1) * Math.Sin(lat2));
             return new LocationPoint(ConvertRadiansToDegrees(lon2), ConvertRadiansToDegrees(lat2));
 

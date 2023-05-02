@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WebSocketLibrary.Models;
@@ -18,6 +17,11 @@ namespace WebSocketLibrary.SocketImplementations
         AreaMessage msg = null;
 
         public UDPSocketForAreaHandling(string host, string port, int id, List<IObserver<AreaObserverWrapper>> observers) : base(host, port, id, observers)
+        {
+
+        }
+
+        public UDPSocketForAreaHandling(string host, string port, int id, List<IObserver<AreaObserverWrapper>> observers, int keepAliveTimeout) : base(host, port, id, observers, keepAliveTimeout)
         {
 
         }
@@ -92,7 +96,9 @@ namespace WebSocketLibrary.SocketImplementations
         {
             Task.WaitAll(Task.Run(() =>
             {
-                while (!isAlive){}
+                while (!isAlive){
+                    Thread.Sleep(1000);
+                }
                 return;
             }));
             Task.WaitAll(Task.Run(() => Repeat(GetArea)));

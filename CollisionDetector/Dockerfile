@@ -8,7 +8,6 @@ WORKDIR /src
 COPY ["CollisionDetector/CollisionDetector.csproj", "CollisionDetector/"]
 COPY ["ApiLibrary/ApiLibrary.csproj", "ApiLibrary/"]
 COPY ["CoreLibrary/CoreLibrary.csproj", "CoreLibrary/"]
-COPY ["DatabaseHandlerLibrary/DatabaseHandlerLibrary.csproj", "DatabaseHandlerLibrary/"]
 COPY ["WebSocketLibrary/WebSocketLibrary.csproj", "WebSocketLibrary/"]
 RUN dotnet restore "CollisionDetector/CollisionDetector.csproj"
 COPY . .

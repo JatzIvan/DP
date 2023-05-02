@@ -14,6 +14,7 @@ using CoreLibrary.RoadSectionHandling.RoadSimplificators;
 using CoreLibrary;
 using System.Reflection;
 using Xunit;
+using System.Diagnostics;
 
 namespace TestingLibrary
 {
@@ -64,6 +65,7 @@ namespace TestingLibrary
 
             public override void PerformActions(VehicleObserverWrapper data)
             {
+                Stopwatch sw = Stopwatch.StartNew();
                 List<VehicleData> vehicles = data.Data.Vehicles;
                 //Console.WriteLine("Num of vehicles recieved " + vehicles.Count);
                 if (vehicles.Count >= 2)
@@ -81,6 +83,10 @@ namespace TestingLibrary
                             Xunit.Assert.Equal(collisionOccured, calcMethod.CollisionOccured());
                         }
                     }
+
+                    Console.WriteLine("Elapsed time (ms) " + (sw.ElapsedTicks / 10000) + " for number of cars " + vehicles.Count);
+                    Console.WriteLine("Elapsed time (mikro) " + (sw.ElapsedTicks / 10) + " for number of cars " + vehicles.Count);
+
                 }
             }
 
@@ -92,11 +98,11 @@ namespace TestingLibrary
         [MemberData(nameof(VehicleWrapperData.TestData), MemberType = typeof(VehicleWrapperData))]
         public void TestCollisionSituations(VehicleObserverWrapper wrapper, bool collision)
         {
-
+            ApplicationConfigurationHandler.InitConstructors();
             ApplicationConfigurationHandler.CurvetureCalcMethod = typeof(CircumcircleRoadCircleCurvesResolver).Name;
             ApplicationConfigurationHandler.SimplificationMethod = typeof(DouglasPeuckerRoadSectionSimplification).Name;
-            ApplicationConfigurationHandler.DPTolerance = 0.5f;
-            ApplicationConfigurationHandler.CurvatureTreshold = 0.006f;
+            ApplicationConfigurationHandler.DPTolerance = 0.3f;
+            ApplicationConfigurationHandler.CurvatureTreshold = 0.008f;
             ApplicationConfigurationHandler.CarDistanceSkipTreshold = 500;
 
             RoadDataHandler handler = new RoadDataHandler("503", "503");

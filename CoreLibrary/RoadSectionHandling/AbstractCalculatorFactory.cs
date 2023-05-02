@@ -1,4 +1,6 @@
 ﻿using CoreLibrary.RoadSectionHandling.CollisionCalculators;
+using CoreLibrary.RoadSectionHandling.Model;
+using CoreLibrary.RoadSectionHandling.RoadParameters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +10,29 @@ using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling
 {
-    public abstract class AbstractCalculatorFactory
+
+    /**
+     * To correctly implement automatic loading for new factory you need define loading in static context
+     * Example:
+     * FactoryImplementation()
+     *   {
+     *      GetInstance();
+     *   }
+     * There is a possibility to create parametrized lambdas. Sadly, parametrized lambdas are not currectly loaded automatically.
+     * "Automatic" initialization needs to be implemented in the respective factories
+     */
+
+    // I: Template for calculators (generic approach)
+    // A: Attribute to look for
+    public abstract class AbstractCalculatorFactory<I, A> where A: AbstractCalculatorAttribute
     {
+        private List<ValueTuple<Type, Func<object>>> loadedCalculators = new List<ValueTuple<Type, Func<object>>>();
+        private ValueTuple<Type, Func<object>> defaultConstructor;
+
+        protected AbstractCalculatorFactory(A attribute)
+        {
+            InitializeInstances(attribute);
+        }
 
         protected static List<Type> LoadImplementations(AbstractCalculatorAttribute attr, Type assignabeType)
         {
@@ -75,6 +98,42 @@ namespace CoreLibrary.RoadSectionHandling
 
         }
 
-        abstract public List<Type> GetLoadedTypes();
+        public virtual List<Type> GetLoadedTypes()
+        {
+            return loadedCalculators.Select(_ => _.Item1).ToList();
+        }
+
+        public abstract ValueTuple<Type, Func<object>> GetDefaultInstance();
+
+        // Load instances of calculator based on attribute
+        // Prepare and store compiled lambda for later invocations
+        // Creating compiled lambda is quite slow, so only create once on startup
+        public virtual void InitializeInstances(A attribute)
+        {
+            List<Type> calculators = LoadImplementations(attribute, typeof(I));
+            foreach (Type calculator in calculators)
+            {
+                loadedCalculators.Add((calculator, CreateCreator(calculator)));
+            }
+
+            defaultConstructor = GetDefaultInstance();
+        }
+
+        // Create new implementation of compiled lambda
+        // If provided type is not found, use default implementation (to make sure, that application will still function with incorrect setup)
+        public virtual I GetResolverImplementation(string type)
+        {
+
+            ValueTuple<Type, Func<object>> foundType = loadedCalculators.Where(i => i.Item1.Name.Equals(type))
+                .FirstOrDefault();
+
+            if (foundType.Equals(default(ValueTuple<Type, Func<object>>)))
+            {
+                foundType = defaultConstructor;
+            }
+
+            return (I) foundType.Item2();
+
+        }
     }
 }

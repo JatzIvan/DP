@@ -10,6 +10,12 @@ namespace CoreLibrary.RoadSectionHandling.Model
 {
     public class RoadPointModel : IDatabaseModel<RoadPointModel>
     {
+
+        public string this[string propertyName]
+        {
+            get { return GetType().GetProperty(propertyName).GetValue(this, null)?.ToString() ?? ""; }
+        }
+
         public int Id { get; set; }
 
         [Column(TypeName = "jsonb")]
