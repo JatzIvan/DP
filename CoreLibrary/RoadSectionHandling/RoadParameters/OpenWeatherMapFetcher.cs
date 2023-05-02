@@ -18,7 +18,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
         public OpenWeatherMapFetcher() : base()
         {
 
-            this.APIKey = ApplicationConfigurationHandler.LoadVariable("OpenWeatherAPIKey");
+            this.APIKey = ApplicationConfigurationHandler.LoadVariable("OPEN_WEATHER_API_KEY");
 
         }
 
