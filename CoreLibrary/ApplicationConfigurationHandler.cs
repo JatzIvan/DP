@@ -52,7 +52,7 @@ namespace CoreLibrary
 
         public static string CurvetureCalcMethod { get; set; } = typeof(CircumcircleRoadCircleCurvesResolver).Name;
 
-        public static string MaxSpeedCalcMethod { get; set; } = typeof(SimpleSpeedCalculatorBasedOnCurvature).Name;
+        public static string MaxSpeedCalcMethod { get; set; } = typeof(SimpleMaxSpeedCalcBasedOnFriction).Name;
 
         public static string RoadStateFetcherImplementation { get; set; } = typeof(DummyRoadStateFetcher).Name;
 
@@ -171,10 +171,10 @@ namespace CoreLibrary
                 DigiMapHost = LoadVariable("DIGIMAP_HOST");
                 DigiMapPort = LoadVariable("DIGIMAP_PORT");
                 DigitalMapConnection = CreateDigiMapUrl();
-                Longitude1 = float.Parse(LoadVariable("RoadQueryLong1"), CultureInfo.InvariantCulture);
-                Latitude1 = float.Parse(LoadVariable("RoadQueryLat1"), CultureInfo.InvariantCulture);
-                Longitude2 = float.Parse(LoadVariable("RoadQueryLong2"), CultureInfo.InvariantCulture);
-                Latitude2 = float.Parse(LoadVariable("RoadQueryLat2"), CultureInfo.InvariantCulture);
+                Longitude1 = float.Parse(LoadVariable("RoadQueryLong1") ?? "0", CultureInfo.InvariantCulture);
+                Latitude1 = float.Parse(LoadVariable("RoadQueryLat1") ?? "0", CultureInfo.InvariantCulture);
+                Longitude2 = float.Parse(LoadVariable("RoadQueryLong2") ?? "0", CultureInfo.InvariantCulture);
+                Latitude2 = float.Parse(LoadVariable("RoadQueryLat2") ?? "0", CultureInfo.InvariantCulture);
                 CustomRoadParameters = LoadVariable("CustomRoadParameters");
                 TestRoadQuery =
                     (String.IsNullOrEmpty(CustomRoadParameters) ? "?" : $"?{CustomRoadParameters}&") +
@@ -182,9 +182,9 @@ namespace CoreLibrary
                     $"&lat1={ConfigurationManager.AppSettings.Get("RoadQueryLat1")}" +
                     $"&long2={ConfigurationManager.AppSettings.Get("RoadQueryLong2")}" +
                     $"&lat2={ConfigurationManager.AppSettings.Get("RoadQueryLat2")}";
-                DPTolerance = float.Parse(LoadVariable("LINE_SIMPLIFICATION_TOLERANCE"), CultureInfo.InvariantCulture);
-                CurvatureTreshold = float.Parse(LoadVariable("CURVATURE_TRESHOLD"), CultureInfo.InvariantCulture);
-                CarDistanceSkipTreshold = float.Parse(LoadVariable("CAR_DISTANCE_SKIP_TRESHOLD"), CultureInfo.InvariantCulture);
+                DPTolerance = float.Parse(LoadVariable("LINE_SIMPLIFICATION_TOLERANCE") ?? "0", CultureInfo.InvariantCulture);
+                CurvatureTreshold = float.Parse(LoadVariable("CURVATURE_TRESHOLD") ?? "0", CultureInfo.InvariantCulture);
+                CarDistanceSkipTreshold = float.Parse(LoadVariable("CAR_DISTANCE_SKIP_TRESHOLD") ?? "500", CultureInfo.InvariantCulture);
                 CurveCollisionCalculator = LoadVariable("CURVE_COLLISION_CALCULATOR");
                 StraightCollisionCalculator = LoadVariable("STRAIGHT_COLLISION_CALCULATOR");
                 //SimplificationMethod = (SimplMethods)Enum.Parse(typeof(SimplMethods), ConfigurationManager.AppSettings.Get("SimplificationMethod"));
