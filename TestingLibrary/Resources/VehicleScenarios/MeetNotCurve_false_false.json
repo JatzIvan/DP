@@ -1,0 +1,28 @@
+{
+  "Index": 10,
+  "Type": "update_vehicles",
+  "vehicles": [
+    {
+      "Id": 1,
+      "Type": "car",
+      "Speed": 10,
+      "Acceleration": 1,
+      "Heading": 132.28,
+      "Position": {
+        "Lat": 48.351976,
+        "Lon": 17.196710
+      }
+    },
+    {
+      "Id": 2,
+      "Type": "car",
+      "Speed": 8,
+      "Acceleration": 1,
+      "Heading": 288.33,
+      "Position": {
+        "Lat": 48.349712,
+        "Lon": 17.201482
+      }
+    }
+  ]
+}

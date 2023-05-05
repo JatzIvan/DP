@@ -51,7 +51,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
         }
 
 
-        public NotifyMessage CreateNotificationMessage(VehicleData host, VehicleData target)
+        public NotifyMessage CreateNotificationMessage(VehicleData host, VehicleData target, AbstractRoadModel collisionPoint, string roadAttr)
         {
             NotifyMessage msg = new NotifyMessage();
 
@@ -60,7 +60,33 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
             msg.Level = GetCollisionSeverity().Equals(CollisionSeverity.MEDIUM) ? NotificationLevel.warning : NotificationLevel.danger;
             msg.Content = new HeadCollisionContent(CalculateTTC(), target.Id);
 
+            if(collisionPoint != null)
+            {
+                if (IsMaxSpeedExceeded(host, msg, collisionPoint.MaxSpeed))
+                {
+                    IsVehicleAbleToBrake(host, roadAttr, msg);
+                }
+            }
+
+
             return msg;
+        }
+
+        public bool IsMaxSpeedExceeded(VehicleData vehicle, NotifyMessage msg, double maxAllowedSpeed)
+        {
+            if (vehicle.Speed > maxAllowedSpeed)
+            {
+                //Console.WriteLine("-----------------------------------------");
+                Console.WriteLine($"Vehicle {vehicle.Id} speed ({vehicle.Speed}) has exceeded the max possible speed ({maxAllowedSpeed}) to traverse curve");
+                //Console.WriteLine("-----------------------------------------");
+                msg.Level = NotificationLevel.danger;
+                //msg.Content.NotificationMessages.Push($"Vehicle speed ({vehicle.Speed}) has exceeded the max possible speed ({maxAllowedSpeed}) to traverse curve");
+                msg.Content.MaxSpeedExceededBy = vehicle.Speed - maxAllowedSpeed;
+
+                return true;
+            }
+
+            return false;
         }
 
         public bool IsVehicleAbleToBrake(VehicleData vehicle, string roadRef, NotifyMessage msg)
@@ -73,7 +99,6 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
             {
                 //Console.WriteLine("-----------------------------------------");
                 Console.WriteLine($"Vehicle {vehicle.Id} breaking distance ({breakingDistance}) was higher than distance to collision ({distanceToColl})");
-                //Console.WriteLine("Distance to coll " + distanceToColl + " - breaking distance " + breakingDistance);
                 //Console.WriteLine("-----------------------------------------");
                 //msg.Content.NotificationMessages.Push($"Vehicle breaking distance ({breakingDistance}) was higher than distance to collision ({distanceToColl})");
                 msg.Content.BrakingDistanceDiff = breakingDistance - distanceToColl;
