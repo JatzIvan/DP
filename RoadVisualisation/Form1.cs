@@ -4,10 +4,14 @@ using CoreLibrary.RoadSectionHandling;
 using CoreLibrary.RoadSectionHandling.Data;
 using CoreLibrary.RoadSectionHandling.Model;
 using CoreLibrary.RoadSectionHandling.RoadSimplificators;
+using GMap.NET;
+using GMap.NET.MapProviders;
+using GMap.NET.WindowsForms;
 using NetTopologySuite.Index.KdTree;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Globalization;
@@ -43,41 +47,11 @@ namespace RoadVisualisation
         private static long numberOfPoints = 0;
         private readonly double EarthRadius = MapParserUtils.rEarth;      //Earth Radius in Km
 
-        //## Now I can calculate the global X and Y for each reference point ##\\
-
-        // This function converts lat and lng coordinates to GLOBAL X and Y positions
-        private Tuple<double, double> latlngToGlobalXY(LocationPoint point)
-        {
-            //Calculates x based on cos of average of the latitudes
-            double x = EarthRadius * point.Longitude * Math.Cos((topPoint.Latitude + bottomPoint.Latitude) / 2);
-            //Calculates y based on latitude
-            double y = EarthRadius * point.Latitude;
-            return new Tuple<double, double>(x,y);
-        }
-
-        /*
-        * This gives me the X and Y in relation to map for the 2 reference points.
-        * Now we have the global AND screen areas and then we can relate both for the projection point.
-        */
-
-        // This function converts lat and lng coordinates to SCREEN X and Y positions
-        private Tuple<double, double> latlngToScreenXY(LocationPoint point, Tuple<double, double> screen)
-        {
-            //Calculate global X and Y for projection point
-            Tuple<double, double> pos = latlngToGlobalXY(point);
-            //Calculate the percentage of Global X position in relation to total global width
-            double perX = ((pos.Item1 - topPointXY.Item1) / (bottomPointXY.Item1 - topPointXY.Item1));
-            //Calculate the percentage of Global Y position in relation to total global height
-            double perY = ((pos.Item2 - topPointXY.Item2) / (bottomPointXY.Item2 - topPointXY.Item2));
-
-            //Returns the screen position based on reference points
-            
-            return new Tuple<double, double>(0 + (screen.Item1 - 0) * perX,
-                                      0 + (screen.Item2 - 0) * perY);
-        }
+        private static GMapOverlay polyOverlay;
 
         public Form1()
         {
+
             InitializeComponent();
             ApplicationConfigurationHandler.LoadConfiguration();
 
@@ -85,10 +59,15 @@ namespace RoadVisualisation
             bottomPoint = new LocationPoint(ApplicationConfigurationHandler.Longitude2, ApplicationConfigurationHandler.Latitude2);
 
             ApiHelper.InitializeClient();
-            topPointXY = latlngToGlobalXY(topPoint);
-            bottomPointXY = latlngToGlobalXY(bottomPoint);
             SimplificationMethod.DataSource = (SectionSimplificationFactory.GetInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
             CurvatureCalcMethod.DataSource = (RoadCurvitureCalculatorFactory.GetInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
+            polyOverlay = new GMapOverlay("polygons");
+            map.MapProvider = GMapProviders.OpenStreetMap;
+            map.Overlays.Add(polyOverlay);
+            map.Position = new GMap.NET.PointLatLng(48.138736, 17.099710);
+            map.MaxZoom = 100;
+            map.MinZoom = 5;
+            map.Zoom = 15;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -96,35 +75,59 @@ namespace RoadVisualisation
 
         }
 
-        private void AddPoint(LocationPoint point, double speed)
+        private void DrawLineMap(LocationPoint point1, LocationPoint point2, double radius, GMapOverlay polyOverlay)
         {
 
-            Tuple<double, double> pointLoc = latlngToScreenXY(point, new Tuple<double, double>(Canvas.Width, Canvas.Height));
-            //speedBasedOnPoint.Add(new Tuple<int, int>((int)pointLoc.Item1 - 5, (int)pointLoc.Item2 - 5), speed);
-            //g.DrawString(Math.Round(speed, 2) + "", new System.Drawing.Font("Arial", 10), new SolidBrush(Color.Black), (int)pointLoc.Item1 - 10, (int)pointLoc.Item2 - 10, new System.Drawing.StringFormat());
+            List<PointLatLng> points = new List<PointLatLng>();
+            points.Add(new PointLatLng(point1.Latitude, point1.Longitude));
+            points.Add(new PointLatLng(point2.Latitude, point2.Longitude));
 
-            //g.FillEllipse(new SolidBrush(Color.Black), (int)pointLoc.Item1 - 4, (int)pointLoc.Item2 - 4 , 4, 4);
-        }
-
-        private void DrawLine(LocationPoint point1, LocationPoint point2, double radius)
-        {
-            Tuple<double, double> pointLoc1 = latlngToScreenXY(point1, new Tuple<double, double>(Canvas.Width, Canvas.Height));
-            Tuple<double, double> pointLoc2 = latlngToScreenXY(point2, new Tuple<double, double>(Canvas.Width, Canvas.Height));
-
-            g.DrawLine(radius < float.Parse(CurveTolerance.Text, CultureInfo.InvariantCulture) ? Pens.Green : Pens.Red, new PointF((float)pointLoc1.Item1, (float)pointLoc1.Item2), new PointF((float)pointLoc2.Item1, (float)pointLoc2.Item2));
+            GMapPolygon polygon = new GMapPolygon(points, "mypolygon");
+            /*polygon.Fill = new SolidBrush(Color.FromArgb(50, Color.Red));*/
+            polygon.Stroke = radius < float.Parse(CurveTolerance.Text, CultureInfo.InvariantCulture) ? new Pen(Color.Green, 3) : new Pen(Color.Red, 3);
+            polyOverlay.Polygons.Add(polygon);
         }
 
         private async void button1_Click(object sender, EventArgs e)
         {
+
+
+            
+
+            double latitude1 = double.Parse(Longitude.Text.Split(",")[0], CultureInfo.InvariantCulture);
+            double longitude1 = double.Parse(Longitude.Text.Split(",")[1], CultureInfo.InvariantCulture);
+
+            double latitude2 = double.Parse(Latitude.Text.Split(",")[0], CultureInfo.InvariantCulture);
+            double longitude2 = double.Parse(Latitude.Text.Split(",")[1], CultureInfo.InvariantCulture);
+
+            ApplicationConfigurationHandler.Longitude1 = longitude1;
+            ApplicationConfigurationHandler.Latitude1 = latitude1;
+            ApplicationConfigurationHandler.Longitude2 = longitude2;
+            ApplicationConfigurationHandler.Latitude2 = latitude2;
+            ApplicationConfigurationHandler.CustomRoadParameters = "ref=" + Ref.Text;
+            ApplicationConfigurationHandler.TestRoadQuery = "?ref=" + Ref.Text + "&" +
+                    $"long1={longitude1.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)}" +
+                    $"&lat1={latitude1.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)}" +
+                    $"&long2={longitude2.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)}" +
+                    $"&lat2={latitude2.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)}";
+
+
+            RoadDataFetcher.ClearInstance();
+
+            topPoint = new LocationPoint(longitude1, latitude1);
+            bottomPoint = new LocationPoint(longitude2, latitude2);
+
+            map.Position = new GMap.NET.PointLatLng(latitude1, longitude1);
+
             tolerance = float.Parse(ToleranceValue.Text, CultureInfo.InvariantCulture);
             regionSizeVal = int.Parse(LangRange.Text, CultureInfo.InvariantCulture);
-            x_cent = Canvas.Width / 2;
-            y_cent = Canvas.Height / 2;
+            /*            x_cent = Canvas.Width / 2;
+                        y_cent = Canvas.Height / 2;*/
             numberOfPoints = 0;
-            Canvas.Refresh();
+            /*Canvas.Refresh();*/
 
             ApiHelper.InitializeClient();
-            RoadDataHandler roadHandler = new RoadDataHandler("503", "503");
+            RoadDataHandler roadHandler = new RoadDataHandler("503", Ref.Text);
             speedBasedOnPoint = new Dictionary<Tuple<int, int>, double>();
             string model = (string)SimplificationMethod.SelectedItem;
             string curv = (string)CurvatureCalcMethod.SelectedItem;
@@ -136,46 +139,30 @@ namespace RoadVisualisation
                 ApplicationConfigurationHandler.LangRegionSize = regionSizeVal;
                 //model = new LangConfig(tolerance, regionSizeVal);
             }
-            /*else
-            {
-                model = new DouglasPeuckerConfig(tolerance);
-            }*/
 
-            Task task = Task.Run(() => {
+            Task task = Task.Run(() =>
+            {
                 roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv));
-                }
+            }
             );
 
             await Task.WhenAll(task);
-            g = Canvas.CreateGraphics();
+            polyOverlay.Clear();
 
-            //PointF point1 = new PointF(200, 200);
-            //PointF point2 = PointF.Add(point1, new Size(20, 20));
-            //g.DrawLine(Pens.Black, point1, point2);
-
-            //List<AbstractRoadModel> heckingDict = roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv));
-            //List<LocationPoint> heckingList = roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv)).Keys.ToList();
-
-/*            foreach (KeyValuePair<LocationPoint, AbstractRoadModel> entry in roadHandler.GetParsedRoadData(new HandlerSetupConfig(model, curv)).Reverse())
-            {
-                AddPoint(entry.Key);
-                if(entry.Value.Previous != null)
-                {
-                    DrawLine(entry.Value.CurrentLocation, entry.Value.Previous.Point.CurrentLocation, 1/entry.Value.Previous.RadiusOfCurvature);
-                }
-            }*/
 
             foreach (AbstractRoadModel entry in roadHandler.GetParsedRoadDataList(new HandlerSetupConfig(model, curv)))
             {
                 numberOfPoints++;
-                AddPoint(entry.CurrentLocation, entry.MaxSpeed);
+                //AddPoint(entry.CurrentLocation, entry.MaxSpeed);
                 if (entry.Next != null)
                 {
-                    DrawLine(entry.CurrentLocation, entry.Next.Point.CurrentLocation, entry.Next.RadiusOfCurvature);
+                    DrawLineMap(entry.CurrentLocation, entry.Next.Point.CurrentLocation, entry.Next.RadiusOfCurvature, polyOverlay);
                 }
             }
             Console.WriteLine("HEREE");
             numOfPoints.Text = numberOfPoints + "";
+            
+            map.Zoom = 15;
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -203,7 +190,7 @@ namespace RoadVisualisation
 
         private void label1_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void label2_Click(object sender, EventArgs e)
@@ -218,6 +205,7 @@ namespace RoadVisualisation
 
         private void ToleranceValue_TextChanged(object sender, EventArgs e)
         {
+
 
         }
 
@@ -238,6 +226,26 @@ namespace RoadVisualisation
 
         private void Canvas_Paint(object sender, PaintEventArgs e)
         {
+        }
+
+        private void gMapControl1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click_1(object sender, EventArgs e)
+        {
+
+        }
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            map.Manager.CancelTileCaching();
         }
     }
 }
