@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ApiLibrary\ApiLibrary.csproj" />
-    <ProjectReference Include="..\DatabaseHandlerLibrary\DatabaseHandlerLibrary.csproj" />
     <ProjectReference Include="..\WebSocketLibrary\WebSocketLibrary.csproj" />
   </ItemGroup>
 

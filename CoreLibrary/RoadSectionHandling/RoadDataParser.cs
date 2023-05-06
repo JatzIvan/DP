@@ -105,13 +105,14 @@ namespace CoreLibrary.RoadSectionHandling
             //modelDict.Remove(new Tuple<LocationPoint, LocationPoint>(RawModel[0].Way.Points[0], RawModel[0].Way.Points[RawModel[0].Way.Points.Count - 1]));
             modelDict.Remove(new Tuple<LocationPoint, LocationPoint>(RawModel.First().Way.Points.First(), RawModel.First().Way.Points.Last()));
 
-
             while (true)
             {
 
-                Console.WriteLine(modelDict.Count);
+                int countBef = modelDict.Count;
 
-                if(modelDict.Count == 0)
+                //Console.WriteLine(modelDict.Count);
+
+                if (modelDict.Count == 0)
                 {
                     break;
                 }
@@ -174,6 +175,14 @@ namespace CoreLibrary.RoadSectionHandling
 
 
                 }
+
+                if(modelDict.Count == countBef)
+                {
+                    Console.WriteLine("Unable to connect road segmets because road segments are not connected (check if parts of the road are not cut of)");
+                    Console.WriteLine("Returning parts that were able to be connected together (Result might be skewed)");
+                    break;
+                }
+
             }
 
             //Dictionary<LocationPoint, AbstractRoadModel> joinedDict = CreateRoadCurvitureModelDictionary(sortedByRoads);

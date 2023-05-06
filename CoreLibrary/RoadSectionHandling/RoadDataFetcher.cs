@@ -37,6 +37,13 @@ namespace CoreLibrary.RoadSectionHandling
 
         }
 
+        public static void ClearInstance()
+        {
+
+            INSTANCE = null;
+
+        }
+
         /**
          * TODO: Do more generic implementation
          */
