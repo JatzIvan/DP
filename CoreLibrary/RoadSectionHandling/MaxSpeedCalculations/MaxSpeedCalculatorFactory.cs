@@ -51,7 +51,7 @@ namespace CoreLibrary.RoadSectionHandling.MaxSpeedCalculators
 
         public override (Type, Func<object>) GetDefaultInstance()
         {
-            return (typeof(SimpleSpeedCalculatorBasedOnCurvature), CreateCreator(typeof(SimpleSpeedCalculatorBasedOnCurvature)));
+            return (typeof(SimpleMaxSpeedCalcBasedOnFriction), CreateCreator(typeof(SimpleMaxSpeedCalcBasedOnFriction)));
         }
     }
 }
