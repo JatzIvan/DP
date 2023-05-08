@@ -123,7 +123,7 @@ namespace TestingLibrary
             ApplicationConfigurationHandler.CurvetureCalcMethod = typeof(CircumcircleRoadCircleCurvesResolver).Name;
             ApplicationConfigurationHandler.SimplificationMethod = typeof(DouglasPeuckerRoadSectionSimplification).Name;
             ApplicationConfigurationHandler.DPTolerance = 0.3f;
-            ApplicationConfigurationHandler.CurvatureTreshold = 0.008f;
+            ApplicationConfigurationHandler.CurvatureTreshold = 0.006f;
             ApplicationConfigurationHandler.CarDistanceSkipTreshold = 500;
 
             RoadDataHandler handler = new RoadDataHandler("503", "503");
