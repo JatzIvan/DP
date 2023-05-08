@@ -261,22 +261,37 @@ namespace WebSocketLibrary
         public override void CloseConnection()
         {
 
-            registeredMessageHandlers.ForEach(handler =>
+            SendCloseMessage();
+/*            registeredMessageHandlers.ForEach(handler =>
             {
                 handler.OnCompleted();
             });
             registeredMessageHandlers.Clear();
 
-            SendCloseMessage();
             //Client.Client.Shutdown(SocketShutdown.Both);
             isAlive = false;
             Client.Close();
             // Close thread for sending messages
             Console.WriteLine("Closing thread");
             sendingThread.Interrupt();
-            keepAliveThread.Interrupt();
+            keepAliveThread.Interrupt();*/
 
-        }                                                      
+        }
+
+        public override void ConnectionCleanup()
+        {
+            base.ConnectionCleanup();
+            registeredMessageHandlers.ForEach(handler =>
+            {
+                handler.OnCompleted();
+            });
+            registeredMessageHandlers.Clear();
+            Client.Close();
+            // Close thread for sending messages
+            Console.WriteLine("Closing thread");
+            sendingThread.Interrupt();
+            keepAliveThread.Interrupt();
+        }
 
         // Inform Other side that connection is closing
         private void SendCloseMessage()
@@ -285,7 +300,7 @@ namespace WebSocketLibrary
 
             //Byte[] sendBytes = ConvertMesssageToBytes(msg);
 
-            SendMessage(msg);
+            SendMessageWithAck(msg);
         }
 
         public void HandleHandShake()
@@ -352,6 +367,7 @@ namespace WebSocketLibrary
                         }
                         else
                         {
+                            Console.WriteLine("Sending Keepalive message");
                             this.SendMessageWithAck(msg);
                         }
                     }

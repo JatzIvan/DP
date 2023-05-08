@@ -36,9 +36,9 @@ namespace WebSocketLibrary
         public KeepAliveMessage GetKeepAliveMessage()
         {
 
-           // Console.WriteLine("Num of messages " + messageQueue.Count);
-            
-            KeepAliveMessage msg = (KeepAliveMessage) messageQueue.Values.FirstOrDefault(a => typeof(KeepAliveMessage) == a.GetType());
+            // Console.WriteLine("Num of messages " + messageQueue.Count);
+
+            KeepAliveMessage msg = (KeepAliveMessage)messageQueue.Values.FirstOrDefault(a => typeof(KeepAliveMessage) == a.GetType());
 
             if (msg == null)
             {
@@ -58,7 +58,7 @@ namespace WebSocketLibrary
         /**
          * Method returns all messages that need to be (and were not) acknowledged
          * This method will skip KeepAlive And ConnectMessages.
-         */ 
+         */
         public List<AbstractMessage> GetAllUnconfirmedMessages()
         {
             List<AbstractMessage> msg = messageQueue.Values.Where(a => typeof(KeepAliveMessage) != a.GetType()
@@ -129,7 +129,7 @@ namespace WebSocketLibrary
 
             AbstractMessage parsedObject = DeserializeObject<AbstractMessage>(receiveString);
 
-            if(parsedObject == null)
+            if (parsedObject == null)
             {
                 return;
             }
@@ -158,8 +158,10 @@ namespace WebSocketLibrary
                 return;
             }
 
+            Console.WriteLine("Received ack");
+
             AbstractMessage queueMessage = messageQueue[msg.AcknowledgingIndex];
-            messageQueue.Remove(msg.AcknowledgingIndex); 
+            messageQueue.Remove(msg.AcknowledgingIndex);
 
             if (queueMessage.GetType().Equals(typeof(ConnectMessage)))
             {
@@ -169,7 +171,7 @@ namespace WebSocketLibrary
 
             //Handle Custom Logic if necessary
             HandleCustomAckMessageLogic(queueMessage);
-            
+
         }
 
         protected abstract void HandleCustomAckMessageLogic(AbstractMessage msg);
@@ -185,7 +187,7 @@ namespace WebSocketLibrary
             // Try to establish connection again
             Task.Run(this.EstablishConnection);
         }
-        
+
         public int GetMessageIndex()
         {
             lock (this)
@@ -218,7 +220,7 @@ namespace WebSocketLibrary
 
             return true;
 
-        } 
+        }
 
         public async Task<bool> EstablishConnection()
         {
@@ -250,5 +252,10 @@ namespace WebSocketLibrary
         }
 
         public abstract void CloseConnection();
+
+        public virtual void ConnectionCleanup()
+        {
+            isAlive = false;
+        }
     }
 }

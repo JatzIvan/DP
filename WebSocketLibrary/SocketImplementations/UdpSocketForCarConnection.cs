@@ -98,6 +98,13 @@ namespace WebSocketLibrary
                 Subscribed = true;
                 LastReceivedMessageTime = DateTime.Now;
             }
+
+            if (msg.GetType().Equals(typeof(UnsubscribeMessage)))
+            {
+                Console.WriteLine("Socket " + Id + " was unsubscribed");
+                ConnectionCleanup();
+            }
+
         }
 
         public override void DropConnection()
