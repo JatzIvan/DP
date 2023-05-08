@@ -95,7 +95,7 @@ namespace CollisionDetector
                             socket.SendMessage(msgVeh2);
 
                         }
-                        Console.WriteLine("--------------------End of collision warning handling------------------------\n\n");
+                        Console.WriteLine("--------------------End of collision warning handling------------------------");
                     }
                 });
             }
