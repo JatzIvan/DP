@@ -16,7 +16,6 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 
         public CircumcircleRoadCircleCurvesResolver()
         {
-            /*this.ConnectedWays = connectedWays;*/
         }
 
         public List<AbstractRoadModel> CalculateCurvesForWays(List<AbstractRoadModel> connectedWays)
@@ -49,6 +48,12 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
                 current = current.Next.Point;
 
             }
+
+            // Approximate edge values
+            current = GetModel(true);
+            current.RadiusOfCircle = current.Next != null ? current.Next.Point.RadiusOfCircle: 0;
+            current = GetModel(false);
+            current.RadiusOfCircle = current.Previous != null ? current.Previous.Point.RadiusOfCircle : 0;
 
             // Calculate curviture 
             current = GetModel(true);
