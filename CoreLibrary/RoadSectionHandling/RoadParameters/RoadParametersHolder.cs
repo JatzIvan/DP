@@ -59,7 +59,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
                 if(output == null)
                 {
                     // If fetch fails (for some reason) and we have old value, use the old value
-                    return parameters.ContainsKey(attr) ? parameters[attr] : null;
+                    return parameters.ContainsKey(attr) ? parameters[attr] : new RoadParameters();
                 }
 
                 if (parameters.ContainsKey(attr))

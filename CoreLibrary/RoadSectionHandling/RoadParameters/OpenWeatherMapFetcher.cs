@@ -27,6 +27,12 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
             string url = GenerateUrl(point);
             WeatherAppDataWrapper fetchedData = APIHandler.Get<WeatherAppDataWrapper>(url);
 
+            if(fetchedData == null)
+            {
+                Console.WriteLine("Could not fetch OpenWeatherMap data, returning default");
+                return new RoadParameters();
+            }
+
             RoadParameters output = new RoadParameters();
             output.Temperature = fetchedData.Main.Temp;
             output.Humidity = fetchedData.Main.Humidity;

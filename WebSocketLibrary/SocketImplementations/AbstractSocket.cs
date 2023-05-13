@@ -62,7 +62,7 @@ namespace WebSocketLibrary
         public List<AbstractMessage> GetAllUnconfirmedMessages()
         {
             List<AbstractMessage> msg = messageQueue.Values.Where(a => typeof(KeepAliveMessage) != a.GetType()
-            && typeof(ConnectMessage) != a.GetType()).ToList();
+            && typeof(ConnectMessage) != a.GetType() && typeof(SubscribeMessage) != a.GetType()).ToList();
 
             return msg;
 
