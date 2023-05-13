@@ -219,7 +219,7 @@ namespace RoadVisualisation
             // numOfPoints
             // 
             numOfPoints.Enabled = false;
-            numOfPoints.Location = new Point(709, 54);
+            numOfPoints.Location = new Point(1000, 54);
             numOfPoints.Name = "numOfPoints";
             numOfPoints.Size = new Size(79, 23);
             numOfPoints.TabIndex = 10;
@@ -257,8 +257,8 @@ namespace RoadVisualisation
             // Canvas
             // 
             Canvas.BackColor = Color.White;
-            Canvas.Controls.Add(map);
             Canvas.Controls.Add(numOfPoints);
+            Canvas.Controls.Add(map);
             Canvas.Dock = DockStyle.Fill;
             Canvas.Location = new Point(0, 0);
             Canvas.Name = "Canvas";

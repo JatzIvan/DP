@@ -9,6 +9,9 @@ using System.Text;
 namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 {
     [CurvatureResolver]
+    /**
+     * When using this implementation, curvature is quite big (for example curves are when value is larger than 700)
+     */
     public class OsculatingCircleCurvesResolver : ICurvesResolver
     {
         private List<AbstractRoadModel> ConnectedWays { get; set; }

@@ -25,6 +25,10 @@ namespace ApiLibrary.Api
 
         private HttpClient currentClient = ApiHelper.ApiClient;
 
+        /**
+         * Method makes POST request with <typeparam name="TIn"> Body </typeparam> and maps the result to specified object <typeparam name="T">Template</typeparam>
+         */
+
         public async Task<TOut> PostAsync<TIn, TOut>(string endpoint, TIn body)
         {
             try
@@ -50,6 +54,11 @@ namespace ApiLibrary.Api
             return default;
         }
 
+        /**
+         * Method makes GET request and maps the result to specified object <typeparam name="T">Template</typeparam>
+         * Wait for fetch to complete
+         */
+
         public T Get<T>(string endpoint)
         {
             Task <T> task = GetAsync<T>(endpoint);
@@ -63,6 +72,10 @@ namespace ApiLibrary.Api
             }
             return default;
         }
+
+        /**
+         * Method makes GET request and maps the result to specified object <typeparam name="T">Template</typeparam>
+         */
 
         public async Task<T> GetAsync<T>(string endpoint)
         {

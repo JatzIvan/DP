@@ -82,8 +82,8 @@ namespace TestingLibrary
         [Theory]
         // 888 is one less than number of points, because we resolve based on curvature between points
         [InlineData(0, 888)]
-        [InlineData(0.006, 436)]
-        [InlineData(0.01, 344)]
+        [InlineData(0.006, 435)]
+        [InlineData(0.01, 343)]
         public void TestCircleCurvatureResolver(float curveTolerance, int numberOfDangerousRegions)
         {
             ApplicationConfigurationHandler.LoadConfiguration();

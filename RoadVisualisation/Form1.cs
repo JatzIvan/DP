@@ -92,7 +92,7 @@ namespace RoadVisualisation
         {
 
 
-            
+
 
             double latitude1 = double.Parse(Longitude.Text.Split(",")[0], CultureInfo.InvariantCulture);
             double longitude1 = double.Parse(Longitude.Text.Split(",")[1], CultureInfo.InvariantCulture);
@@ -161,7 +161,7 @@ namespace RoadVisualisation
             }
             Console.WriteLine("HEREE");
             numOfPoints.Text = numberOfPoints + "";
-            
+
             map.Zoom = 15;
         }
 

@@ -124,7 +124,7 @@ namespace TestingLibrary
             ApplicationConfigurationHandler.SimplificationMethod = typeof(DouglasPeuckerRoadSectionSimplification).Name;
             ApplicationConfigurationHandler.DPTolerance = 0.3f;
             ApplicationConfigurationHandler.CurvatureTreshold = 0.006f;
-            ApplicationConfigurationHandler.CarDistanceSkipTreshold = 500;
+            ApplicationConfigurationHandler.CarDistanceSkipTreshold = 300;
 
             RoadDataHandler handler = new RoadDataHandler("503", "503");
             handler.roadDataFether = roadDataFetcher.Object;
