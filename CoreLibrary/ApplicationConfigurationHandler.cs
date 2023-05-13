@@ -203,7 +203,7 @@ namespace CoreLibrary
                 {
                     RoadGroupByAttribute = "Ref";
                 }
-                MapDataOrigin = LoadVariable("MAP_DATA_ORIGIN");
+                MapDataOrigin = LoadVariable("MAP_DATA_ORIGIN") ?? "remote";  
                 InitConstructors();
             }
             catch (Exception e)
