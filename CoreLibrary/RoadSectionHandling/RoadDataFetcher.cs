@@ -1,7 +1,9 @@
 ﻿using ApiLibrary.Api;
 using CoreLibrary.RoadSectionHandling.Model;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -50,8 +52,20 @@ namespace CoreLibrary.RoadSectionHandling
         public virtual List<RoadPointModel> GetRoadFromAPI()
         {
 
-            List<RoadPointModel> output = Handler.Get<List<RoadPointModel>>(
+            List<RoadPointModel> output = null;
+
+            if (ApplicationConfigurationHandler.MapDataOrigin.Equals("local"))
+            {
+                Console.WriteLine("Loading road data from local file");
+                string jsonString = File.ReadAllText(ApplicationConfigurationHandler.LoadVariable("LOCAL_DATA_PATH"));
+                output = JsonConvert.DeserializeObject<List<RoadPointModel>>(jsonString)!;
+            }
+            else
+            {
+                Console.WriteLine("Loading road data from API");
+                output = Handler.Get<List<RoadPointModel>>(
                 ApplicationConfigurationHandler.DigitalMapConnection + "/roads/" + ApplicationConfigurationHandler.TestRoadQuery);
+            }
 
             // When no road data could be fetched, repeat 3 times and then default with empty list
             // TODO: Implement repeat

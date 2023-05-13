@@ -72,6 +72,8 @@ namespace CoreLibrary
 
         public static float IntegrationModuleInterval { get; set; }
 
+        public static string MapDataOrigin { get; set; }
+
         /*public static AbstractSimplificationModel GetSimplificationModelFromConfiguration()
         {
 
@@ -201,6 +203,7 @@ namespace CoreLibrary
                 {
                     RoadGroupByAttribute = "Ref";
                 }
+                MapDataOrigin = LoadVariable("MAP_DATA_ORIGIN");
                 InitConstructors();
             }
             catch (Exception e)
