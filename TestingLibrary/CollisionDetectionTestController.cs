@@ -125,6 +125,7 @@ namespace TestingLibrary
             ApplicationConfigurationHandler.DPTolerance = 0.3f;
             ApplicationConfigurationHandler.CurvatureTreshold = 0.006f;
             ApplicationConfigurationHandler.CarDistanceSkipTreshold = 300;
+            ApplicationConfigurationHandler.MapDataOrigin = "test";
 
             RoadDataHandler handler = new RoadDataHandler("503", "503");
             handler.roadDataFether = roadDataFetcher.Object;

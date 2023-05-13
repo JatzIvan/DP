@@ -27,6 +27,7 @@ namespace TestingLibrary
         {
             ApplicationConfigurationHandler.DPTolerance = 0;
             ApplicationConfigurationHandler.SimplificationMethod = typeof(DouglasPeuckerRoadSectionSimplification).Name;
+            ApplicationConfigurationHandler.MapDataOrigin = "test";
             RoadDataHandler handler = new RoadDataHandler("503", "503");
             handler.roadDataFether = roadDataFetcher.Object;
 
@@ -46,6 +47,7 @@ namespace TestingLibrary
             ApplicationConfigurationHandler.LoadConfiguration();
             ApplicationConfigurationHandler.SimplificationMethod = typeof(DouglasPeuckerRoadSectionSimplification).Name;
             ApplicationConfigurationHandler.DPTolerance = simplificationTolerance;
+            ApplicationConfigurationHandler.MapDataOrigin = "test";
 
             RoadDataHandler handler = new RoadDataHandler("503", "503");
             handler.roadDataFether = roadDataFetcher.Object;
@@ -67,6 +69,7 @@ namespace TestingLibrary
             ApplicationConfigurationHandler.SimplificationMethod = typeof(LangRoadSectionSimplification).Name;
             ApplicationConfigurationHandler.DPTolerance = simplificationTolerance;
             ApplicationConfigurationHandler.LangRegionSize = regionSize;
+            ApplicationConfigurationHandler.MapDataOrigin = "test";
 
             RoadDataHandler handler = new RoadDataHandler("503", "503");
             handler.roadDataFether = roadDataFetcher.Object;
@@ -90,6 +93,7 @@ namespace TestingLibrary
             ApplicationConfigurationHandler.DPTolerance = 0;
             ApplicationConfigurationHandler.SimplificationMethod = typeof(DouglasPeuckerRoadSectionSimplification).Name;
             ApplicationConfigurationHandler.CurvetureCalcMethod = typeof(CircumcircleRoadCircleCurvesResolver).Name;
+            ApplicationConfigurationHandler.MapDataOrigin = "test";
 
             RoadDataHandler handler = new RoadDataHandler("503", "503");
             handler.roadDataFether = roadDataFetcher.Object;
