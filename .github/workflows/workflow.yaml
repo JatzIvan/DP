@@ -38,7 +38,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build the Docker image
-        run: docker build . --file ./CollisionDetector/Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/trafic-dt-head-collision-handler
+        run: docker build . --file ./CollisionDetector/Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/traffic-dt-head-collision-handler
 
       - name: Docker Push
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/trafic-dt-head-collision-handler
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/traffic-dt-head-collision-handler
