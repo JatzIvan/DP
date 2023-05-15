@@ -16,6 +16,7 @@ using WebSocketLibrary.Models;
 using WebSocketLibrary;
 using System.Runtime.InteropServices;
 using System.Collections;
+using NetTopologySuite.Index.KdTree;
 
 namespace TestingLibrary
 {
@@ -133,7 +134,7 @@ namespace TestingLibrary
 
             public CustomCollisionDataHandler(RoadDataHandler roadHandler) : base(roadHandler.GetParsedRoadData())
             {
-                roadHandler.GatherCurvaturesBetweenVehicles();
+               // roadHandler.GatherCurvaturesBetweenVehicles();
                 this.dataStorage = roadHandler;
             }
 
@@ -159,7 +160,15 @@ namespace TestingLibrary
                 if (vehicles.Count >= 2)
                 {
                     Stopwatch sw = Stopwatch.StartNew();
-                    IEnumerable<IEnumerable<VehicleData>> pairsToCalc = CreateVehiclePairs(vehicles);
+
+                    List<Tuple<VehicleData, AbstractRoadModel>> mappedVehicles = vehicles
+                    .Select(veh => (veh, MapParserUtils.ConvertGPStoCartsian(new LocationPoint(veh.Position.Lon, veh.Position.Lat))))
+                    .Select(convertedVehicle => new Tuple<VehicleData, AbstractRoadModel>(
+                        convertedVehicle.veh, currectRoadModel.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle.Item2.Item1, convertedVehicle.Item2.Item2, convertedVehicle.Item2.Item3)).Data
+                    )).ToList();
+
+                    IEnumerable<IEnumerable<Tuple<VehicleData, AbstractRoadModel>>> pairsToCalc = CreateVehiclePairs(mappedVehicles);
+
                     Console.WriteLine("Created all pairs in " + sw.ElapsedMilliseconds);
                     // Try threading or something, right now I need to ensure that this concept can work
                    // foreach(var pair in pairsToCalc)

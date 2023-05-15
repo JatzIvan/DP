@@ -47,7 +47,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
 
         public override (Type, Func<object>) GetDefaultInstance()
         {
-            return (typeof(SimpleStraightRoadCurvatureCalculator), CreateCreator(typeof(SimpleStraightRoadCurvatureCalculator)));
+            return (typeof(SimpleStraightRoadCollisionCalculator), CreateCreator(typeof(SimpleStraightRoadCollisionCalculator)));
         }
 
         // Choose from list by config value or else return Dummy implementation

@@ -15,6 +15,7 @@ using CoreLibrary;
 using System.Reflection;
 using Xunit;
 using System.Diagnostics;
+using NetTopologySuite.Index.KdTree;
 
 namespace TestingLibrary
 {
@@ -62,7 +63,7 @@ namespace TestingLibrary
 
             public TestCollisionDetector(RoadDataHandler roadHandler, bool collisionOccured, bool speedExceeded) : base(roadHandler.GetParsedRoadData())
             {
-                roadHandler.GatherCurvaturesBetweenVehicles();
+                //roadHandler.GatherCurvaturesBetweenVehicles();
                 this.dataStorage = roadHandler;
                 this.collisionOccured = collisionOccured;
                 this.speedExceeded = speedExceeded;
@@ -75,7 +76,14 @@ namespace TestingLibrary
                 //Console.WriteLine("Num of vehicles recieved " + vehicles.Count);
                 if (vehicles.Count >= 2)
                 {
-                    IEnumerable<IEnumerable<VehicleData>> pairsToCalc = CreateVehiclePairs(vehicles);
+
+                    List<Tuple<VehicleData, AbstractRoadModel>> mappedVehicles = vehicles
+                    .Select(veh => (veh, MapParserUtils.ConvertGPStoCartsian(new LocationPoint(veh.Position.Lon, veh.Position.Lat))))
+                    .Select(convertedVehicle => new Tuple<VehicleData, AbstractRoadModel>(
+                        convertedVehicle.veh, currectRoadModel.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle.Item2.Item1, convertedVehicle.Item2.Item2, convertedVehicle.Item2.Item3)).Data
+                    )).ToList();
+
+                    IEnumerable<IEnumerable<Tuple<VehicleData, AbstractRoadModel>>> pairsToCalc = CreateVehiclePairs(mappedVehicles);
 
                     // Try threading or something, right now I need to ensure that this concept can work
                     foreach (var pair in pairsToCalc)
@@ -87,11 +95,11 @@ namespace TestingLibrary
 
                             if (calcMethod.CollisionOccured())
                             {
-                                messages.Add(calcMethod.CreateNotificationMessage(pair.ElementAt(0), pair.ElementAt(1), collisionPoint, dataStorage.SectionRef));
-                                messages.Add(calcMethod.CreateNotificationMessage(pair.ElementAt(1), pair.ElementAt(0), collisionPoint, dataStorage.SectionRef));
+                                messages.Add(calcMethod.CreateNotificationMessage(pair.ElementAt(0).Item1, pair.ElementAt(1).Item1, collisionPoint, dataStorage.SectionRef));
+                                messages.Add(calcMethod.CreateNotificationMessage(pair.ElementAt(1).Item1, pair.ElementAt(0).Item1, collisionPoint, dataStorage.SectionRef));
                                 
                                 Xunit.Assert.Equal(collisionOccured, calcMethod.CollisionOccured());
-                                Xunit.Assert.Equal(pair.ElementAt(0).Speed > collisionPoint.MaxSpeed || pair.ElementAt(1).Speed > collisionPoint.MaxSpeed, speedExceeded);
+                                Xunit.Assert.Equal(pair.ElementAt(0).Item1.Speed > collisionPoint.MaxSpeed || pair.ElementAt(1).Item1.Speed > collisionPoint.MaxSpeed, speedExceeded);
 
                             }
 

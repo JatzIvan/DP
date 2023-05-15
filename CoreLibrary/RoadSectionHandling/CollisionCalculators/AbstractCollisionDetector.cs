@@ -81,17 +81,23 @@ namespace WebSocketLibrary
          * If distance between cars is greater than {constant} in config, do not calculate collision to save time
          */
         // TODO: discuss this. This can cause much slowdown (probably less that doing all collision calculations). Find a better solution (if doable)
-        private bool SkipCalculations(VehicleData vehicle1, VehicleData vehicle2)
+        private bool SkipCalculations(Tuple<VehicleData, AbstractRoadModel> vehicle1Tuple, Tuple<VehicleData, AbstractRoadModel> vehicle2Tuple)
         {
 
-            (double, double, double) convertedVehicle1 = MapParserUtils.ConvertGPStoCartsian(
-                new LocationPoint(vehicle1.Position.Lon, vehicle1.Position.Lat));
-            (double, double, double) convertedVehicle2 = MapParserUtils.ConvertGPStoCartsian(
-                new LocationPoint(vehicle2.Position.Lon, vehicle2.Position.Lat));
+            /*            (double, double, double) convertedVehicle1 = MapParserUtils.ConvertGPStoCartsian(
+                            new LocationPoint(vehicle1.Position.Lon, vehicle1.Position.Lat));
+                        (double, double, double) convertedVehicle2 = MapParserUtils.ConvertGPStoCartsian(
+                            new LocationPoint(vehicle2.Position.Lon, vehicle2.Position.Lat));*/
 
-            AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle1.Item1, convertedVehicle1.Item2, convertedVehicle1.Item3)).Data;
-            AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle2.Item1, convertedVehicle2.Item2, convertedVehicle2.Item3)).Data;
+            /* AbstractRoadModel v1Point = currectRoadModel.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle1.Item1, convertedVehicle1.Item2, convertedVehicle1.Item3)).Data;
+             AbstractRoadModel v2Point = currectRoadModel.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle2.Item1, convertedVehicle2.Item2, convertedVehicle2.Item3)).Data;
+ */
 
+            AbstractRoadModel v1Point = vehicle1Tuple.Item2;
+            AbstractRoadModel v2Point = vehicle2Tuple.Item2;
+
+            VehicleData vehicle1 = vehicle1Tuple.Item1;
+            VehicleData vehicle2 = vehicle2Tuple.Item1;
 
             // Calculate only if they go against each other
             if (DetermineDirection(vehicle1.Heading, v1Point) == DetermineDirection(vehicle2.Heading, v2Point))
@@ -198,6 +204,15 @@ namespace WebSocketLibrary
 
         }
 
+        /**
+         * Simple method pairs cars with eachother for later
+         */
+        public IEnumerable<IEnumerable<Tuple<VehicleData, AbstractRoadModel>>> CreateVehiclePairs(List<Tuple<VehicleData, AbstractRoadModel>> vehicles)
+        {
+            return GetPermutations(vehicles, 2);
+
+        }
+
         // https://stackoverflow.com/questions/12249051/unique-combinations-of-list
         public static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> items, int count)
         {
@@ -220,7 +235,7 @@ namespace WebSocketLibrary
          * Method determines which type of calculator to use
          * Application is able to distinguish between straight and curve but right now we only care about curves
          */
-        public ICollisionCalculatorImplementation ResolveCollisionCalculatorBasedOnCurvature(VehicleData vehicle1, VehicleData vehicle2)
+        public ICollisionCalculatorImplementation ResolveCollisionCalculatorBasedOnCurvature(Tuple<VehicleData, AbstractRoadModel> vehicle1, Tuple<VehicleData, AbstractRoadModel> vehicle2)
         {
 
             // Now check if they are not too far away

@@ -21,7 +21,7 @@ namespace CollisionDetector
 
         public CustomCollisionDataHandler(RoadDataHandler roadHandler) : base(roadHandler.GetParsedRoadData())
         {
-            roadHandler.GatherCurvaturesBetweenVehicles();
+            //roadHandler.GatherCurvaturesBetweenVehicles();
             this.dataStorage = roadHandler;
         }
 
@@ -49,7 +49,13 @@ namespace CollisionDetector
             List<VehicleData> vehicles = data.Data.Vehicles;
             if (vehicles.Count >= 2)
             {
-                IEnumerable<IEnumerable<VehicleData>> pairsToCalc = CreateVehiclePairs(vehicles);
+                List<Tuple<VehicleData, AbstractRoadModel>> mappedVehicles = vehicles
+                    .Select(veh => ( veh, MapParserUtils.ConvertGPStoCartsian(new LocationPoint(veh.Position.Lon, veh.Position.Lat)) ) )
+                    .Select(convertedVehicle => new Tuple<VehicleData, AbstractRoadModel>(
+                        convertedVehicle.veh, currectRoadModel.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle.Item2.Item1, convertedVehicle.Item2.Item2, convertedVehicle.Item2.Item3)).Data
+                    )).ToList();
+
+                IEnumerable<IEnumerable<Tuple<VehicleData, AbstractRoadModel>>> pairsToCalc = CreateVehiclePairs(mappedVehicles);
                 ParallelOptions options = new ParallelOptions
                                 {
                                     MaxDegreeOfParallelism = ApplicationConfigurationHandler.MaxParallelism is null ? -1 : int.Parse(ApplicationConfigurationHandler.MaxParallelism)
@@ -59,6 +65,7 @@ namespace CollisionDetector
 
                 Parallel.ForEach(pairsToCalc, options, pair =>
                 {
+
                     ICollisionCalculatorImplementation calcMethod = ResolveCollisionCalculatorBasedOnCurvature(pair.ElementAt(0), pair.ElementAt(1));
                     if (calcMethod != null)
                     {
@@ -68,8 +75,8 @@ namespace CollisionDetector
                         if (calcMethod.CollisionOccured())
                         {
 
-                            NotifyMessage msgVeh1 = calcMethod.CreateNotificationMessage(pair.ElementAt(0), pair.ElementAt(1), collisionPoint, dataStorage.SectionRef);
-                            NotifyMessage msgVeh2 = calcMethod.CreateNotificationMessage(pair.ElementAt(1), pair.ElementAt(0), collisionPoint, dataStorage.SectionRef);
+                            NotifyMessage msgVeh1 = calcMethod.CreateNotificationMessage(pair.ElementAt(0).Item1, pair.ElementAt(1).Item1, collisionPoint, dataStorage.SectionRef);
+                            NotifyMessage msgVeh2 = calcMethod.CreateNotificationMessage(pair.ElementAt(1).Item1, pair.ElementAt(0).Item1, collisionPoint, dataStorage.SectionRef);
 
                             // If collision occured, check if one or both cars go above speed limit
 /*                            if (collisionPoint != null)

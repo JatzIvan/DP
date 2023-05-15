@@ -9,11 +9,8 @@ using WebSocketLibrary.Models;
 namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculators
 {
     [CollisionType(CollisionTypeEnum.STRAIGHT)]
-    class SimpleTTCCalculator : ICollisionCalculatorImplementation
+    class SimpleStraightRoadCollisionCalculator : ICollisionCalculatorImplementation
     {
-
-        // Radius of Earth (in m)
-        private float R = 6378137;
 
         private bool CollisionWillHappen = false;
         private double TTC;
@@ -37,26 +34,12 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
         // Longitude X
         // Latitude Y
         // https://www.movable-type.co.uk/scripts/latlong.html
-        public AbstractRoadModel PerformCollisionCalculations(VehicleData vehicle1, VehicleData vehicle2, KdTree<AbstractRoadModel> currectRoadModel)
+        public AbstractRoadModel PerformCollisionCalculations(Tuple<VehicleData, AbstractRoadModel> vehicle1Tuple, Tuple<VehicleData, AbstractRoadModel> vehicle2Tuple,
+            KdTree<AbstractRoadModel> currectRoadModel)
         {
 
-            //double d = Math.Sqrt(Math.Pow((vehicle1.Position.Lon - vehicle2.Position.Lon), 2) + Math.Pow(vehicle1.Position.Lat - vehicle2.Position.Lat, 2));
-
-            /*double d = MapParserUtils.CalculateDistanceBetweenPoints(new LocationPoint(vehicle1.Position.Lon, vehicle1.Position.Lat), new LocationPoint(vehicle2.Position.Lon, vehicle2.Position.Lat));
-
-            double xInter = vehicle1.Position.Lon + (vehicle1.Speed / (vehicle1.Speed - vehicle2.Speed)) * d * Math.Cos(vehicle1.Heading);
-
-            double yInter = vehicle1.Position.Lat + (vehicle1.Speed / (vehicle1.Speed - vehicle2.Speed)) * d * Math.Sin(vehicle1.Heading);
-
-            double xInter2 = ((vehicle2.Position.Lat - vehicle1.Position.Lat) - (vehicle2.Position.Lon * Math.Tan(vehicle2.Heading)
-            - vehicle1.Position.Lon * Math.Tan(vehicle1.Heading))) / (Math.Tan(vehicle1.Heading) - Math.Tan(vehicle2.Heading));
-
-            double yInter2 = ((vehicle2.Position.Lon - vehicle1.Position.Lon) - (vehicle2.Position.Lat * (Math.Cos(vehicle2.Heading) / Math.Sin(vehicle2.Heading))
-            - vehicle1.Position.Lat * (Math.Cos(vehicle1.Heading) / Math.Sin(vehicle1.Heading)))) / ((Math.Cos(vehicle1.Heading)/ Math.Sin(vehicle1.Heading)) - (Math.Cos(vehicle2.Heading) / Math.Sin(vehicle2.Heading)));
-            
-            */
-            //double lat = asin(z / R)
-            //double lon = atan2(y, x)
+            VehicleData vehicle1 = vehicle1Tuple.Item1;
+            VehicleData vehicle2 = vehicle2Tuple.Item1;
 
             //Convert to radian
             double lon1 = MapParserUtils.ConvertDegreesToRadians(vehicle1.Position.Lon);
@@ -132,12 +115,6 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
             }
 
             return null;
-            /*double xInter = ((vehicle2PosCartesian.Item2 - vehicle1PosCartesian.Item2) - (vehicle2PosCartesian.Item1 * Math.Tan(vehicle2.Heading)
-                - vehicle1PosCartesian.Item1 * Math.Tan(vehicle1.Heading))) / (Math.Tan(vehicle1.Heading) - Math.Tan(vehicle2.Heading));
-
-            double yInter = ((vehicle2PosCartesian.Item1 - vehicle1PosCartesian.Item1) - (vehicle2PosCartesian.Item2 * (1/Math.Tan(vehicle2.Heading))
-                - vehicle1PosCartesian.Item1 * (1 / Math.Tan(vehicle1.Heading)))) / ((1 / Math.Tan(vehicle1.Heading)) - (1 / Math.Tan(vehicle2.Heading)));
-            */
         }
     }
 }
