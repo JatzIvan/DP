@@ -6,12 +6,17 @@ using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling.RoadParameters
 {
+
+    /**
+     * Simple singleton object that holds road information for all tracked road segments
+     */
+
     public class RoadParametersHolder
     {
 
         private static RoadParametersHolder INSTANCE;
 
-        private Dictionary<object, RoadParameters> parameters = new Dictionary<object, RoadParameters>();
+        private Dictionary<string, RoadParameters> parameters = new Dictionary<string, RoadParameters>();
 
         private ApiCallsHandler handler { get; set; }
 

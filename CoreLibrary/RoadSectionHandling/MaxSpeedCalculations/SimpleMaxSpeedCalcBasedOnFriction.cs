@@ -19,6 +19,8 @@ namespace CoreLibrary.RoadSectionHandling.MaxSpeedCalculations
             {
 
                 point.MaxSpeed = GetMaxSpeed(point, roadRef);
+
+                // For Debug purposes
                 if(point.MaxSpeed < 10)
                 {
                     Console.WriteLine(point.MaxSpeed + " -- " + point.CurrentLocation.Longitude + "," + point.CurrentLocation.Latitude);

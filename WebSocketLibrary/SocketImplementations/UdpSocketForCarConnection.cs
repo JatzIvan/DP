@@ -20,10 +20,6 @@ namespace WebSocketLibrary
 
         public UdpSocketForCarConnection(string host, string port, int id, List<IObserver<VehicleObserverWrapper>> observers, float interval) : this(host, port, id, observers, 6000, interval)
         {
-/*            this.Interval = interval;
-            this.KeepAliveTimetout = 6000;
-            SubscriptionAliveThread = new Thread(CheckLastMessageTime);
-            SubscriptionAliveThread.Start();*/
         }
 
         public UdpSocketForCarConnection(string host, string port, int id, List<IObserver<VehicleObserverWrapper>> observers, int keepAliveTimeout, float interval) : base(host, port, id, observers, keepAliveTimeout)
@@ -43,7 +39,6 @@ namespace WebSocketLibrary
                 return;
             }
 
-            //Console.WriteLine(parsedObject.Type);
 
             switch (parsedObject.Type)
             {
@@ -78,11 +73,8 @@ namespace WebSocketLibrary
             if (msg == null)
             {
                 msg = new SubscribeMessage();
-                //msg.Index = GetMessageIndex();
                 msg.Interval = Interval;
                 msg.Content = SubscribeContent.vehicles;
-                //msg.Road = "503";
-                //AddToMessageQueue(msg.Index, msg);
             }
 
             return msg;
@@ -141,14 +133,6 @@ namespace WebSocketLibrary
 
             base.ActivateConnection();
             Subscribe();
-            //Task.Run(() => Do(IsSubscribed));
-            // Send Subscribe message
-            // TODO: This is probably not the best idea, think this through
-            /*while (!Subscribed && isAlive)
-            {
-                SendMessage(GetSubscribeMessage());
-                Thread.Sleep(200);
-            }*/
         }
 
         private void CheckLastMessageTime()

@@ -54,6 +54,7 @@ namespace CoreLibrary.RoadSectionHandling
 
             List<RoadPointModel> output = null;
 
+            // Gain road data from local or remote
             if (ApplicationConfigurationHandler.MapDataOrigin.Equals("local"))
             {
                 Console.WriteLine("Loading road data from local file");

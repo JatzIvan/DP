@@ -78,6 +78,7 @@ namespace WebSocketLibrary
             this.keepAliveTimeout = keepAliveTimeout;
             //EP = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); // endpoint where server is listening
 
+            // Resolve docker address when needed
             IPAddress ip = Uri.CheckHostName(host).Equals(UriHostNameType.Dns) ? 
                 Dns.GetHostEntry(host).AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork) :
                 IPAddress.Parse(host);
@@ -111,7 +112,6 @@ namespace WebSocketLibrary
             {
                 Console.WriteLine("Trying to connect socket " + Id);
                 HandleHandShake();
-                //throw new Exception("Not connected yet");
             }
 
             return isAlive;
@@ -125,14 +125,6 @@ namespace WebSocketLibrary
         {
             try
             {
-
-                //Create Subscribe Message (for now it is hardcoded)
-                //SubscribeMessage firstMsg = new SubscribeMessage();
-                //firstMsg.Interval = 200;
-                //firstMsg.Content = SubscribeContent.vehicles;
-
-
-
                 // Setup connection with data server
                 isAlive = checkIfAlive();
 
@@ -154,14 +146,9 @@ namespace WebSocketLibrary
             UdpState state = new UdpState();
             state.client = Client;
             state.endpoint = EP;
-            /**
-             * Handle Errors
-             */
 
-            //if (checkIfAlive())
-            //{
+
             Client.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
-            //}
             
         }
 
@@ -206,15 +193,8 @@ namespace WebSocketLibrary
                 //Console.WriteLine(e);
             }
 
-
-
-            //Console.WriteLine("Socket " + Id + " has recieved data");
-
-            //if (receiveBytes.Length >= 4)
-            //{
             string receiveString = Encoding.ASCII.GetString(receiveBytes);
                 ResolveMessageType(receiveString);
-            //}
 
 
             UdpState state = new UdpState();
@@ -242,17 +222,10 @@ namespace WebSocketLibrary
          * Save message into queue and send when possible.
          * This is necessary because there are multiple threads that send messages
          */
-
         public override AbstractMessage SendMessage(AbstractMessage msg)
         {
             msg.Index = GetMessageIndex();
             messagesQueue.Enqueue(msg);
-            
-            /*if (checkIfAlive())
-            {
-                Byte[] msgInBytes = ConvertMesssageToBytes(msg);
-                Client.Send(msgInBytes, msgInBytes.Length, EP);
-            }*/
 
             return msg;
 
@@ -262,19 +235,6 @@ namespace WebSocketLibrary
         {
 
             SendCloseMessage();
-/*            registeredMessageHandlers.ForEach(handler =>
-            {
-                handler.OnCompleted();
-            });
-            registeredMessageHandlers.Clear();
-
-            //Client.Client.Shutdown(SocketShutdown.Both);
-            isAlive = false;
-            Client.Close();
-            // Close thread for sending messages
-            Console.WriteLine("Closing thread");
-            sendingThread.Interrupt();
-            keepAliveThread.Interrupt();*/
 
         }
 
@@ -350,12 +310,6 @@ namespace WebSocketLibrary
             {
                 while (true)
                 {
-                    //Dictionary<int, AbstractSocket> activeConnections = WebSocketManagerFactory.GetInstance().GetActiveConnections();
-
-                    //Console.WriteLine(activeConnections.Count);
-
-                    //foreach (KeyValuePair<int, AbstractSocket> entry in activeConnections)
-                    //{
                     if (checkIfAlive())
                     {
                         KeepAliveMessage msg = this.GetKeepAliveMessage();
@@ -371,7 +325,6 @@ namespace WebSocketLibrary
                             this.SendMessageWithAck(msg);
                         }
                     }
-                    //}
 
                     Thread.Sleep(keepAliveTimeout);
                 }

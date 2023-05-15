@@ -14,7 +14,6 @@ namespace WebSocketLibrary
         private string Name;
         private IMessageHandler<T> CollisionDetector;
 
-        // TODO: add calculation templates
         public WebSocketMessageHandler(string name, IMessageHandler<T> collisionDetector)
         {
             if (String.IsNullOrEmpty(name))
@@ -31,7 +30,7 @@ namespace WebSocketLibrary
          */
         public virtual void OnCompleted()
         {
-            throw new NotImplementedException();
+            Console.WriteLine("Observer stopped calculating");
         }
 
         /**

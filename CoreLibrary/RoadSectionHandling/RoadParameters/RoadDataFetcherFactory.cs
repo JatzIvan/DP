@@ -8,9 +8,6 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
     public class RoadDataFetcherFactory : AbstractCalculatorFactory<GenericRoadStateFetcher, RoadDataFetcherAttribute>
     {
 
-/*        private static List<ValueTuple<Type, Func<LocationPoint, object>>> loadedCalculators = new List<ValueTuple<Type, Func<LocationPoint, object>>>();
-        private static ValueTuple<Type, Func<LocationPoint, object>> defaultConstructor;*/
-
         private RoadDataFetcherFactory(): base(new RoadDataFetcherAttribute())
         {
 

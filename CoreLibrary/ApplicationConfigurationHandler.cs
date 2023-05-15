@@ -74,38 +74,6 @@ namespace CoreLibrary
 
         public static string MapDataOrigin { get; set; }
 
-        /*public static AbstractSimplificationModel GetSimplificationModelFromConfiguration()
-        {
-
-            switch (SimplificationMethod)
-            {
-                case SimplMethods.DouglasPeuckerRoadSectionSimplification.ToString():
-
-                    return new DouglasPeuckerConfig(DPTolerance);
-
-                case SimplMethods.LangRoadSectionSimplification.ToString():
-                    int regionSize;
-                    try
-                    {
-                        regionSize = int.Parse(ConfigurationManager.AppSettings.Get("LangRegionSize"), CultureInfo.InvariantCulture);
-
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        Console.WriteLine("Missing or invalid config value for region size, defaulting 4");
-                        regionSize = 4;
-                    }
-                    return new LangConfig(DPTolerance, regionSize);
-
-                default:
-                    Console.WriteLine("Missing Simplification method type in config, default with DouglasPeuckerConfig with tolarance of 0.001");
-                    return new DouglasPeuckerConfig(0.001f);
-            }
-
-
-        }*/
-
         private static bool IsFactory(Type t)
         {
             while (t != null)

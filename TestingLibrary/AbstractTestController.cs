@@ -12,6 +12,10 @@ using System.Threading.Tasks;
 
 namespace TestingLibrary
 {
+
+    /**
+     * Used to load test resources
+     */
     public abstract class AbstractTestController
     {
 

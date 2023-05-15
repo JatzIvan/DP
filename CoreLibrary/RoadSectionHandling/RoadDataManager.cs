@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 
 namespace CoreLibrary.RoadSectionHandling
 {
+
+    /**
+     * Manager to create and store RoadDataHandler objects
+     * Use this for correct road data recalc after new weather data was fetched
+     */
     public class RoadDataManager
     {
 

@@ -36,16 +36,13 @@ namespace WebSocketLibrary
         public KeepAliveMessage GetKeepAliveMessage()
         {
 
-            // Console.WriteLine("Num of messages " + messageQueue.Count);
-
             KeepAliveMessage msg = (KeepAliveMessage)messageQueue.Values.FirstOrDefault(a => typeof(KeepAliveMessage) == a.GetType());
 
             if (msg == null)
             {
                 msg = new KeepAliveMessage();
                 keepAliveFailedAttempts = 0;
-                //msg.Index = GetMessageIndex();
-                //AddToMessageQueue(msg.Index, msg);
+
             }
             else
             {

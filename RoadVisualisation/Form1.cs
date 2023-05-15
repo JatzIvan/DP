@@ -25,27 +25,11 @@ namespace RoadVisualisation
     public partial class Form1 : Form
     {
 
-        Pen blackPen = new Pen(Color.Black);
-        Pen orangePen = new Pen(Color.Orange);
-        Pen redPen = new Pen(Color.Red);
-        Graphics g = null;
-
-
-        static int x_cent, y_cent;
-
         static float tolerance;
         static int regionSizeVal;
         static Dictionary<Tuple<int, int>, double> speedBasedOnPoint = new Dictionary<Tuple<int, int>, double>();
-        //private static LocationPoint topPoint = new LocationPoint(17.16, 48.38);
-        //private static LocationPoint bottomPoint = new LocationPoint(17.27, 48.31);
 
-        private static LocationPoint topPoint;
-        private static LocationPoint bottomPoint;
-
-        private static Tuple<double, double> topPointXY;
-        private static Tuple<double, double> bottomPointXY;
         private static long numberOfPoints = 0;
-        private readonly double EarthRadius = MapParserUtils.rEarth;      //Earth Radius in Km
 
         private static GMapOverlay polyOverlay;
 
@@ -54,9 +38,6 @@ namespace RoadVisualisation
 
             InitializeComponent();
             ApplicationConfigurationHandler.LoadConfiguration();
-
-            topPoint = new LocationPoint(ApplicationConfigurationHandler.Longitude1, ApplicationConfigurationHandler.Latitude1);
-            bottomPoint = new LocationPoint(ApplicationConfigurationHandler.Longitude2, ApplicationConfigurationHandler.Latitude2);
 
             ApiHelper.InitializeClient();
             SimplificationMethod.DataSource = (SectionSimplificationFactory.GetInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
@@ -114,9 +95,6 @@ namespace RoadVisualisation
 
             RoadDataFetcher.ClearInstance();
 
-            topPoint = new LocationPoint(longitude1, latitude1);
-            bottomPoint = new LocationPoint(longitude2, latitude2);
-
             map.Position = new GMap.NET.PointLatLng(latitude1, longitude1);
 
             tolerance = float.Parse(ToleranceValue.Text, CultureInfo.InvariantCulture);
@@ -149,7 +127,6 @@ namespace RoadVisualisation
             await Task.WhenAll(task);
             polyOverlay.Clear();
 
-
             foreach (AbstractRoadModel entry in roadHandler.GetParsedRoadDataList(new HandlerSetupConfig(model, curv)))
             {
                 numberOfPoints++;
@@ -159,7 +136,6 @@ namespace RoadVisualisation
                     DrawLineMap(entry.CurrentLocation, entry.Next.Point.CurrentLocation, entry.Next.RadiusOfCurvature, polyOverlay);
                 }
             }
-            Console.WriteLine("HEREE");
             numOfPoints.Text = numberOfPoints + "";
 
             map.Zoom = 15;

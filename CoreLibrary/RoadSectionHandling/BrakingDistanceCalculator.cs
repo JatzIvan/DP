@@ -20,7 +20,7 @@ namespace CoreLibrary.RoadSectionHandling
 
             //RoadParametersHolder.GetInstance().GetParametersForRoad(roadRef, false).GetFriction();
 
-            double a = g * 0.7;
+            double a = g * RoadParametersHolder.GetInstance().GetParametersForRoad(roadRef, false).GetFriction();
 
             double S = Math.Pow(vehicleData.Speed, 2)/(2*a);
 

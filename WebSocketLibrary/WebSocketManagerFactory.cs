@@ -89,32 +89,6 @@ namespace WebSocketLibrary
 
         }
 
-        /*public bool OpenConnection(AbstractSocket connection, List<IObserver<ObserverWrapper>> handler)
-        {
-
-            if(connection == null || !RegisteredConnections.ContainsValue(connection))
-            {
-                return false;
-            }
-
-            handler.ForEach(h =>
-            {
-                connection.Subscribe(h);
-            });
-
-            RegisteredConnections.Remove(connection.Id);
-            PendingConnections.Add(connection.Id, connection);
-
-            return connection.CreateConnectionWithDataSocket();
-
-        }
-
-
-        public bool OpenConnection(int connectionId, List<IObserver<ObserverWrapper>> handler)
-        {
-            return OpenConnection(RegisteredConnections[connectionId], handler);
-        }*/
-
         public void CloseConnection(AbstractSocket ws)
         {
             lock (this)

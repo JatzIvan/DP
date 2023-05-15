@@ -70,8 +70,8 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
                     continue;
                 }
 
-                current.Next.RadiusOfCurvature = MapParserUtils.CalculateLocationNorm(subtractLocations(after.TangentOfPoint, before.TangentOfPoint)) /
-                    MapParserUtils.CalculateLocationNorm(subtractLocations(after.CurrentLocation, before.CurrentLocation));
+                current.Next.RadiusOfCurvature = MapParserUtils.CalculateLocationNorm(SubtractLocations(after.TangentOfPoint, before.TangentOfPoint)) /
+                    MapParserUtils.CalculateLocationNorm(SubtractLocations(after.CurrentLocation, before.CurrentLocation));
 
                 current = current.Next.Point;
 
@@ -94,8 +94,8 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
                     continue;
                 }
 
-                current.Previous.RadiusOfCurvature = MapParserUtils.CalculateLocationNorm(subtractLocations(before.TangentOfPoint, after.TangentOfPoint)) /
-                    MapParserUtils.CalculateLocationNorm(subtractLocations(before.CurrentLocation, after.CurrentLocation));
+                current.Previous.RadiusOfCurvature = MapParserUtils.CalculateLocationNorm(SubtractLocations(before.TangentOfPoint, after.TangentOfPoint)) /
+                    MapParserUtils.CalculateLocationNorm(SubtractLocations(before.CurrentLocation, after.CurrentLocation));
 
                 current = current.Previous.Point;
 
@@ -128,7 +128,7 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 
         }
 
-        private LocationPoint subtractLocations(LocationPoint p1, LocationPoint p2)
+        private LocationPoint SubtractLocations(LocationPoint p1, LocationPoint p2)
         {
             return new LocationPoint((p1.Longitude - p2.Longitude), p1.Latitude - p2.Latitude);
         }
@@ -142,7 +142,7 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
             LocationPoint pointx_p1 = point.Next.Point.CurrentLocation;
             LocationPoint pointx_m1 = point.Previous.Point.CurrentLocation;
 
-            LocationPoint newPoint = subtractLocations(pointx_p1, pointx_m1);
+            LocationPoint newPoint = SubtractLocations(pointx_p1, pointx_m1);
 
             return new LocationPoint(newPoint.Longitude / MapParserUtils.CalculateLocationNorm(newPoint), newPoint.Latitude / MapParserUtils.CalculateLocationNorm(newPoint));
         }
