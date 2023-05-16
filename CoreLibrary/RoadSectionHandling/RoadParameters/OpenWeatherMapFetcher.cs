@@ -34,7 +34,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
 
             if(fetchedData == null)
             {
-                Console.WriteLine("Could not fetch OpenWeatherMap data, returning default");
+                Logger.GetLogger().WriteLine("Could not fetch OpenWeatherMap data, returning default");
                 return new RoadParameters();
             }
 

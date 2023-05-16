@@ -88,7 +88,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
                 
                 if(smallestCumDistance < Math.Abs(currentCumDistance - distanceToCollision))
                 {
-                    //Console.WriteLine("cum distance -- " + smallestCumDistance + " and distance to col - " + distanceToCollision);
+                    //Logger.GetLogger().WriteLine("cum distance -- " + smallestCumDistance + " and distance to col - " + distanceToCollision);
                     break;
                 }
                 else
@@ -108,12 +108,12 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
 
             if (distanceToCollision < (AbstractCollisionDetector.GetDistanceBetweenMapPoints(pointWithSmallestCumDistance, v1Point) + v1Offset))
             {
-                //Console.WriteLine((v1Direction ? "Previous" : "Next") + " with radius of curv " + (v1Direction ? pointWithSmallestCumDistance.Previous.RadiusOfCurvature : pointWithSmallestCumDistance.Next.RadiusOfCurvature));
+                //Logger.GetLogger().WriteLine((v1Direction ? "Previous" : "Next") + " with radius of curv " + (v1Direction ? pointWithSmallestCumDistance.Previous.RadiusOfCurvature : pointWithSmallestCumDistance.Next.RadiusOfCurvature));
                 CollisionWillHappen = (v1Direction ? pointWithSmallestCumDistance.Previous.RadiusOfCurvature : pointWithSmallestCumDistance.Next.RadiusOfCurvature) > ApplicationConfigurationHandler.CurvatureTreshold;
             }
             else
             {
-                //Console.WriteLine((v1Direction ? "Next" : "Previous") + " with radius of curv " + (v1Direction ? pointWithSmallestCumDistance.Next.RadiusOfCurvature : pointWithSmallestCumDistance.Previous.RadiusOfCurvature));
+                //Logger.GetLogger().WriteLine((v1Direction ? "Next" : "Previous") + " with radius of curv " + (v1Direction ? pointWithSmallestCumDistance.Next.RadiusOfCurvature : pointWithSmallestCumDistance.Previous.RadiusOfCurvature));
                 CollisionWillHappen = (v1Direction ? pointWithSmallestCumDistance.Next.RadiusOfCurvature : pointWithSmallestCumDistance.Previous.RadiusOfCurvature) > ApplicationConfigurationHandler.CurvatureTreshold;
             }
 
@@ -121,11 +121,11 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.CurveCalculators
             if (CollisionWillHappen)
             {
 
-                Console.WriteLine($"Vehicle {vehicle1.Id}-({vehicle1.Position.Lat.ToString().Replace(",", ".")},{vehicle1.Position.Lon.ToString().Replace(",", ".")}/{vehicle1.Heading}/{vehicle1.Speed}) " +
+                Logger.GetLogger().WriteLine($"Vehicle {vehicle1.Id}-({vehicle1.Position.Lat.ToString().Replace(",", ".")},{vehicle1.Position.Lon.ToString().Replace(",", ".")}/{vehicle1.Heading}/{vehicle1.Speed}) " +
                     $"and {vehicle2.Id}-({vehicle2.Position.Lat.ToString().Replace(",", ".")},{vehicle2.Position.Lon.ToString().Replace(",", ".")}/{vehicle2.Heading}/{vehicle2.Speed}) will meet in dangerous area");
-                Console.WriteLine("They will meet at mapped point - " + pointWithSmallestCumDistance.CurrentLocation.Latitude.ToString().Replace(",", ".") + "," + pointWithSmallestCumDistance.CurrentLocation.Longitude.ToString().Replace(",", "."));
-                //Console.WriteLine($"TTC - {TTC} at approximated meet point - " + realCollisionPoint.Latitude.ToString().Replace(",", ".") + "," + realCollisionPoint.Longitude.ToString().Replace(",", "."));
-                Console.WriteLine("TTC - " + TTC);
+                Logger.GetLogger().WriteLine("They will meet at mapped point - " + pointWithSmallestCumDistance.CurrentLocation.Latitude.ToString().Replace(",", ".") + "," + pointWithSmallestCumDistance.CurrentLocation.Longitude.ToString().Replace(",", "."));
+                //Logger.GetLogger().WriteLine($"TTC - {TTC} at approximated meet point - " + realCollisionPoint.Latitude.ToString().Replace(",", ".") + "," + realCollisionPoint.Longitude.ToString().Replace(",", "."));
+                Logger.GetLogger().WriteLine("TTC - " + TTC);
 
             }
 

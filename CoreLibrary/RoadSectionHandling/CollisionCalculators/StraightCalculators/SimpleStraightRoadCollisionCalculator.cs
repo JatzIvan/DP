@@ -84,7 +84,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
 
             if(Math.Sin(ang_1) * Math.Sin(ang_2) < 0)
             {
-                Console.WriteLine("Skipping");
+                Logger.GetLogger().WriteLine("Skipping");
                 return null;
             }
 
@@ -101,17 +101,17 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
             double TTX1 = MapParserUtils.CalculateDistanceBetweenPointsFromRadians(new LocationPoint(lon3, lat3), new LocationPoint(lon1, lat1)) / vehicle1.Speed;
             double TTX2 = MapParserUtils.CalculateDistanceBetweenPointsFromRadians(new LocationPoint(lon3, lat3), new LocationPoint(lon2, lat2)) / vehicle2.Speed;
 
-            Console.WriteLine(MapParserUtils.ConvertRadiansToDegrees(lat3) + " " + MapParserUtils.ConvertRadiansToDegrees(lon3));
+            Logger.GetLogger().WriteLine(MapParserUtils.ConvertRadiansToDegrees(lat3) + " " + MapParserUtils.ConvertRadiansToDegrees(lon3));
 
             if(Math.Abs(TTX1 - TTX2) <= 5)
             {
-                Console.WriteLine("They should meet");
+                Logger.GetLogger().WriteLine("They should meet");
                 CollisionWillHappen = true;
                 TTC = (TTX1 < TTX2 ? TTX1 : TTX2);
             }
             else
             {
-                Console.WriteLine("They wont probs meet");
+                Logger.GetLogger().WriteLine("They wont probs meet");
             }
 
             return null;

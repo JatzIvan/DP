@@ -143,7 +143,7 @@ namespace WebSocketLibrary
                 // This signals that this pair can be skipped
                 if ((direction ? v1Point.Next : v1Point.Previous) == null)
                 {
-                    //Console.WriteLine("Skip: Could not find in said distance passed eachother");
+                    //Logger.GetLogger().WriteLine("Skip: Could not find in said distance passed eachother");
                     return true;
                 }
 

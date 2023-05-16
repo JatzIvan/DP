@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CoreLibrary;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -109,8 +110,8 @@ namespace WebSocketLibrary
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error occured while parsing Incomming message");
-                Console.WriteLine(e.ToString());
+                Logger.GetLogger().WriteLine("Error occured while parsing Incomming message");
+                Logger.GetLogger().WriteLine(e.ToString());
                 //TODO setup log with all incidents
             }
 
@@ -131,7 +132,7 @@ namespace WebSocketLibrary
                 return;
             }
 
-            //Console.WriteLine(parsedObject.Type);
+            //Logger.GetLogger().WriteLine(parsedObject.Type);
 
             switch (parsedObject.Type)
             {
@@ -139,7 +140,7 @@ namespace WebSocketLibrary
                     ResolveAckMessage(DeserializeObject<AcknowledgeMessage>(receiveString));
                     break;
                 default:
-                    Console.WriteLine("Unknown message, ignoring");
+                    Logger.GetLogger().WriteLine("Unknown message, ignoring");
                     break;
             }
         }
@@ -155,14 +156,14 @@ namespace WebSocketLibrary
                 return;
             }
 
-            Console.WriteLine("Received ack");
+            Logger.GetLogger().WriteLine("Received ack");
 
             AbstractMessage queueMessage = messageQueue[msg.AcknowledgingIndex];
             messageQueue.Remove(msg.AcknowledgingIndex);
 
             if (queueMessage.GetType().Equals(typeof(ConnectMessage)))
             {
-                Console.WriteLine("Socket " + Id + " has established a connection");
+                Logger.GetLogger().WriteLine("Socket " + Id + " has established a connection");
                 ActivateConnection();
             }
 

@@ -9,6 +9,7 @@ COPY ["CollisionDetector/CollisionDetector.csproj", "CollisionDetector/"]
 COPY ["ApiLibrary/ApiLibrary.csproj", "ApiLibrary/"]
 COPY ["CoreLibrary/CoreLibrary.csproj", "CoreLibrary/"]
 COPY ["WebSocketLibrary/WebSocketLibrary.csproj", "WebSocketLibrary/"]
+COPY ["SimpleLogger/SimpleLogger.csproj", "SimpleLogger/"]
 RUN dotnet restore "CollisionDetector/CollisionDetector.csproj"
 COPY . .
 WORKDIR "/src/CollisionDetector"

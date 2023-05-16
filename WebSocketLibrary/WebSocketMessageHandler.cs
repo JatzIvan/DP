@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreLibrary;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -30,7 +31,7 @@ namespace WebSocketLibrary
          */
         public virtual void OnCompleted()
         {
-            Console.WriteLine("Observer stopped calculating");
+            Logger.GetLogger().WriteLine("Observer stopped calculating");
         }
 
         /**
@@ -38,7 +39,7 @@ namespace WebSocketLibrary
          */
         public virtual void OnError(Exception error)
         {
-            Console.WriteLine("Error occured during data handling");
+            Logger.GetLogger().WriteLine("Error occured during data handling");
         }
 
         public virtual void OnNext(T value)

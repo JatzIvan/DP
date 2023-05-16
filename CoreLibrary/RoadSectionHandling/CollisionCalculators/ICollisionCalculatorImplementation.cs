@@ -68,7 +68,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
         {
             if (vehicle.Speed > maxAllowedSpeed)
             {
-                Console.WriteLine($"Vehicle {vehicle.Id} speed ({vehicle.Speed}) has exceeded the max possible speed ({maxAllowedSpeed}) to traverse curve");
+                Logger.GetLogger().WriteLine($"Vehicle {vehicle.Id} speed ({vehicle.Speed}) has exceeded the max possible speed ({maxAllowedSpeed}) to traverse curve");
                 msg.Level = NotificationLevel.danger;
                 msg.Content.MaxSpeedExceededBy = vehicle.Speed - maxAllowedSpeed;
 
@@ -89,7 +89,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
 
             if(distanceToColl < breakingDistance)
             {
-                Console.WriteLine($"Vehicle {vehicle.Id} breaking distance ({breakingDistance}) was higher than distance to collision ({distanceToColl})");
+                Logger.GetLogger().WriteLine($"Vehicle {vehicle.Id} breaking distance ({breakingDistance}) was higher than distance to collision ({distanceToColl})");
                 msg.Content.BrakingDistanceDiff = breakingDistance - distanceToColl;
             }
 

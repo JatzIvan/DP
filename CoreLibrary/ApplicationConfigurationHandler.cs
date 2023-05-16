@@ -106,7 +106,7 @@ namespace CoreLibrary
                 System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(factory.TypeHandle);
             }
 
-            Console.WriteLine("Factory init took " + sw.ElapsedMilliseconds);
+            Logger.GetLogger().WriteLine("Factory init took " + sw.ElapsedMilliseconds);
         }
 
         public static void RecalculateTestRoadQuery(bool skipCustomParams, AreaMessage msg)
@@ -126,7 +126,7 @@ namespace CoreLibrary
                 IPAddress.Parse(DigiMapHost))
                 + ":" + DigiMapPort);
 
-            Console.WriteLine(mapAddr);
+            Logger.GetLogger().WriteLine(mapAddr);
 
             return mapAddr;
         }
@@ -176,8 +176,8 @@ namespace CoreLibrary
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error occured during config parsing");
-                Console.WriteLine(e);
+                Logger.GetLogger().WriteLine("Error occured during config parsing");
+                Logger.GetLogger().WriteLine(e.ToString());
             }
         }
 
@@ -185,7 +185,7 @@ namespace CoreLibrary
         {
 
             string val = LoadEnvironmentVariable(variable) ?? LoadConfigurationVariable(variable);
-            Console.WriteLine("Loaded variable " + variable + " with value " + val);
+            Logger.GetLogger().WriteLine("Loaded variable " + variable + " with value " + val);
             return LoadEnvironmentVariable(variable) ?? LoadConfigurationVariable(variable);
         }
 

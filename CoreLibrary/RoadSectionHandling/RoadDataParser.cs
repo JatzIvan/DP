@@ -162,8 +162,8 @@ namespace CoreLibrary.RoadSectionHandling
 
                 if(modelDict.Count == countBef)
                 {
-                    Console.WriteLine("Unable to connect road segmets because road segments are not connected (check if parts of the road are not cut of)");
-                    Console.WriteLine("Returning parts that were able to be connected together (Result might be skewed)");
+                    Logger.GetLogger().WriteLine("Unable to connect road segmets because road segments are not connected (check if parts of the road are not cut of)");
+                    Logger.GetLogger().WriteLine("Returning parts that were able to be connected together (Result might be skewed)");
                     break;
                 }
 

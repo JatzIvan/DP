@@ -23,7 +23,7 @@ namespace CoreLibrary.RoadSectionHandling.MaxSpeedCalculations
                 // For Debug purposes
                 if(point.MaxSpeed < 10)
                 {
-                    Console.WriteLine(point.MaxSpeed + " -- " + point.CurrentLocation.Longitude + "," + point.CurrentLocation.Latitude);
+                    Logger.GetLogger().WriteLine(point.MaxSpeed + " -- " + point.CurrentLocation.Longitude + "," + point.CurrentLocation.Latitude);
                 }
             }
         }

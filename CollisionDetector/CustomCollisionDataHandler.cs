@@ -29,9 +29,9 @@ namespace CollisionDetector
         {
             if (vehicle.Speed > maxAllowedSpeed)
             {
-                //Console.WriteLine("-----------------------------------------");
-                Console.WriteLine($"Vehicle {vehicle.Id} speed ({vehicle.Speed}) has exceeded the max possible speed ({maxAllowedSpeed}) to traverse curve");
-                //Console.WriteLine("-----------------------------------------");
+                //Logger.GetLogger().WriteLine("-----------------------------------------");
+                Logger.GetLogger().WriteLine($"Vehicle {vehicle.Id} speed ({vehicle.Speed}) has exceeded the max possible speed ({maxAllowedSpeed}) to traverse curve");
+                //Logger.GetLogger().WriteLine("-----------------------------------------");
                 msg.Level = NotificationLevel.danger;
                 //msg.Content.NotificationMessages.Push($"Vehicle speed ({vehicle.Speed}) has exceeded the max possible speed ({maxAllowedSpeed}) to traverse curve");
                 msg.Content.MaxSpeedExceededBy = vehicle.Speed - maxAllowedSpeed;
@@ -69,7 +69,7 @@ namespace CollisionDetector
                     ICollisionCalculatorImplementation calcMethod = ResolveCollisionCalculatorBasedOnCurvature(pair.ElementAt(0), pair.ElementAt(1));
                     if (calcMethod != null)
                     {
-                        Console.WriteLine("--------------------Start of collision warning handling------------------------");
+                        Logger.GetLogger().WriteLine("--------------------Start of collision warning handling------------------------");
                         AbstractRoadModel collisionPoint = calcMethod.PerformCollisionCalculations(pair.ElementAt(0), pair.ElementAt(1), currectRoadModel);
 
                         if (calcMethod.CollisionOccured())
@@ -102,14 +102,14 @@ namespace CollisionDetector
                             socket.SendMessage(msgVeh2);
 
                         }
-                        Console.WriteLine("--------------------End of collision warning handling------------------------");
+                        Logger.GetLogger().WriteLine("--------------------End of collision warning handling------------------------");
                     }
                 });
             }
 
             if (sw.ElapsedMilliseconds > 100)
             {
-                Console.WriteLine("Elapsed time " + sw.ElapsedMilliseconds + " for number of cars " + vehicles.Count);
+                Logger.GetLogger().WriteLine("Elapsed time " + sw.ElapsedMilliseconds + " for number of cars " + vehicles.Count);
             }
         }
     }

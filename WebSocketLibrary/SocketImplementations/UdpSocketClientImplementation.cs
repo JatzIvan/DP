@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CoreLibrary;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -110,7 +111,7 @@ namespace WebSocketLibrary
         {
             if (!isAlive)
             {
-                Console.WriteLine("Trying to connect socket " + Id);
+                Logger.GetLogger().WriteLine("Trying to connect socket " + Id);
                 HandleHandShake();
             }
 
@@ -135,8 +136,8 @@ namespace WebSocketLibrary
             }
             catch (SocketException e)
             {
-                Console.WriteLine(e);
-                Console.WriteLine("Try again after 10 seconds");
+                Logger.GetLogger().WriteLine(e.ToString());
+                Logger.GetLogger().WriteLine("Try again after 10 seconds");
                 return false;
             }
         }
@@ -190,7 +191,7 @@ namespace WebSocketLibrary
             }
             catch (Exception)
             {
-                //Console.WriteLine(e);
+                //Logger.GetLogger().WriteLine(e);
             }
 
             string receiveString = Encoding.ASCII.GetString(receiveBytes);
@@ -213,7 +214,7 @@ namespace WebSocketLibrary
             }
             catch (Exception)
             {
-                Console.WriteLine("Socket was closed, stopping receive");
+                Logger.GetLogger().WriteLine("Socket was closed, stopping receive");
             }
 
         }
@@ -248,7 +249,7 @@ namespace WebSocketLibrary
             registeredMessageHandlers.Clear();
             Client.Close();
             // Close thread for sending messages
-            Console.WriteLine("Closing thread");
+            Logger.GetLogger().WriteLine("Closing thread");
             sendingThread.Interrupt();
             keepAliveThread.Interrupt();
         }
@@ -316,12 +317,12 @@ namespace WebSocketLibrary
 
                         if (this.keepAliveFailedAttempts > 5)
                         {
-                            Console.WriteLine("Socket " + this.Id + " has lost connection");
+                            Logger.GetLogger().WriteLine("Socket " + this.Id + " has lost connection");
                             WebSocketManagerFactory.GetInstance().DropActiveConnection(this);
                         }
                         else
                         {
-                            Console.WriteLine("Sending Keepalive message");
+                            Logger.GetLogger().WriteLine("Sending Keepalive message");
                             this.SendMessageWithAck(msg);
                         }
                     }

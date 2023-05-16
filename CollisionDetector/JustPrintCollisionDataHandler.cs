@@ -1,4 +1,5 @@
-﻿using CoreLibrary.RoadSectionHandling.Model;
+﻿using CoreLibrary;
+using CoreLibrary.RoadSectionHandling.Model;
 using NetTopologySuite.Index.KdTree;
 using System;
 using System.Collections.Generic;
@@ -20,11 +21,9 @@ namespace CollisionDetector
 
             List<VehicleData> vehicles = data.Data.Vehicles;
 
-            Console.WriteLine(vehicles.Count);
-
             foreach (VehicleData veh in vehicles)
             {
-                Console.WriteLine("Vehicle with Id: " + veh.Id + ", Long: " + veh.Position.Lon + ", Lat: " + veh.Position.Lat);
+                Logger.GetLogger().WriteLine("Vehicle with Id: " + veh.Id + ", Long: " + veh.Position.Lon + ", Lat: " + veh.Position.Lat);
             }
         }
     }

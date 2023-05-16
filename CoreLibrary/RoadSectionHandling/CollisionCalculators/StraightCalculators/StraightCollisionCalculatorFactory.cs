@@ -40,7 +40,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
         {
             if(INSTANCE != null)
             {
-                Console.WriteLine("Warning: Rewriting existing Factory instance " + INSTANCE.GetType() + " with " + newInstance.GetType());
+                Logger.GetLogger().WriteLine("Warning: Rewriting existing Factory instance " + INSTANCE.GetType() + " with " + newInstance.GetType());
             }
             INSTANCE = newInstance;
         }

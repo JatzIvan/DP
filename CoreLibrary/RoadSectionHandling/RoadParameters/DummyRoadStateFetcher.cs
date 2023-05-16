@@ -19,7 +19,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
         public override RoadParameters FetchRoadParameters(LocationPoint point)
         {
 
-            Console.WriteLine("Dummy implementation, returning empty object");
+            Logger.GetLogger().WriteLine("Dummy implementation, returning empty object");
 
             return new RoadParameters();
 

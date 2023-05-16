@@ -59,7 +59,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
                 // TODO: change this, this is just for testing purposes
                 RoadParameters output = RoadDataFetcherFactory.GetInstance().GetResolverImplementation(ApplicationConfigurationHandler.RoadStateFetcherImplementation).FetchRoadParameters(point);
 
-                Console.WriteLine("Fetched new road parameters");
+                Logger.GetLogger().WriteLine("Fetched new road parameters");
 
                 if(output == null)
                 {

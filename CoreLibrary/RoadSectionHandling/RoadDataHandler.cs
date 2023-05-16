@@ -86,12 +86,12 @@ namespace CoreLibrary.RoadSectionHandling
 
                 List<RoadPointModel> fetchedModel = GetRawRoadData();
 
-                Console.WriteLine("Data fetched");
+                Logger.GetLogger().WriteLine("Data fetched");
 
                 // Big oops, this means that we did not manage to fetch any data
                 if (fetchedModel == null || fetchedModel.Count == 0)
                 {
-                    Console.Write("Could not fetch any data, check if OSM road data link is valid");
+                    Logger.GetLogger().WriteLine("Could not fetch any data, check if OSM road data link is valid");
                 }
                 RoadDataParser parser = new RoadDataParser(fetchedModel);
 
@@ -132,7 +132,7 @@ namespace CoreLibrary.RoadSectionHandling
                 RoadInfoInTreeForm= roadTreeFormCopy;
             }
 
-            Console.WriteLine("Recalculated road model for " + this.SectionRef);
+            Logger.GetLogger().WriteLine("Recalculated road model for " + this.SectionRef);
 
         }
 

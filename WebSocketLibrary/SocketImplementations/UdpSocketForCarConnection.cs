@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -86,14 +87,14 @@ namespace WebSocketLibrary
 
             if (msg.GetType().Equals(typeof(SubscribeMessage)))
             {
-                Console.WriteLine("Socket " + Id + " starts recieving data");
+                Logger.GetLogger().WriteLine("Socket " + Id + " starts recieving data");
                 Subscribed = true;
                 LastReceivedMessageTime = DateTime.Now;
             }
 
             if (msg.GetType().Equals(typeof(UnsubscribeMessage)))
             {
-                Console.WriteLine("Socket " + Id + " was unsubscribed");
+                Logger.GetLogger().WriteLine("Socket " + Id + " was unsubscribed");
                 ConnectionCleanup();
             }
 
@@ -147,7 +148,7 @@ namespace WebSocketLibrary
 
                         if((DateTime.Now - LastReceivedMessageTime).TotalMilliseconds > 5 * KeepAliveTimetout)
                         {
-                            Console.WriteLine("Socket " + this.Id + " lost vehicle update subscription");
+                            Logger.GetLogger().WriteLine("Socket " + this.Id + " lost vehicle update subscription");
                             Subscribed = false;
                             Subscribe();
                         }

@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Api;
+using CoreLibrary;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ namespace ApiLibrary.Api
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Logger.GetLogger().WriteLine(ex.ToString());
             }
             return default;
         }
@@ -68,7 +69,7 @@ namespace ApiLibrary.Api
                 return task.Result;
             }catch(Exception e)
             {
-                Console.WriteLine("Exception Occured during fetch", e);
+                Logger.GetLogger().WriteLine("Exception Occured during fetch : " + e.ToString());
             }
             return default;
         }
@@ -84,7 +85,7 @@ namespace ApiLibrary.Api
                 //using (var client = currentClient)
                 //{
 
-                    Console.WriteLine(currentClient.BaseAddress + endpoint);
+                Logger.GetLogger().WriteLine(currentClient.BaseAddress + endpoint);
 
                     using (HttpResponseMessage response = await currentClient.GetAsync(endpoint))
                     {
@@ -97,7 +98,7 @@ namespace ApiLibrary.Api
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Logger.GetLogger().WriteLine(ex.ToString());
             }
 
             return default;

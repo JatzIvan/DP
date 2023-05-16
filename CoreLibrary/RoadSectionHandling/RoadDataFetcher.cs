@@ -57,13 +57,13 @@ namespace CoreLibrary.RoadSectionHandling
             // Gain road data from local or remote
             if (ApplicationConfigurationHandler.MapDataOrigin.Equals("local"))
             {
-                Console.WriteLine("Loading road data from local file");
+                Logger.GetLogger().WriteLine("Loading road data from local file");
                 string jsonString = File.ReadAllText(ApplicationConfigurationHandler.LoadVariable("LOCAL_DATA_PATH"));
                 output = JsonConvert.DeserializeObject<List<RoadPointModel>>(jsonString)!;
             }
             else
             {
-                Console.WriteLine("Loading road data from API");
+                Logger.GetLogger().WriteLine("Loading road data from API");
                 output = Handler.Get<List<RoadPointModel>>(
                 ApplicationConfigurationHandler.DigitalMapConnection + "/roads/" + ApplicationConfigurationHandler.TestRoadQuery);
             }
@@ -139,7 +139,7 @@ namespace CoreLibrary.RoadSectionHandling
             }
             else
             {
-                Console.WriteLine($"No data found for {ApplicationConfigurationHandler.RoadGroupByAttribute} " + attr);
+                Logger.GetLogger().WriteLine($"No data found for {ApplicationConfigurationHandler.RoadGroupByAttribute} " + attr);
                 return new List<RoadPointModel>();
             }
 

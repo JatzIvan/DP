@@ -41,18 +41,18 @@ namespace CoreLibrary.RoadSectionHandling
 
             // Some reflection magic to read all "calculators" from current namespace
             // TODO test this with functional implementation
-            Console.WriteLine("Loading Implementations for " + assignabeType.Name);
+            Logger.GetLogger().WriteLine("Loading Implementations for " + assignabeType.Name);
 
             List<Type> collisionImplementations = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()).Where(t => t.GetCustomAttributes<AbstractCalculatorAttribute>()
                         .Any(y => y.Type == attr.Type)).Where(p => assignabeType.IsAssignableFrom(p)).ToList();
             
-            Console.WriteLine("Found and loaded " + collisionImplementations.Count + " implementations");
+            Logger.GetLogger().WriteLine("Found and loaded " + collisionImplementations.Count + " implementations");
 
             foreach(Type impl in collisionImplementations)
             {
-                Console.WriteLine(impl.Name);
+                Logger.GetLogger().WriteLine(impl.Name);
             }
-            Console.WriteLine("");
+            Logger.GetLogger().WriteLine("");
             // Some more magic to create instances of gathered types (we do not need to provide any data to constructors)
             //implKlazzes.ForEach(klazz => curveCollisionImplementations.Add((ICollisionCalculatorImplementation)Activator.CreateInstance(klazz)));
             return collisionImplementations;
