@@ -155,15 +155,6 @@ namespace RoadVisualisation
             }
         }
 
-        private void Canvas_MouseMove(object sender, MouseEventArgs e)
-        {
-
-            if (speedBasedOnPoint.ContainsKey(new Tuple<int, int>(e.X, e.Y))) //checking cursor Location if inside the rect
-            {
-                Max_Speed_fld.Text = speedBasedOnPoint[new Tuple<int, int>(e.X, e.Y)] + "";//setting tooltip to Panel1
-            }
-        }
-
         private void label1_Click(object sender, EventArgs e)
         {
 
@@ -222,6 +213,16 @@ namespace RoadVisualisation
         {
             base.OnFormClosing(e);
             map.Manager.CancelTileCaching();
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CurvatureCalcMethod_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
