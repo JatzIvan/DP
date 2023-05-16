@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies for tests
         run: dotnet restore
       - name: Build test
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --configuration PipeLine --no-restore
       - name: Test
         run: dotnet test --no-restore --verbosity normal
   
