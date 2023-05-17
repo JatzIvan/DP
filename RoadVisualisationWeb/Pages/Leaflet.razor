@@ -1,24 +1,19 @@
-﻿﻿
-@inject IJSRuntime JSRuntime
+﻿@inject IJSRuntime JSRuntime
 @implements IAsyncDisposable
+@page "/"
 @using ApiLibrary.Api;
 @using ConsoleApp1.Api;
-@using CoreLibrary
 @using CoreLibrary.RoadSectionHandling.Data;
-@using CoreLibrary.RoadSectionHandling.Model;
-@using CoreLibrary.RoadSectionHandling.RoadSimplificators;
+@using CoreLibrary;
 @using System.Globalization;
 @using CoreLibrary.RoadSectionHandling;
-@page "/"
+@using CoreLibrary.RoadSectionHandling.Model;
 
 <div id="top-bar">
     <div id="menu">
         <ul>
             <li> <label for="simpl">Tolerance</label> <input id="simpl" @bind-value="@simplTolerance" /></li>
             <li> <label for="curv">Curvature</label> <input id="curv" @bind-value="@curvTolerance" /></li>
-            <li class="@(selectedSimplification.Equals(typeof(LangRoadSectionSimplification).Name)?"visible-item":"hidden-item")">
-                <label for="lang">Region</label>
-                <input id="lang" value="@langSize" /></li>
             <li>
                 <label for="simplification">Simplification Calculator</label>
                 <select name="simplification" id="simplification" @bind="@selectedSimplification">
@@ -57,7 +52,7 @@
 <div id="map"></div>
 @code {
 
-    List<string> simplifications = (SectionSimplificationFactory.GetInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
+    List<string> simplifications = new List<string> { (SectionSimplificationFactory.GetInstance()).GetDefaultInstance().Item1.Name };
     List<string> curvatures = (RoadCurvitureCalculatorFactory.GetInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
 
     string selectedSimplification = (SectionSimplificationFactory.GetInstance()).GetDefaultInstance().Item1.Name;
@@ -142,7 +137,7 @@
         string model = selectedSimplification;
         string curv = selectedCurvature;
 
-        ApplicationConfigurationHandler.DPTolerance = curvTolerance;
+        ApplicationConfigurationHandler.DPTolerance = simplTolerance;
 
         if (selectedSimplification.Equals("LangRoadSectionSimplification"))
         {
@@ -167,7 +162,6 @@
                     await module.InvokeAsync<string>("addLine", entry.CurrentLocation.Longitude, entry.CurrentLocation.Latitude, entry.Next.Point.CurrentLocation.Longitude, entry.Next.Point.CurrentLocation.Latitude,
                     entry.Next.RadiusOfCurvature, curvTolerance);
                 }
-                //DrawLineMap(entry.CurrentLocation, entry.Next.Point.CurrentLocation, entry.Next.RadiusOfCurvature, polyOverlay);
             }
         }
     }
