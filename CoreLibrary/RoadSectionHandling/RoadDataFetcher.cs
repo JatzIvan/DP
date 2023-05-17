@@ -16,7 +16,7 @@ namespace CoreLibrary.RoadSectionHandling
     {
         private ApiCallsHandler Handler { get; set; }
 
-        private List<RoadPointModel> RawFetchedData { get; set; }
+        public List<RoadPointModel> RawFetchedData { get; set; }
 
         private Dictionary<string, List<RoadPointModel>> RoadSegmentsByRef { get; set; }
 

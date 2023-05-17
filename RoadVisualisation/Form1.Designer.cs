@@ -302,7 +302,7 @@ namespace RoadVisualisation
             Controls.Add(Canvas);
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
             Name = "Form1";
-            Text = "Form1";
+            Text = "Visualisator";
             Load += Form1_Load;
             panel2.ResumeLayout(false);
             panel2.PerformLayout();

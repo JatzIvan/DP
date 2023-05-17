@@ -138,8 +138,8 @@ namespace CoreLibrary
 
                 DataServerHost = LoadVariable("DATASERVER_HOST");
                 DataServerPort = LoadVariable("DATASERVER_PORT");
-                DigiMapHost = LoadVariable("DIGIMAP_HOST");
-                DigiMapPort = LoadVariable("DIGIMAP_PORT");
+                DigiMapHost = LoadVariable("DIGIMAP_HOST") ?? "localhost";
+                DigiMapPort = LoadVariable("DIGIMAP_PORT") ?? "8000";
                 DigitalMapConnection = CreateDigiMapUrl();
                 Longitude1 = float.Parse(LoadVariable("RoadQueryLong1") ?? "0", CultureInfo.InvariantCulture);
                 Latitude1 = float.Parse(LoadVariable("RoadQueryLat1") ?? "0", CultureInfo.InvariantCulture);
