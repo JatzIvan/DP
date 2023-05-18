@@ -1,5 +1,4 @@
-﻿using ConsoleApp1.Api;
-using CoreLibrary;
+﻿using CoreLibrary;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
