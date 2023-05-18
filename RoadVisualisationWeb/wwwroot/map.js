@@ -3,35 +3,48 @@ export function load_map() {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
     var drawnItems = new L.FeatureGroup();
+
+    window.drawnItems = drawnItems;
+
     map.addLayer(drawnItems);
+
     var drawControl = new L.Control.Draw({
         edit: {
             featureGroup: drawnItems,
-            edit: false, // Disable default edit toolbar
-            remove: false // Disable default remove toolbar
+            edit: false,
+            remove: false
         },
         draw: {
-            polygon: false, // Enable polygon drawing mode
+            polygon: false,
             polyline: false,
             circle: false,
-            rectangle: true,
+            rectangle: {
+                shapeOptions: {
+                    color: '#424bf5',
+                    fillOpacity: 0,
+                    opacity: 1
+                },
+                tooltip: {
+                    text: 'Draw a rectangle'
+                }
+            },
             marker: false
         },
     });
     map.addControl(drawControl);
-
-    var currentShape = null;
+    
+    window.currentShape = null;
     map.on(L.Draw.Event.CREATED, function (event) {
 
-        if (currentShape) {
-            drawnItems.removeLayer(currentShape);
+        if (window.currentShape) {
+            window.drawnItems.removeLayer(window.currentShape);
         }
 
         var layer = event.layer;
-        currentShape = layer;
-        drawnItems.addLayer(layer);
+        window.currentShape = layer;
+        window.drawnItems.addLayer(layer);
 
-        var boundaryPoints = layer.getLatLngs(); // Retrieve the boundary points of the drawn polygon
+        var boundaryPoints = layer.getLatLngs();
         var event = new Event('change');
 
         document.getElementById("top").value = boundaryPoints[0][1].lat + "," + boundaryPoints[0][1].lng;
@@ -39,7 +52,7 @@ export function load_map() {
         document.getElementById("bottom").value = boundaryPoints[0][3].lat + "," + boundaryPoints[0][3].lng;
         document.getElementById("bottom").dispatchEvent(event);
 
-        console.log(boundaryPoints); // Display the boundary points in the console
+        console.log(boundaryPoints);
 
     });
 
@@ -50,8 +63,19 @@ export function load_map() {
     return "";
 }
 
+export function drawRect(lon1, lat1, lon2, lat2) {
+    var drawnRectangle = new L.Rectangle([[lat1, lon1], [lat2, lon2]], {
+        color: '#424bf5',
+        fillOpacity: 0,
+        opacity: 1
+    });
+    window.currentShape = L.layerGroup();
+    window.drawnItems.addLayer(window.currentShape);
+    window.currentShape.addLayer(drawnRectangle)
+}
+
 export function zoom(lon, lat) {
-    window.map.setView({ lon: lon, lat: lat }, 16);
+    window.map.setView({ lon: lon, lat: lat }, 12.5);
     window.overlay.clearLayers();
 }
 

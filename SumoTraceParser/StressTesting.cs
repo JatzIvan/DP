@@ -178,7 +178,7 @@ namespace TestingLibrary
                     //foreach(var pair in pairsToCalc)
                     Parallel.ForEach(pairsToCalc, new ParallelOptions
                     {
-                        MaxDegreeOfParallelism = 6
+                        MaxDegreeOfParallelism = 8
                     }, pair =>
                     {
                         ICollisionCalculatorImplementation calcMethod = ResolveCollisionCalculatorBasedOnCurvature(pair.ElementAt(0), pair.ElementAt(1));

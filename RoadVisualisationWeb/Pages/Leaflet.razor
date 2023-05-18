@@ -43,14 +43,14 @@
                     }
                 </select>
             </li>
-            
+
             <li><label for="top">Top Point</label><input id="top" @bind-value="@topPoint" /></li>
             <li><label for="bottom">Bottom Point</label><input id="bottom" @bind-value="@bottomPoint" /></li>
             <li><label for="ref">Ref</label><input id="ref" @bind-value="@xref" style="width:50px" /></li>
             <li><label for="endpint">DIGIMAP</label><input id="endpoint" @bind-value="@DIGIMAP" /></li>
             <li> <button @onclick="redraw" class="btn btn-dark" style="margin-top: 20px"> Redraw </button> </li>
         </ul>
-        
+
     </div>
 </div>
 
@@ -95,10 +95,24 @@
 
             var client = new HttpClient();
             module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./map.js");
-            if(module != null)
+            if (module != null)
             {
                 result = await module.InvokeAsync<string>("load_map");
             }
+
+            if (module != null)
+            {
+
+                double latitude1 = double.Parse(topPoint.Split(",")[0], CultureInfo.InvariantCulture);
+                double longitude1 = double.Parse(topPoint.Split(",")[1], CultureInfo.InvariantCulture);
+
+                double latitude2 = double.Parse(bottomPoint.Split(",")[0], CultureInfo.InvariantCulture);
+                double longitude2 = double.Parse(bottomPoint.Split(",")[1], CultureInfo.InvariantCulture);
+
+                await module.InvokeAsync<string>("zoom", longitude1, latitude1);
+                await module.InvokeAsync<string>("drawRect", longitude1, latitude1, longitude2, latitude2);
+            }
+
         }
     }
     async ValueTask IAsyncDisposable.DisposeAsync()
@@ -133,10 +147,7 @@
 
         RoadDataFetcher.ClearInstance();
 
-        /*            x_cent = Canvas.Width / 2;
-                    y_cent = Canvas.Height / 2;*/
         int numberOfPoints = 0;
-        /*Canvas.Refresh();*/
 
         ApiHelper.InitializeClient();
 
@@ -154,29 +165,31 @@
         List<RoadPointModel> outp = await ApiCallsHandler.GetHandler().GetAsync<List<RoadPointModel>>(
                 ApplicationConfigurationHandler.DigitalMapConnection + "/roads/" + ApplicationConfigurationHandler.TestRoadQuery);
 
-        if(outp == null || outp.Count == 0){
+        if (outp == null || outp.Count == 0)
+        {
 
         }
         else
         {
             RoadDataFetcher.GetInstance().RawFetchedData = outp;
 
-            if (module != null)
+            /*if (module != null)
             {
                 await module.InvokeAsync<string>("zoom", outp[0].Way.Points[0].Longitude, outp[0].Way.Points[0].Latitude);
-            }
+            }*/
 
             Dictionary<string, List<RoadPointModel>> groupedByRef = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByAttr();
 
             if (xref != null && !xref.Equals(""))
             {
-                groupedByRef = groupedByRef.Where(x => x.Key.Equals(xref)).ToDictionary(x => x.Key, x=> x.Value);
+                groupedByRef = groupedByRef.Where(x => x.Key.Equals(xref)).ToDictionary(x => x.Key, x => x.Value);
             }
 
-            foreach (KeyValuePair <string, List<RoadPointModel>> rf in groupedByRef){
+            foreach (KeyValuePair<string, List<RoadPointModel>> rf in groupedByRef)
+            {
 
                 RoadDataHandler roadHandler = new RoadDataHandler("503", rf.Key);
-            foreach (AbstractRoadModel entry in roadHandler.GetParsedRoadDataList(new HandlerSetupConfig(model, curv)))
+                foreach (AbstractRoadModel entry in roadHandler.GetParsedRoadDataList(new HandlerSetupConfig(model, curv)))
                 {
                     numberOfPoints++;
                     //AddPoint(entry.CurrentLocation, entry.MaxSpeed);
@@ -189,7 +202,7 @@
                             entry.Next.RadiusOfCurvature, curvTolerance);
                         }
                     }
-                }            
+                }
             }
 
         }
