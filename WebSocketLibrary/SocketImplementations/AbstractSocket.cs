@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CoreLibrary;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -36,16 +37,13 @@ namespace WebSocketLibrary
         public KeepAliveMessage GetKeepAliveMessage()
         {
 
-           // Console.WriteLine("Num of messages " + messageQueue.Count);
-            
-            KeepAliveMessage msg = (KeepAliveMessage) messageQueue.Values.FirstOrDefault(a => typeof(KeepAliveMessage) == a.GetType());
+            KeepAliveMessage msg = (KeepAliveMessage)messageQueue.Values.FirstOrDefault(a => typeof(KeepAliveMessage) == a.GetType());
 
             if (msg == null)
             {
                 msg = new KeepAliveMessage();
                 keepAliveFailedAttempts = 0;
-                //msg.Index = GetMessageIndex();
-                //AddToMessageQueue(msg.Index, msg);
+
             }
             else
             {
@@ -58,7 +56,7 @@ namespace WebSocketLibrary
         /**
          * Method returns all messages that need to be (and were not) acknowledged
          * This method will skip KeepAlive And ConnectMessages.
-         */ 
+         */
         public List<AbstractMessage> GetAllUnconfirmedMessages()
         {
             List<AbstractMessage> msg = messageQueue.Values.Where(a => typeof(KeepAliveMessage) != a.GetType()
@@ -112,8 +110,8 @@ namespace WebSocketLibrary
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error occured while parsing Incomming message");
-                Console.WriteLine(e.ToString());
+                Logger.GetLogger().WriteLine("Error occured while parsing Incomming message");
+                Logger.GetLogger().WriteLine(e.ToString());
                 //TODO setup log with all incidents
             }
 
@@ -129,12 +127,12 @@ namespace WebSocketLibrary
 
             AbstractMessage parsedObject = DeserializeObject<AbstractMessage>(receiveString);
 
-            if(parsedObject == null)
+            if (parsedObject == null)
             {
                 return;
             }
 
-            //Console.WriteLine(parsedObject.Type);
+            //Logger.GetLogger().WriteLine(parsedObject.Type);
 
             switch (parsedObject.Type)
             {
@@ -142,7 +140,7 @@ namespace WebSocketLibrary
                     ResolveAckMessage(DeserializeObject<AcknowledgeMessage>(receiveString));
                     break;
                 default:
-                    Console.WriteLine("Unknown message, ignoring");
+                    Logger.GetLogger().WriteLine("Unknown message, ignoring");
                     break;
             }
         }
@@ -158,18 +156,20 @@ namespace WebSocketLibrary
                 return;
             }
 
+            Logger.GetLogger().WriteLine("Received ack");
+
             AbstractMessage queueMessage = messageQueue[msg.AcknowledgingIndex];
-            messageQueue.Remove(msg.AcknowledgingIndex); 
+            messageQueue.Remove(msg.AcknowledgingIndex);
 
             if (queueMessage.GetType().Equals(typeof(ConnectMessage)))
             {
-                Console.WriteLine("Socket " + Id + " has established a connection");
+                Logger.GetLogger().WriteLine("Socket " + Id + " has established a connection");
                 ActivateConnection();
             }
 
             //Handle Custom Logic if necessary
             HandleCustomAckMessageLogic(queueMessage);
-            
+
         }
 
         protected abstract void HandleCustomAckMessageLogic(AbstractMessage msg);
@@ -185,7 +185,7 @@ namespace WebSocketLibrary
             // Try to establish connection again
             Task.Run(this.EstablishConnection);
         }
-        
+
         public int GetMessageIndex()
         {
             lock (this)
@@ -218,7 +218,7 @@ namespace WebSocketLibrary
 
             return true;
 
-        } 
+        }
 
         public async Task<bool> EstablishConnection()
         {
@@ -250,5 +250,10 @@ namespace WebSocketLibrary
         }
 
         public abstract void CloseConnection();
+
+        public virtual void ConnectionCleanup()
+        {
+            isAlive = false;
+        }
     }
 }

@@ -52,7 +52,7 @@ namespace CoreLibrary
 
         public static string CurvetureCalcMethod { get; set; } = typeof(CircumcircleRoadCircleCurvesResolver).Name;
 
-        public static string MaxSpeedCalcMethod { get; set; } = typeof(SimpleSpeedCalculatorBasedOnCurvature).Name;
+        public static string MaxSpeedCalcMethod { get; set; } = typeof(SimpleMaxSpeedCalcBasedOnFriction).Name;
 
         public static string RoadStateFetcherImplementation { get; set; } = typeof(DummyRoadStateFetcher).Name;
 
@@ -72,37 +72,7 @@ namespace CoreLibrary
 
         public static float IntegrationModuleInterval { get; set; }
 
-        /*public static AbstractSimplificationModel GetSimplificationModelFromConfiguration()
-        {
-
-            switch (SimplificationMethod)
-            {
-                case SimplMethods.DouglasPeuckerRoadSectionSimplification.ToString():
-
-                    return new DouglasPeuckerConfig(DPTolerance);
-
-                case SimplMethods.LangRoadSectionSimplification.ToString():
-                    int regionSize;
-                    try
-                    {
-                        regionSize = int.Parse(ConfigurationManager.AppSettings.Get("LangRegionSize"), CultureInfo.InvariantCulture);
-
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        Console.WriteLine("Missing or invalid config value for region size, defaulting 4");
-                        regionSize = 4;
-                    }
-                    return new LangConfig(DPTolerance, regionSize);
-
-                default:
-                    Console.WriteLine("Missing Simplification method type in config, default with DouglasPeuckerConfig with tolarance of 0.001");
-                    return new DouglasPeuckerConfig(0.001f);
-            }
-
-
-        }*/
+        public static string MapDataOrigin { get; set; }
 
         private static bool IsFactory(Type t)
         {
@@ -136,7 +106,7 @@ namespace CoreLibrary
                 System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(factory.TypeHandle);
             }
 
-            Console.WriteLine("Factory init took " + sw.ElapsedMilliseconds);
+            Logger.GetLogger().WriteLine("Factory init took " + sw.ElapsedMilliseconds);
         }
 
         public static void RecalculateTestRoadQuery(bool skipCustomParams, AreaMessage msg)
@@ -156,7 +126,7 @@ namespace CoreLibrary
                 IPAddress.Parse(DigiMapHost))
                 + ":" + DigiMapPort);
 
-            Console.WriteLine(mapAddr);
+            Logger.GetLogger().WriteLine(mapAddr);
 
             return mapAddr;
         }
@@ -168,13 +138,13 @@ namespace CoreLibrary
 
                 DataServerHost = LoadVariable("DATASERVER_HOST");
                 DataServerPort = LoadVariable("DATASERVER_PORT");
-                DigiMapHost = LoadVariable("DIGIMAP_HOST");
-                DigiMapPort = LoadVariable("DIGIMAP_PORT");
+                DigiMapHost = LoadVariable("DIGIMAP_HOST") ?? "localhost";
+                DigiMapPort = LoadVariable("DIGIMAP_PORT") ?? "8000";
                 DigitalMapConnection = CreateDigiMapUrl();
-                Longitude1 = float.Parse(LoadVariable("RoadQueryLong1"), CultureInfo.InvariantCulture);
-                Latitude1 = float.Parse(LoadVariable("RoadQueryLat1"), CultureInfo.InvariantCulture);
-                Longitude2 = float.Parse(LoadVariable("RoadQueryLong2"), CultureInfo.InvariantCulture);
-                Latitude2 = float.Parse(LoadVariable("RoadQueryLat2"), CultureInfo.InvariantCulture);
+                Longitude1 = float.Parse(LoadVariable("RoadQueryLong1") ?? "0", CultureInfo.InvariantCulture);
+                Latitude1 = float.Parse(LoadVariable("RoadQueryLat1") ?? "0", CultureInfo.InvariantCulture);
+                Longitude2 = float.Parse(LoadVariable("RoadQueryLong2") ?? "0", CultureInfo.InvariantCulture);
+                Latitude2 = float.Parse(LoadVariable("RoadQueryLat2") ?? "0", CultureInfo.InvariantCulture);
                 CustomRoadParameters = LoadVariable("CustomRoadParameters");
                 TestRoadQuery =
                     (String.IsNullOrEmpty(CustomRoadParameters) ? "?" : $"?{CustomRoadParameters}&") +
@@ -182,9 +152,9 @@ namespace CoreLibrary
                     $"&lat1={ConfigurationManager.AppSettings.Get("RoadQueryLat1")}" +
                     $"&long2={ConfigurationManager.AppSettings.Get("RoadQueryLong2")}" +
                     $"&lat2={ConfigurationManager.AppSettings.Get("RoadQueryLat2")}";
-                DPTolerance = float.Parse(LoadVariable("LINE_SIMPLIFICATION_TOLERANCE"), CultureInfo.InvariantCulture);
-                CurvatureTreshold = float.Parse(LoadVariable("CURVATURE_TRESHOLD"), CultureInfo.InvariantCulture);
-                CarDistanceSkipTreshold = float.Parse(LoadVariable("CAR_DISTANCE_SKIP_TRESHOLD"), CultureInfo.InvariantCulture);
+                DPTolerance = float.Parse(LoadVariable("LINE_SIMPLIFICATION_TOLERANCE") ?? "0", CultureInfo.InvariantCulture);
+                CurvatureTreshold = float.Parse(LoadVariable("CURVATURE_TRESHOLD") ?? "0", CultureInfo.InvariantCulture);
+                CarDistanceSkipTreshold = float.Parse(LoadVariable("CAR_DISTANCE_SKIP_TRESHOLD") ?? "500", CultureInfo.InvariantCulture);
                 CurveCollisionCalculator = LoadVariable("CURVE_COLLISION_CALCULATOR");
                 StraightCollisionCalculator = LoadVariable("STRAIGHT_COLLISION_CALCULATOR");
                 //SimplificationMethod = (SimplMethods)Enum.Parse(typeof(SimplMethods), ConfigurationManager.AppSettings.Get("SimplificationMethod"));
@@ -201,12 +171,13 @@ namespace CoreLibrary
                 {
                     RoadGroupByAttribute = "Ref";
                 }
+                MapDataOrigin = LoadVariable("MAP_DATA_ORIGIN") ?? "remote";  
                 InitConstructors();
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error occured during config parsing");
-                Console.WriteLine(e);
+                Logger.GetLogger().WriteLine("Error occured during config parsing");
+                Logger.GetLogger().WriteLine(e.ToString());
             }
         }
 
@@ -214,7 +185,7 @@ namespace CoreLibrary
         {
 
             string val = LoadEnvironmentVariable(variable) ?? LoadConfigurationVariable(variable);
-            Console.WriteLine("Loaded variable " + variable + " with value " + val);
+            Logger.GetLogger().WriteLine("Loaded variable " + variable + " with value " + val);
             return LoadEnvironmentVariable(variable) ?? LoadConfigurationVariable(variable);
         }
 

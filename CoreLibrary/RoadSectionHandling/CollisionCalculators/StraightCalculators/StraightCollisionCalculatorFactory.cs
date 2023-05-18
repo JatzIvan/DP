@@ -40,14 +40,14 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators.StraightCalculato
         {
             if(INSTANCE != null)
             {
-                Console.WriteLine("Warning: Rewriting existing Factory instance " + INSTANCE.GetType() + " with " + newInstance.GetType());
+                Logger.GetLogger().WriteLine("Warning: Rewriting existing Factory instance " + INSTANCE.GetType() + " with " + newInstance.GetType());
             }
             INSTANCE = newInstance;
         }
 
         public override (Type, Func<object>) GetDefaultInstance()
         {
-            return (typeof(SimpleStraightRoadCurvatureCalculator), CreateCreator(typeof(SimpleStraightRoadCurvatureCalculator)));
+            return (typeof(SimpleStraightRoadCollisionCalculator), CreateCreator(typeof(SimpleStraightRoadCollisionCalculator)));
         }
 
         // Choose from list by config value or else return Dummy implementation

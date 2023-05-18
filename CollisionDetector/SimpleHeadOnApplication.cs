@@ -22,7 +22,6 @@ namespace CollisionDetector
 
             ApplicationConfigurationHandler.RecalculateTestRoadQuery(false, ws2.AreaFetched());
 
-            WebSocketManagerFactory.GetInstance().CloseConnection(ws2);
 
             Dictionary<string, List<RoadPointModel>> sections = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByAttr();
 
@@ -46,6 +45,8 @@ namespace CollisionDetector
                     , ApplicationConfigurationHandler.KeepAliveFrequency);*/
 
             }
+
+            WebSocketManagerFactory.GetInstance().CloseConnection(ws2);
         }
 
         public override void StartThreads()

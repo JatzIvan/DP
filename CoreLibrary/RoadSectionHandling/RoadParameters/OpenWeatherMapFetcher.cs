@@ -9,6 +9,11 @@ using static System.Net.WebRequestMethods;
 
 namespace CoreLibrary.RoadSectionHandling.RoadParameters
 {
+    /**
+     * Implementation fetches data fron OpenWeatherMap using free v2.5 endpoint
+     * API key is required
+     */
+
     [RoadDataFetcher]
     internal class OpenWeatherMapFetcher : GenericRoadStateFetcher
     {
@@ -29,7 +34,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
 
             if(fetchedData == null)
             {
-                Console.WriteLine("Could not fetch OpenWeatherMap data, returning default");
+                Logger.GetLogger().WriteLine("Could not fetch OpenWeatherMap data, returning default");
                 return new RoadParameters();
             }
 
@@ -52,10 +57,7 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
     public class WeatherAppDataWrapper
     {
         public WeatherAppDataWrapper() { }
-/*        [JsonProperty("lat")]
-        public float Lat { get; set; }
-        [JsonProperty("lon")]
-        public float Lon { get; set; }*/
+
         [JsonProperty("main")]
         public CurrentWeatherAppDataWrapper Main { get; set; }
         [JsonProperty("visibility")]

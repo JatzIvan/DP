@@ -82,7 +82,7 @@ namespace SumoTraceParser
             }
 
             List<Tuple<string, string>> pairs = AbstractCollisionDetector.GetPermutations(allVehicles, 2).Select(x => new Tuple<string, string>(x.ElementAt(0), x.ElementAt(1))).ToList();
-           Console.WriteLine("Number of pairs - " + pairs.Count());
+           Logger.GetLogger().WriteLine("Number of pairs - " + pairs.Count());
 
             Dictionary<Tuple<string, string>, List<Tuple<double, Timestep>>> allDistances = new Dictionary<Tuple<string, string>, List<Tuple<double, Timestep>>>();
 
@@ -95,8 +95,8 @@ namespace SumoTraceParser
             {
                 List<string> currentVehicles = step.Vehicles.Select(x => x.Id).ToList();
 
-                Console.WriteLine("---------------------------------------------");
-                Console.WriteLine("Processing timestep - " + step.Time);
+                Logger.GetLogger().WriteLine("---------------------------------------------");
+                Logger.GetLogger().WriteLine("Processing timestep - " + step.Time);
 
                 foreach (KeyValuePair<Tuple<string, string>, List<Tuple<double, Timestep>>> vehicles in allDistances)
                 {
@@ -110,7 +110,7 @@ namespace SumoTraceParser
                     }
                 }
 
-                Console.WriteLine("---------------------------------------------");
+                Logger.GetLogger().WriteLine("---------------------------------------------");
 
             }
 
@@ -119,7 +119,7 @@ namespace SumoTraceParser
 
                 Tuple<double, Timestep> smallestDistance = vehiclesWithDistances.Value.DefaultIfEmpty(new Tuple<double, Timestep>(Double.MaxValue, null)).OrderBy(p => p.Item1).First();
 
-                Console.WriteLine("Smallest distance between vehicles " + vehiclesWithDistances.Key.Item1 + "/" + vehiclesWithDistances.Key.Item2 + " is " + smallestDistance.Item1);
+                Logger.GetLogger().WriteLine("Smallest distance between vehicles " + vehiclesWithDistances.Key.Item1 + "/" + vehiclesWithDistances.Key.Item2 + " is " + smallestDistance.Item1);
 
                 // There is not point if the smallest distance between vehicles is this high
                 if(smallestDistance.Item1 > 50)
@@ -193,7 +193,7 @@ namespace SumoTraceParser
 
                 if (smallestCumDistance < Math.Abs(currentCumDistance - distanceToCollision))
                 {
-                    //Console.WriteLine("cum distance -- " + smallestCumDistance + " and distance to col - " + distanceToCollision);
+                    //Logger.GetLogger().WriteLine("cum distance -- " + smallestCumDistance + " and distance to col - " + distanceToCollision);
                     break;
                 }
                 else
@@ -217,7 +217,7 @@ namespace SumoTraceParser
                 CollisionWillHappen = (v1Direction ? pointWithSmallestCumDistance.Next.RadiusOfCurvature : pointWithSmallestCumDistance.Previous.RadiusOfCurvature) > ApplicationConfigurationHandler.CurvatureTreshold;
             }
 
-            Console.WriteLine("Coll will happen " + CollisionWillHappen);
+            Logger.GetLogger().WriteLine("Coll will happen " + CollisionWillHappen);
             return CollisionWillHappen;
 
         }

@@ -1,0 +1,211 @@
+﻿@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+@page "/"
+@using ApiLibrary.Api;
+@using ConsoleApp1.Api;
+@using CoreLibrary.RoadSectionHandling.Data;
+@using CoreLibrary;
+@using System.Globalization;
+@using CoreLibrary.RoadSectionHandling;
+@using CoreLibrary.RoadSectionHandling.Model;
+@using CoreLibrary.RoadSectionHandling.RoadSimplificators;
+
+<div id="top-bar">
+    <div id="menu">
+        <ul>
+            <li> <label for="simpl">Tolerance</label> <input id="simpl" @bind-value="@simplTolerance" style="width:50px" /></li>
+            <li> <label for="curv">Curvature</label> <input id="curv" @bind-value="@curvTolerance" style="width:50px" /></li>
+            <li class="@(selectedSimplification.Equals(typeof(LangRoadSectionSimplification).Name)?"visible-item":"hidden-item")">
+                <label for="lang">Region</label>
+                <input id="lang" value="@langSize" style="width:50px" />
+            </li>
+            <li>
+                <label for="simplification">Simplification Calculator</label>
+                <select name="simplification" id="simplification" @bind="@selectedSimplification" style="height:30px">
+                    @foreach (var item in simplifications)
+                    {
+
+                        <option value="@item">
+                            @item
+                        </option>
+                    }
+                </select>
+            </li>
+            <li>
+                <label for="curvature">Curvature Calculator</label>
+                <select name="curvature" id="curvature" @bind="@selectedCurvature" style="height:30px">
+                    @foreach (var item in curvatures)
+                    {
+
+                        <option value="@item">
+                            @item
+                        </option>
+                    }
+                </select>
+            </li>
+
+            <li><label for="top">Top Point</label><input id="top" @bind-value="@topPoint" /></li>
+            <li><label for="bottom">Bottom Point</label><input id="bottom" @bind-value="@bottomPoint" /></li>
+            <li><label for="ref">Ref</label><input id="ref" @bind-value="@xref" style="width:50px" /></li>
+            <li><label for="endpint">DIGIMAP</label><input id="endpoint" @bind-value="@DIGIMAP" /></li>
+            <li> <button @onclick="redraw" class="btn btn-dark" style="margin-top: 20px"> Redraw </button> </li>
+        </ul>
+
+    </div>
+</div>
+
+
+<div id="map"></div>
+
+@code {
+
+    List<string> simplifications = (SectionSimplificationFactory.GetInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
+    //new List<string> { (SectionSimplificationFactory.GetInstance()).GetDefaultInstance().Item1.Name };
+    List<string> curvatures = (RoadCurvitureCalculatorFactory.GetInstance()).GetLoadedTypes().Select(_ => _.Name).ToList();
+
+    string selectedSimplification = (SectionSimplificationFactory.GetInstance()).GetDefaultInstance().Item1.Name;
+
+    string selectedCurvature = (RoadCurvitureCalculatorFactory.GetInstance()).GetDefaultInstance().Item1.Name;
+
+
+    float curvTolerance = 0.006f;
+    float simplTolerance = 0.3f;
+
+    int langSize = 4;
+
+    string topPoint = "48.370298,17.150139";
+
+    string bottomPoint = "48.306885,17.265176";
+
+    string xref = "503";
+
+    string DIGIMAP = "http://ail-lab.fiit.stuba.sk:8000";
+
+    private IJSObjectReference? module;
+    private string? result;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+
+            ApplicationConfigurationHandler.DigitalMapConnection = DIGIMAP;
+            ApplicationConfigurationHandler.MapDataOrigin = "remote";
+            ApplicationConfigurationHandler.RoadGroupByAttribute = "Ref";
+            ApiHelper.InitializeClient();
+
+            var client = new HttpClient();
+            module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./map.js");
+            if (module != null)
+            {
+                result = await module.InvokeAsync<string>("load_map");
+            }
+
+            if (module != null)
+            {
+
+                double latitude1 = double.Parse(topPoint.Split(",")[0], CultureInfo.InvariantCulture);
+                double longitude1 = double.Parse(topPoint.Split(",")[1], CultureInfo.InvariantCulture);
+
+                double latitude2 = double.Parse(bottomPoint.Split(",")[0], CultureInfo.InvariantCulture);
+                double longitude2 = double.Parse(bottomPoint.Split(",")[1], CultureInfo.InvariantCulture);
+
+                await module.InvokeAsync<string>("zoom", longitude1, latitude1);
+                await module.InvokeAsync<string>("drawRect", longitude1, latitude1, longitude2, latitude2);
+            }
+
+        }
+    }
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (module is not null)
+        {
+            await module.DisposeAsync();
+        }
+    }
+    async void redraw()
+    {
+
+        ApplicationConfigurationHandler.DigitalMapConnection = DIGIMAP;
+
+        double latitude1 = double.Parse(topPoint.Split(",")[0], CultureInfo.InvariantCulture);
+        double longitude1 = double.Parse(topPoint.Split(",")[1], CultureInfo.InvariantCulture);
+
+        double latitude2 = double.Parse(bottomPoint.Split(",")[0], CultureInfo.InvariantCulture);
+        double longitude2 = double.Parse(bottomPoint.Split(",")[1], CultureInfo.InvariantCulture);
+
+        ApplicationConfigurationHandler.Longitude1 = longitude1;
+        ApplicationConfigurationHandler.Latitude1 = latitude1;
+        ApplicationConfigurationHandler.Longitude2 = longitude2;
+        ApplicationConfigurationHandler.Latitude2 = latitude2;
+        ApplicationConfigurationHandler.CustomRoadParameters = "ref=" + xref;
+        ApplicationConfigurationHandler.TestRoadQuery = "?ref=" + xref + "&" +
+                $"long1={longitude1.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)}" +
+                $"&lat1={latitude1.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)}" +
+                $"&long2={longitude2.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)}" +
+                $"&lat2={latitude2.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)}";
+
+
+        RoadDataFetcher.ClearInstance();
+
+        int numberOfPoints = 0;
+
+        ApiHelper.InitializeClient();
+
+        string model = selectedSimplification;
+        string curv = selectedCurvature;
+
+        ApplicationConfigurationHandler.DPTolerance = simplTolerance;
+
+        if (selectedSimplification.Equals("LangRoadSectionSimplification"))
+        {
+            ApplicationConfigurationHandler.LangRegionSize = langSize;
+            //model = new LangConfig(tolerance, regionSizeVal);
+        }
+
+        List<RoadPointModel> outp = await ApiCallsHandler.GetHandler().GetAsync<List<RoadPointModel>>(
+                ApplicationConfigurationHandler.DigitalMapConnection + "/roads/" + ApplicationConfigurationHandler.TestRoadQuery);
+
+        if (outp == null || outp.Count == 0)
+        {
+
+        }
+        else
+        {
+            RoadDataFetcher.GetInstance().RawFetchedData = outp;
+
+            /*if (module != null)
+            {
+                await module.InvokeAsync<string>("zoom", outp[0].Way.Points[0].Longitude, outp[0].Way.Points[0].Latitude);
+            }*/
+
+            Dictionary<string, List<RoadPointModel>> groupedByRef = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByAttr();
+
+            if (xref != null && !xref.Equals(""))
+            {
+                groupedByRef = groupedByRef.Where(x => x.Key.Equals(xref)).ToDictionary(x => x.Key, x => x.Value);
+            }
+
+            foreach (KeyValuePair<string, List<RoadPointModel>> rf in groupedByRef)
+            {
+
+                RoadDataHandler roadHandler = new RoadDataHandler("503", rf.Key);
+                foreach (AbstractRoadModel entry in roadHandler.GetParsedRoadDataList(new HandlerSetupConfig(model, curv)))
+                {
+                    numberOfPoints++;
+                    //AddPoint(entry.CurrentLocation, entry.MaxSpeed);
+                    if (entry.Next != null)
+                    {
+
+                        if (module != null)
+                        {
+                            await module.InvokeAsync<string>("addLine", entry.CurrentLocation.Longitude, entry.CurrentLocation.Latitude, entry.Next.Point.CurrentLocation.Longitude, entry.Next.Point.CurrentLocation.Latitude,
+                            entry.Next.RadiusOfCurvature, curvTolerance);
+                        }
+                    }
+                }
+            }
+
+        }
+
+    }
+}

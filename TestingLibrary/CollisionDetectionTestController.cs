@@ -15,6 +15,7 @@ using CoreLibrary;
 using System.Reflection;
 using Xunit;
 using System.Diagnostics;
+using NetTopologySuite.Index.KdTree;
 
 namespace TestingLibrary
 {
@@ -35,7 +36,7 @@ namespace TestingLibrary
                 {
                     string jsonString = File.ReadAllText(file);
                     CarUpdateInfo roadRaw = JsonConvert.DeserializeObject<CarUpdateInfo>(jsonString)!;
-                    _data.Add(new object[] { new VehicleObserverWrapper(roadRaw, 0), Convert.ToBoolean(file.Split("_")[1].Replace(".json", "")) });
+                    _data.Add(new object[] { new VehicleObserverWrapper(roadRaw, 0), Convert.ToBoolean(file.Split("_")[1].Replace(".json", "")), Convert.ToBoolean(file.Split("_")[2].Replace(".json", "")) });
 
                 }
             }
@@ -56,21 +57,33 @@ namespace TestingLibrary
 
             private bool collisionOccured;
 
-            public TestCollisionDetector(RoadDataHandler roadHandler, bool collisionOccured) : base(roadHandler.GetParsedRoadData())
+            private bool speedExceeded;
+
+            private List<NotifyMessage> messages = new List<NotifyMessage>();
+
+            public TestCollisionDetector(RoadDataHandler roadHandler, bool collisionOccured, bool speedExceeded) : base(roadHandler.GetParsedRoadData())
             {
-                roadHandler.GatherCurvaturesBetweenVehicles();
+                //roadHandler.GatherCurvaturesBetweenVehicles();
                 this.dataStorage = roadHandler;
                 this.collisionOccured = collisionOccured;
+                this.speedExceeded = speedExceeded;
             }
 
             public override void PerformActions(VehicleObserverWrapper data)
             {
                 Stopwatch sw = Stopwatch.StartNew();
                 List<VehicleData> vehicles = data.Data.Vehicles;
-                //Console.WriteLine("Num of vehicles recieved " + vehicles.Count);
+                //Logger.GetLogger().WriteLine("Num of vehicles recieved " + vehicles.Count);
                 if (vehicles.Count >= 2)
                 {
-                    IEnumerable<IEnumerable<VehicleData>> pairsToCalc = CreateVehiclePairs(vehicles);
+
+                    List<Tuple<VehicleData, AbstractRoadModel>> mappedVehicles = vehicles
+                    .Select(veh => (veh, MapParserUtils.ConvertGPStoCartsian(new LocationPoint(veh.Position.Lon, veh.Position.Lat))))
+                    .Select(convertedVehicle => new Tuple<VehicleData, AbstractRoadModel>(
+                        convertedVehicle.veh, currectRoadModel.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle.Item2.Item1, convertedVehicle.Item2.Item2, convertedVehicle.Item2.Item3)).Data
+                    )).ToList();
+
+                    IEnumerable<IEnumerable<Tuple<VehicleData, AbstractRoadModel>>> pairsToCalc = CreateVehiclePairs(mappedVehicles);
 
                     // Try threading or something, right now I need to ensure that this concept can work
                     foreach (var pair in pairsToCalc)
@@ -80,12 +93,28 @@ namespace TestingLibrary
                         {
                             AbstractRoadModel collisionPoint = calcMethod.PerformCollisionCalculations(pair.ElementAt(0), pair.ElementAt(1), currectRoadModel);
 
-                            Xunit.Assert.Equal(collisionOccured, calcMethod.CollisionOccured());
+                            if (calcMethod.CollisionOccured())
+                            {
+                                messages.Add(calcMethod.CreateNotificationMessage(pair.ElementAt(0).Item1, pair.ElementAt(1).Item1, collisionPoint, dataStorage.SectionRef));
+                                messages.Add(calcMethod.CreateNotificationMessage(pair.ElementAt(1).Item1, pair.ElementAt(0).Item1, collisionPoint, dataStorage.SectionRef));
+                                
+                                Xunit.Assert.Equal(collisionOccured, calcMethod.CollisionOccured());
+                                Xunit.Assert.Equal(pair.ElementAt(0).Item1.Speed > collisionPoint.MaxSpeed || pair.ElementAt(1).Item1.Speed > collisionPoint.MaxSpeed, speedExceeded);
+
+                            }
+
                         }
                     }
 
-                    Console.WriteLine("Elapsed time (ms) " + (sw.ElapsedTicks / 10000) + " for number of cars " + vehicles.Count);
-                    Console.WriteLine("Elapsed time (mikro) " + (sw.ElapsedTicks / 10) + " for number of cars " + vehicles.Count);
+                    if (collisionOccured)
+                    {
+                        Xunit.Assert.Equal(2 ,messages.Count);
+                    }
+
+                    Xunit.Assert.Equal(speedExceeded, messages.Where(msg => msg.Level.Equals(NotificationLevel.danger)).ToList().Count > 0);
+
+                    Logger.GetLogger().WriteLine("Elapsed time (ms) " + (sw.ElapsedTicks / 10000) + " for number of cars " + vehicles.Count);
+                    Logger.GetLogger().WriteLine("Elapsed time (mikro) " + (sw.ElapsedTicks / 10) + " for number of cars " + vehicles.Count);
 
                 }
             }
@@ -96,19 +125,20 @@ namespace TestingLibrary
 
         [Theory]
         [MemberData(nameof(VehicleWrapperData.TestData), MemberType = typeof(VehicleWrapperData))]
-        public void TestCollisionSituations(VehicleObserverWrapper wrapper, bool collision)
+        public void TestCollisionSituations(VehicleObserverWrapper wrapper, bool collision, bool speedExceeded)
         {
             ApplicationConfigurationHandler.InitConstructors();
             ApplicationConfigurationHandler.CurvetureCalcMethod = typeof(CircumcircleRoadCircleCurvesResolver).Name;
             ApplicationConfigurationHandler.SimplificationMethod = typeof(DouglasPeuckerRoadSectionSimplification).Name;
             ApplicationConfigurationHandler.DPTolerance = 0.3f;
-            ApplicationConfigurationHandler.CurvatureTreshold = 0.008f;
-            ApplicationConfigurationHandler.CarDistanceSkipTreshold = 500;
+            ApplicationConfigurationHandler.CurvatureTreshold = 0.006f;
+            ApplicationConfigurationHandler.CarDistanceSkipTreshold = 300;
+            ApplicationConfigurationHandler.MapDataOrigin = "test";
 
             RoadDataHandler handler = new RoadDataHandler("503", "503");
             handler.roadDataFether = roadDataFetcher.Object;
 
-            new TestCollisionDetector(handler, collision).PerformActions(wrapper);
+            new TestCollisionDetector(handler, collision, speedExceeded).PerformActions(wrapper);
         }
 
 

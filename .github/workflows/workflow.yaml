@@ -18,9 +18,9 @@ jobs:
         with:
           dotnet-version: 6.x
       - name: Install dependencies for tests
-        run: dotnet restore
-      - name: Build test
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet restore --ignore-failed-sources
+      - name: Build test 
+        run: dotnet build --no-restore
       - name: Test
         run: dotnet test --no-restore --verbosity normal
   
@@ -38,7 +38,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build the Docker image
-        run: docker build . --file ./CollisionDetector/Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/trafic-dt-head-collision-handler
+        run: docker build . --file ./CollisionDetector/Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/traffic-dt-head-collision-handler
 
       - name: Docker Push
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/trafic-dt-head-collision-handler
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/traffic-dt-head-collision-handler

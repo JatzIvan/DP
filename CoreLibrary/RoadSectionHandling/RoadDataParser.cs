@@ -25,7 +25,6 @@ namespace CoreLibrary.RoadSectionHandling
 
             foreach(RoadPointModel model in RawModel)
             {
-                //Tuple<LocationPoint, LocationPoint> key = new Tuple<LocationPoint, LocationPoint>(model.Way.Points[0], model.Way.Points[model.Way.Points.Count - 1]);
                 Tuple<LocationPoint, LocationPoint> key = new Tuple<LocationPoint, LocationPoint>(model.Way.Points.First(), model.Way.Points.Last());
 
                 if (!modelDictionary.ContainsKey(key))
@@ -39,9 +38,7 @@ namespace CoreLibrary.RoadSectionHandling
 
         }
 
-        // Create a dictionary of connected points from sorted list
-        // Key -- GPS location of point
-        // Value -- point definition w/ curviture
+        // Create a list of connected points from sorted list
         private List<AbstractRoadModel> CreateRoadCurvitureModelDictionary(List<RoadPointModel> sortedByRoads)
         {
 
@@ -59,9 +56,9 @@ namespace CoreLibrary.RoadSectionHandling
                     }
 
                     AbstractRoadModel currentCurvitureModel = (AbstractRoadModel)Activator.CreateInstance(typeof(AbstractRoadModel), new object[] { way });
-                    //{
+
                     currentCurvitureModel.Previous = beforeCurvitureModel == null ? null : new SegmentCurvitureChain(beforeCurvitureModel);
-                    //};
+
 
                     if (beforeCurvitureModel != null)
                     {
@@ -69,10 +66,7 @@ namespace CoreLibrary.RoadSectionHandling
                         currentCurvitureModel.Distance = beforeCurvitureModel.Distance + MapParserUtils.CalculateDistanceBetweenPoints(beforeCurvitureModel.CurrentLocation
                             , currentCurvitureModel.CurrentLocation);
                         beforeCurvitureModel.Next = new SegmentCurvitureChain(currentCurvitureModel);
-                        /*currentCurvitureModel.Previous.Distance += MapParserUtils.CalculateBearingBetweenPoints(currentCurvitureModel.CurrentLocation
-                        , beforeCurvitureModel.CurrentLocation);
-                        beforeCurvitureModel.Next.Distance += MapParserUtils.CalculateBearingBetweenPoints(beforeCurvitureModel.CurrentLocation
-                        , currentCurvitureModel.CurrentLocation);*/
+
                     }
 
                     roadCurvOut.Add(way, currentCurvitureModel);
@@ -85,9 +79,7 @@ namespace CoreLibrary.RoadSectionHandling
             return roadCurvOut.Values.ToList();
         }
 
-        // Function creates a dictionary of connected points
-        // Key -- GPS location of point
-        // Value -- point definition w/ curviture
+        // Function creates a list of connected points
         // Function needs to determine all separate connected roads
         public List<AbstractRoadModel> GetConnectedWays()
         {
@@ -102,16 +94,15 @@ namespace CoreLibrary.RoadSectionHandling
             {
                 RawModel[0]
             };
-            //modelDict.Remove(new Tuple<LocationPoint, LocationPoint>(RawModel[0].Way.Points[0], RawModel[0].Way.Points[RawModel[0].Way.Points.Count - 1]));
             modelDict.Remove(new Tuple<LocationPoint, LocationPoint>(RawModel.First().Way.Points.First(), RawModel.First().Way.Points.Last()));
-
 
             while (true)
             {
 
-                Console.WriteLine(modelDict.Count);
+                int countBef = modelDict.Count;
 
-                if(modelDict.Count == 0)
+
+                if (modelDict.Count == 0)
                 {
                     break;
                 }
@@ -125,11 +116,7 @@ namespace CoreLibrary.RoadSectionHandling
                         break;
                     }
 
-                    //LocationPoint currentFirst = sortedByRoads[0].Way.Points[0];
-
                     LocationPoint currentFirst = sortedByRoads.First().Way.Points.First();
-
-                    //Console.WriteLine(currentFirst.Longitude + ":" + currentFirst.Latitude);
 
                     // Check which record in dictionary has "Road segment end" same as start of current first segment
                     // Found segment is places on front
@@ -155,8 +142,6 @@ namespace CoreLibrary.RoadSectionHandling
                         break;
                     }
 
-                    //LocationPoint currentLast = sortedByRoads[sortedByRoads.Count - 1].Way.Points[sortedByRoads[sortedByRoads.Count - 1].Way.Points.Count - 1];
-
                     LocationPoint currentLast = sortedByRoads.Last().Way.Points.Last();
 
                     // Check which record in dictionary has "Road segment start" same as end of current last segment
@@ -174,10 +159,16 @@ namespace CoreLibrary.RoadSectionHandling
 
 
                 }
-            }
 
-            //Dictionary<LocationPoint, AbstractRoadModel> joinedDict = CreateRoadCurvitureModelDictionary(sortedByRoads);
-           
+                if(modelDict.Count == countBef)
+                {
+                    Logger.GetLogger().WriteLine("Unable to connect road segmets because road segments are not connected (check if parts of the road are not cut of)");
+                    Logger.GetLogger().WriteLine("Returning parts that were able to be connected together (Result might be skewed)");
+                    break;
+                }
+
+            }
+            
             return CreateRoadCurvitureModelDictionary(sortedByRoads);
         }
 

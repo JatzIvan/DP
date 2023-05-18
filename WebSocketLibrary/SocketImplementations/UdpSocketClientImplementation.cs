@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CoreLibrary;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -78,6 +79,7 @@ namespace WebSocketLibrary
             this.keepAliveTimeout = keepAliveTimeout;
             //EP = new IPEndPoint(IPAddress.Parse(host), Int32.Parse(port)); // endpoint where server is listening
 
+            // Resolve docker address when needed
             IPAddress ip = Uri.CheckHostName(host).Equals(UriHostNameType.Dns) ? 
                 Dns.GetHostEntry(host).AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork) :
                 IPAddress.Parse(host);
@@ -109,9 +111,8 @@ namespace WebSocketLibrary
         {
             if (!isAlive)
             {
-                Console.WriteLine("Trying to connect socket " + Id);
+                Logger.GetLogger().WriteLine("Trying to connect socket " + Id);
                 HandleHandShake();
-                //throw new Exception("Not connected yet");
             }
 
             return isAlive;
@@ -125,14 +126,6 @@ namespace WebSocketLibrary
         {
             try
             {
-
-                //Create Subscribe Message (for now it is hardcoded)
-                //SubscribeMessage firstMsg = new SubscribeMessage();
-                //firstMsg.Interval = 200;
-                //firstMsg.Content = SubscribeContent.vehicles;
-
-
-
                 // Setup connection with data server
                 isAlive = checkIfAlive();
 
@@ -143,8 +136,8 @@ namespace WebSocketLibrary
             }
             catch (SocketException e)
             {
-                Console.WriteLine(e);
-                Console.WriteLine("Try again after 10 seconds");
+                Logger.GetLogger().WriteLine(e.ToString());
+                Logger.GetLogger().WriteLine("Try again after 10 seconds");
                 return false;
             }
         }
@@ -154,14 +147,9 @@ namespace WebSocketLibrary
             UdpState state = new UdpState();
             state.client = Client;
             state.endpoint = EP;
-            /**
-             * Handle Errors
-             */
 
-            //if (checkIfAlive())
-            //{
+
             Client.BeginReceive(new AsyncCallback(Ws_HandleMessage), state);
-            //}
             
         }
 
@@ -203,18 +191,11 @@ namespace WebSocketLibrary
             }
             catch (Exception)
             {
-                //Console.WriteLine(e);
+                //Logger.GetLogger().WriteLine(e);
             }
 
-
-
-            //Console.WriteLine("Socket " + Id + " has recieved data");
-
-            //if (receiveBytes.Length >= 4)
-            //{
             string receiveString = Encoding.ASCII.GetString(receiveBytes);
                 ResolveMessageType(receiveString);
-            //}
 
 
             UdpState state = new UdpState();
@@ -233,7 +214,7 @@ namespace WebSocketLibrary
             }
             catch (Exception)
             {
-                Console.WriteLine("Socket was closed, stopping receive");
+                Logger.GetLogger().WriteLine("Socket was closed, stopping receive");
             }
 
         }
@@ -242,17 +223,10 @@ namespace WebSocketLibrary
          * Save message into queue and send when possible.
          * This is necessary because there are multiple threads that send messages
          */
-
         public override AbstractMessage SendMessage(AbstractMessage msg)
         {
             msg.Index = GetMessageIndex();
             messagesQueue.Enqueue(msg);
-            
-            /*if (checkIfAlive())
-            {
-                Byte[] msgInBytes = ConvertMesssageToBytes(msg);
-                Client.Send(msgInBytes, msgInBytes.Length, EP);
-            }*/
 
             return msg;
 
@@ -261,22 +235,24 @@ namespace WebSocketLibrary
         public override void CloseConnection()
         {
 
+            SendCloseMessage();
+
+        }
+
+        public override void ConnectionCleanup()
+        {
+            base.ConnectionCleanup();
             registeredMessageHandlers.ForEach(handler =>
             {
                 handler.OnCompleted();
             });
             registeredMessageHandlers.Clear();
-
-            SendCloseMessage();
-            //Client.Client.Shutdown(SocketShutdown.Both);
-            isAlive = false;
             Client.Close();
             // Close thread for sending messages
-            Console.WriteLine("Closing thread");
+            Logger.GetLogger().WriteLine("Closing thread");
             sendingThread.Interrupt();
             keepAliveThread.Interrupt();
-
-        }                                                      
+        }
 
         // Inform Other side that connection is closing
         private void SendCloseMessage()
@@ -285,7 +261,7 @@ namespace WebSocketLibrary
 
             //Byte[] sendBytes = ConvertMesssageToBytes(msg);
 
-            SendMessage(msg);
+            SendMessageWithAck(msg);
         }
 
         public void HandleHandShake()
@@ -335,27 +311,21 @@ namespace WebSocketLibrary
             {
                 while (true)
                 {
-                    //Dictionary<int, AbstractSocket> activeConnections = WebSocketManagerFactory.GetInstance().GetActiveConnections();
-
-                    //Console.WriteLine(activeConnections.Count);
-
-                    //foreach (KeyValuePair<int, AbstractSocket> entry in activeConnections)
-                    //{
                     if (checkIfAlive())
                     {
                         KeepAliveMessage msg = this.GetKeepAliveMessage();
 
                         if (this.keepAliveFailedAttempts > 5)
                         {
-                            Console.WriteLine("Socket " + this.Id + " has lost connection");
+                            Logger.GetLogger().WriteLine("Socket " + this.Id + " has lost connection");
                             WebSocketManagerFactory.GetInstance().DropActiveConnection(this);
                         }
                         else
                         {
+                            Logger.GetLogger().WriteLine("Sending Keepalive message");
                             this.SendMessageWithAck(msg);
                         }
                     }
-                    //}
 
                     Thread.Sleep(keepAliveTimeout);
                 }

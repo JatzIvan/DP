@@ -15,7 +15,8 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
          * If method returns null, there is no collision
          * When CollisionInfo is returned, it should be provided to both vehicles
          */
-        public AbstractRoadModel PerformCollisionCalculations(VehicleData vehicle1, VehicleData vehicle2, KdTree<AbstractRoadModel> currectRoadModel);
+        public AbstractRoadModel PerformCollisionCalculations(Tuple<VehicleData, AbstractRoadModel> vehicle1Tuple, Tuple<VehicleData, AbstractRoadModel> vehicle2Tuple,
+            KdTree<AbstractRoadModel> currectRoadModel);
 
         public double CalculateTTC();
 
@@ -37,32 +38,49 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
 
         }
 
-        public WarningMessage CreateWarningMessage(VehicleData vehicle)
-        {
-            WarningMessage msg = new WarningMessage();
-
-            //msg.Index = new Random().Next();
-            msg.VehicleId = vehicle.Id;
-            msg.TimeToCollision = CalculateTTC();
-            msg.CollisionSeverity = GetCollisionSeverity().ToString();
-            msg.CollisionType = "headon";
-
-            return msg;
-        }
-
-
-        public NotifyMessage CreateNotificationMessage(VehicleData host, VehicleData target)
+        /**
+         * Create warning message with correct content based on calculation output
+         */
+        public NotifyMessage CreateNotificationMessage(VehicleData host, VehicleData target, AbstractRoadModel collisionPoint, string roadAttr)
         {
             NotifyMessage msg = new NotifyMessage();
 
-            //msg.Index = new Random().Next();
             msg.VehicleId = host.Id;
             msg.Level = GetCollisionSeverity().Equals(CollisionSeverity.MEDIUM) ? NotificationLevel.warning : NotificationLevel.danger;
             msg.Content = new HeadCollisionContent(CalculateTTC(), target.Id);
 
+            if(collisionPoint != null)
+            {
+                if (IsMaxSpeedExceeded(host, msg, collisionPoint.MaxSpeed))
+                {
+                    IsVehicleAbleToBrake(host, roadAttr, msg);
+                }
+            }
+
+
             return msg;
         }
 
+        /**
+         * Modify warning message based on vehicle speed and max speed at meeting point
+         */
+        public bool IsMaxSpeedExceeded(VehicleData vehicle, NotifyMessage msg, double maxAllowedSpeed)
+        {
+            if (vehicle.Speed > maxAllowedSpeed)
+            {
+                Logger.GetLogger().WriteLine($"Vehicle {vehicle.Id} speed ({vehicle.Speed}) has exceeded the max possible speed ({maxAllowedSpeed}) to traverse curve");
+                msg.Level = NotificationLevel.danger;
+                msg.Content.MaxSpeedExceededBy = vehicle.Speed - maxAllowedSpeed;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /**
+         * Determine if braking distance is smaller than distance to meeting point
+         */
         public bool IsVehicleAbleToBrake(VehicleData vehicle, string roadRef, NotifyMessage msg)
         {
 
@@ -71,11 +89,7 @@ namespace CoreLibrary.RoadSectionHandling.CollisionCalculators
 
             if(distanceToColl < breakingDistance)
             {
-                //Console.WriteLine("-----------------------------------------");
-                Console.WriteLine($"Vehicle {vehicle.Id} breaking distance ({breakingDistance}) was higher than distance to collision ({distanceToColl})");
-                //Console.WriteLine("Distance to coll " + distanceToColl + " - breaking distance " + breakingDistance);
-                //Console.WriteLine("-----------------------------------------");
-                //msg.Content.NotificationMessages.Push($"Vehicle breaking distance ({breakingDistance}) was higher than distance to collision ({distanceToColl})");
+                Logger.GetLogger().WriteLine($"Vehicle {vehicle.Id} breaking distance ({breakingDistance}) was higher than distance to collision ({distanceToColl})");
                 msg.Content.BrakingDistanceDiff = breakingDistance - distanceToColl;
             }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,10 +21,6 @@ namespace WebSocketLibrary
 
         public UdpSocketForCarConnection(string host, string port, int id, List<IObserver<VehicleObserverWrapper>> observers, float interval) : this(host, port, id, observers, 6000, interval)
         {
-/*            this.Interval = interval;
-            this.KeepAliveTimetout = 6000;
-            SubscriptionAliveThread = new Thread(CheckLastMessageTime);
-            SubscriptionAliveThread.Start();*/
         }
 
         public UdpSocketForCarConnection(string host, string port, int id, List<IObserver<VehicleObserverWrapper>> observers, int keepAliveTimeout, float interval) : base(host, port, id, observers, keepAliveTimeout)
@@ -43,7 +40,6 @@ namespace WebSocketLibrary
                 return;
             }
 
-            //Console.WriteLine(parsedObject.Type);
 
             switch (parsedObject.Type)
             {
@@ -78,11 +74,8 @@ namespace WebSocketLibrary
             if (msg == null)
             {
                 msg = new SubscribeMessage();
-                //msg.Index = GetMessageIndex();
                 msg.Interval = Interval;
                 msg.Content = SubscribeContent.vehicles;
-                //msg.Road = "503";
-                //AddToMessageQueue(msg.Index, msg);
             }
 
             return msg;
@@ -94,10 +87,17 @@ namespace WebSocketLibrary
 
             if (msg.GetType().Equals(typeof(SubscribeMessage)))
             {
-                Console.WriteLine("Socket " + Id + " starts recieving data");
+                Logger.GetLogger().WriteLine("Socket " + Id + " starts recieving data");
                 Subscribed = true;
                 LastReceivedMessageTime = DateTime.Now;
             }
+
+            if (msg.GetType().Equals(typeof(UnsubscribeMessage)))
+            {
+                Logger.GetLogger().WriteLine("Socket " + Id + " was unsubscribed");
+                ConnectionCleanup();
+            }
+
         }
 
         public override void DropConnection()
@@ -134,14 +134,6 @@ namespace WebSocketLibrary
 
             base.ActivateConnection();
             Subscribe();
-            //Task.Run(() => Do(IsSubscribed));
-            // Send Subscribe message
-            // TODO: This is probably not the best idea, think this through
-            /*while (!Subscribed && isAlive)
-            {
-                SendMessage(GetSubscribeMessage());
-                Thread.Sleep(200);
-            }*/
         }
 
         private void CheckLastMessageTime()
@@ -156,7 +148,7 @@ namespace WebSocketLibrary
 
                         if((DateTime.Now - LastReceivedMessageTime).TotalMilliseconds > 5 * KeepAliveTimetout)
                         {
-                            Console.WriteLine("Socket " + this.Id + " lost vehicle update subscription");
+                            Logger.GetLogger().WriteLine("Socket " + this.Id + " lost vehicle update subscription");
                             Subscribed = false;
                             Subscribe();
                         }

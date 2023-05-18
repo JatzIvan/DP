@@ -8,6 +8,11 @@ using System.Text;
 
 namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 {
+    /**
+     * Simple curvature calculator based on 3 road points
+     * This calculator takes into account curvature direction (small curvature in right direction is canceled by small curvature in left direction)
+     */
+
     [CurvatureResolver]
     public class CircumcircleRoadCircleCurvesResolver : ICurvesResolver
     {
@@ -16,7 +21,6 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 
         public CircumcircleRoadCircleCurvesResolver()
         {
-            /*this.ConnectedWays = connectedWays;*/
         }
 
         public List<AbstractRoadModel> CalculateCurvesForWays(List<AbstractRoadModel> connectedWays)
@@ -50,6 +54,14 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 
             }
 
+            // Approximate edge values
+            current = GetModel(true);
+            current.RadiusOfCircle = current.Next != null ? current.Next.Point.RadiusOfCircle : 0;
+            current.Angle = current.Next != null ? current.Next.Point.Angle : 0;
+            current = GetModel(false);
+            current.RadiusOfCircle = current.Previous != null ? current.Previous.Point.RadiusOfCircle : 0;
+            current.Angle = current.Previous != null ? current.Previous.Point.Angle : 0;
+
             // Calculate curviture 
             current = GetModel(true);
             while (true)
@@ -66,6 +78,7 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
                     ? 1/(current.RadiusOfCircle + current.Next.Point.RadiusOfCircle)/ 2 
                     : 1/current.Next.Point.RadiusOfCircle;*/
 
+                // Use harmonic mean (which is just transformed aritmetic mean)
                 current.Next.RadiusOfCurvature = current.RadiusOfCircle > 0
                     ? 1 / (
                     Math.Abs(2 * current.RadiusOfCircle * current.Next.Point.RadiusOfCircle / 
@@ -91,6 +104,7 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
                     ? 1/((current.RadiusOfCircle + current.Previous.Point.RadiusOfCircle) / 2)
                     : 1/current.Previous.Point.RadiusOfCircle;*/
 
+                // Use harmonic mean (which is just transformed aritmetic mean)
                 current.Previous.RadiusOfCurvature = current.RadiusOfCircle > 0
                         ? 1 / (
                         Math.Abs(2 * current.RadiusOfCircle * current.Previous.Point.RadiusOfCircle /
@@ -105,6 +119,9 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 
         }
 
+        /**
+         * Utility method to get first or last point of road
+         */
         private AbstractRoadModel GetModel(bool first)
         {
 
@@ -128,10 +145,11 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 
         }
 
+        /**
+         * Signed angle is used to determine direction of curvature (from vectors)
+         */
         private double CalculateAngle(LocationPoint bef, LocationPoint curr, LocationPoint after)
         {
-            double warnTreshold = 60;
-            
             Vector2 v0 = new Vector2(Convert.ToSingle(curr.Longitude - bef.Longitude), Convert.ToSingle(curr.Latitude - bef.Latitude));
             Vector2 v1 = new Vector2(Convert.ToSingle(after.Longitude - curr.Longitude), Convert.ToSingle(after.Latitude - curr.Latitude));
 
@@ -143,7 +161,9 @@ namespace CoreLibrary.RoadSectionHandling.CurvatureCalculations
 
 
 
-        // Use https://roadcurvature.com/how-it-works/
+        /**
+         * Simple osculating circle from triangle
+         */
         private double GetCircleRadiusFromPoints(LocationPoint point1, LocationPoint point2, LocationPoint point3)
         {
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreLibrary;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -65,7 +66,7 @@ namespace WebSocketLibrary.SocketImplementations
 
             if(msg == null)
             {
-                Console.WriteLine("Requesting Area");
+                Logger.GetLogger().WriteLine("Requesting Area");
                 SendMessage(new RequestAreaMessage());
                 return msg;
             }

@@ -27,6 +27,7 @@ namespace TestingLibrary
         {
             ApplicationConfigurationHandler.DPTolerance = 0;
             ApplicationConfigurationHandler.SimplificationMethod = typeof(DouglasPeuckerRoadSectionSimplification).Name;
+            ApplicationConfigurationHandler.MapDataOrigin = "test";
             RoadDataHandler handler = new RoadDataHandler("503", "503");
             handler.roadDataFether = roadDataFetcher.Object;
 
@@ -46,6 +47,7 @@ namespace TestingLibrary
             ApplicationConfigurationHandler.LoadConfiguration();
             ApplicationConfigurationHandler.SimplificationMethod = typeof(DouglasPeuckerRoadSectionSimplification).Name;
             ApplicationConfigurationHandler.DPTolerance = simplificationTolerance;
+            ApplicationConfigurationHandler.MapDataOrigin = "test";
 
             RoadDataHandler handler = new RoadDataHandler("503", "503");
             handler.roadDataFether = roadDataFetcher.Object;
@@ -67,6 +69,7 @@ namespace TestingLibrary
             ApplicationConfigurationHandler.SimplificationMethod = typeof(LangRoadSectionSimplification).Name;
             ApplicationConfigurationHandler.DPTolerance = simplificationTolerance;
             ApplicationConfigurationHandler.LangRegionSize = regionSize;
+            ApplicationConfigurationHandler.MapDataOrigin = "test";
 
             RoadDataHandler handler = new RoadDataHandler("503", "503");
             handler.roadDataFether = roadDataFetcher.Object;
@@ -82,14 +85,15 @@ namespace TestingLibrary
         [Theory]
         // 888 is one less than number of points, because we resolve based on curvature between points
         [InlineData(0, 888)]
-        [InlineData(0.006, 436)]
-        [InlineData(0.01, 344)]
+        [InlineData(0.006, 435)]
+        [InlineData(0.01, 343)]
         public void TestCircleCurvatureResolver(float curveTolerance, int numberOfDangerousRegions)
         {
             ApplicationConfigurationHandler.LoadConfiguration();
             ApplicationConfigurationHandler.DPTolerance = 0;
             ApplicationConfigurationHandler.SimplificationMethod = typeof(DouglasPeuckerRoadSectionSimplification).Name;
             ApplicationConfigurationHandler.CurvetureCalcMethod = typeof(CircumcircleRoadCircleCurvesResolver).Name;
+            ApplicationConfigurationHandler.MapDataOrigin = "test";
 
             RoadDataHandler handler = new RoadDataHandler("503", "503");
             handler.roadDataFether = roadDataFetcher.Object;

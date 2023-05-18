@@ -1,4 +1,5 @@
-﻿using SumoTraceParser.Models;
+﻿using CoreLibrary;
+using SumoTraceParser.Models;
 using SumoTraceParser.OutputFileTemplate;
 using System;
 using System.Collections.Generic;
@@ -51,8 +52,8 @@ namespace SumoTraceParser
 
         public void CreateExportBasedOnConfig(ExportConfig conf, T VehiclePairs)
         {
-            Console.WriteLine("\n\n");
-            Console.WriteLine("Started Exporting");
+            Logger.GetLogger().WriteLine("\n\n");
+            Logger.GetLogger().WriteLine("Started Exporting");
 
             bool exists = System.IO.Directory.Exists(conf.OutputPath + "/sumo_parsed");
 
@@ -66,7 +67,7 @@ namespace SumoTraceParser
             foreach(Tuple<string, List<string>> keep in vehiclesToKeep)
             {
 
-                Console.WriteLine("Exporting pair - " + String.Join(",", keep.Item2));
+                Logger.GetLogger().WriteLine("Exporting pair - " + String.Join(",", keep.Item2));
 
                 FcdExport newExport = new FcdExport();
                 newExport.Timestemps = new List<Timestep>();
@@ -95,7 +96,7 @@ namespace SumoTraceParser
 
                 }
 
-                Console.WriteLine("Creating output - " + String.Join(",", keep.Item2));
+                Logger.GetLogger().WriteLine("Creating output - " + String.Join(",", keep.Item2));
 
                 switch (conf.Output)
                 {

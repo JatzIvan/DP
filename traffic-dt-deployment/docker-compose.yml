@@ -1,0 +1,139 @@
+# docker-compose.yml
+version: '2'
+
+services:
+  
+  integration_module:
+    image: stefanschindler/traffic-dt-integration-module
+    ports:
+      - "${INTEGRATION_MODULE_PROCESSORS_HOST_PORT}:${INTEGRATION_MODULE_PROCESSORS_CONTAINER_PORT}/udp"
+      - "${INTEGRATION_MODULE_VEHICLES_HOST_PORT}:${INTEGRATION_MODULE_VEHICLES_CONTAINER_PORT}/udp"
+    environment:
+      - PROCESSORS_CONNECTION_PORT=${INTEGRATION_MODULE_PROCESSORS_CONTAINER_PORT}
+      - VEHICLES_CONNECTION_PORT=${INTEGRATION_MODULE_VEHICLES_CONTAINER_PORT}
+      - AREA_TOP_LEFT_LAT=${INTEGRATION_MODULE_AREA_TOP_LEFT_LAT}
+      - AREA_TOP_LEFT_LON=${INTEGRATION_MODULE_AREA_TOP_LEFT_LON}
+      - AREA_BOTTOM_RIGHT_LAT=${INTEGRATION_MODULE_AREA_BOTTOM_RIGHT_LAT}
+      - AREA_BOTTOM_RIGHT_LON=${INTEGRATION_MODULE_AREA_BOTTOM_RIGHT_LON}
+      - VEHICLE_KEEPALIVE_TIMEOUT=${INTEGRATION_MODULE_VEHICLE_KEEPALIVE_TIMEOUT}
+      - PROCESSOR_KEEPALIVE_TIMEOUT=${INTEGRATION_MODULE_PROCESSOR_KEEPALIVE_TIMEOUT}
+      - NOTIFICATIONS_DURATION=${INTEGRATION_MODULE_NOTIFICATIONS_DURATION}
+      - VEHICLES_LOG_FILEPATH=${INTEGRATION_MODULE_VEHICLES_LOG_FILEPATH}
+    volumes:
+      - ./Volumes/IntegrationModule:/volume
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "300m"
+
+  visualization_processor:
+    image: stefanschindler/traffic-dt-visualization-processor
+    ports:
+      - "${VISUALIZATION_PROCESSOR_HOST_PORT}:${VISUALIZATION_PROCESSOR_CONTAINER_PORT}"
+    environment:
+      - PORT=${VISUALIZATION_PROCESSOR_CONTAINER_PORT}
+      - INTEGRATION_MODULE_HOST=integration_module
+      - INTEGRATION_MODULE_PORT=${INTEGRATION_MODULE_PROCESSORS_CONTAINER_PORT}
+      - KEEPALIVE_INTERVAL=${VISUALIZATION_PROCESSOR_KEEPALIVE_INTERVAL}
+      - SUBSCRIPTION_INTERVAL=${VISUALIZATION_PROCESSOR_SUBSCRIPTION_INTERVAL}
+      - SUBSCRIPTION_CHECK_INTERVAL=${VISUALIZATION_PROCESSOR_SUBSCRIPTION_CHECK_INTERVAL}
+    depends_on:
+      - integration_module
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "300m"
+
+  vehicle_simulator:
+    image: stefanschindler/traffic-dt-vehicle-simulator
+    depends_on:
+      - integration_module
+    restart: ${VEHICLE_SIMULATOR_RESTART}
+    environment:
+      - INTEGRATION_MODULE_HOST=integration_module
+      - INTEGRATION_MODULE_PORT=${INTEGRATION_MODULE_VEHICLES_CONTAINER_PORT}
+      - VEHICLE_DUMP_FILEPATH=${VEHICLE_SIMULATOR_DUMP_FILEPATH}    
+      - VEHICLE_DUMP_START_TIME_OFFSET=${VEHICLE_SIMULATOR_VEHICLE_DUMP_START_TIME_OFFSET}
+    volumes:
+      - ./Volumes/VehicleSimulator:/volume
+    profiles:
+      - vehicle-simulator
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "300m"
+
+  processor_simulator:
+    image: stefanschindler/traffic-dt-processor-simulator
+    depends_on:
+      - integration_module
+    environment:
+      - INTEGRATION_MODULE_HOST=integration_module
+      - INTEGRATION_MODULE_PORT=${INTEGRATION_MODULE_PROCESSORS_CONTAINER_PORT}
+      - KEEPALIVE_INTERVAL=${PROCESSOR_SIMULATOR_KEEPALIVE_INTERVAL}
+      - SUBSCRIPTION_INTERVAL=${PROCESSOR_SIMULATOR_SUBSCRIPTION_INTERVAL}
+      - SUBSCRIPTION_CHECK_INTERVAL=${PROCESSOR_SIMULATOR_SUBSCRIPTION_CHECK_INTERVAL}
+    profiles:
+      - processor-simulator
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "300m"
+
+  dashboard:
+    image: stefanschindler/traffic-dt-dashboard
+    ports:
+      - "${DASHBOARD_HOST_PORT}:${DASHBOARD_CONTAINER_PORT}"
+    environment:
+      - PORT=${DASHBOARD_CONTAINER_PORT}
+      - REACT_APP_API_REST_BASE_URL=${DASHBOARD_API_REST_BASE_URL}
+      - REACT_APP_API_WEBSOCKET_BASE_URL=${DASHBOARD_API_WEBSOCKET_BASE_URL}
+    depends_on:
+      - visualization_processor
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "300m"
+
+  head_collisions:
+    # you can also use the latest build from dockerhub - ivanjatz/traffic-dt-head-collision-handler
+    # use DIGIMAP_URL only when digimap on http://ail-lab.fiit.stuba.sk:8000 is operational, else use local docker or local dump
+    # image: ivanjatz/traffic-dt-head-collision-handler
+    build:  
+      context: ../.
+      dockerfile: CollisionDetector/Dockerfile
+    environment:
+      - DATASERVER_HOST=integration_module
+      - DATASERVER_PORT=${INTEGRATION_MODULE_PROCESSORS_HOST_PORT}
+      - DIGIMAP_HOST=${DIGIMAP_HOST}
+      - DIGIMAP_PORT=${DIGIMAP_PORT}
+      # - DIGIMAP_URL=${HEAD_COLLISION_DIGIMAP_URL}
+      - LINE_SIMPLIFICATION_TOLERANCE=${HEAD_COLLISIONS_LINE_SIMPLIFICATION_TOLERANCE}
+      - CURVATURE_TRESHOLD=${HEAD_COLLISIONS_CURVATURE_TRESHOLD}
+      - CAR_DISTANCE_SKIP_TRESHOLD=${HEAD_COLLISIONS_CAR_DISTANCE_SKIP_TRESHOLD}
+      - ROAD_STATE_FETCHER=${HEAD_COLLISIONS_ROAD_STATE_FETCHER}
+      - OPEN_WEATHER_API_KEY=${HEAD_COLLISIONS_OPEN_WEATHER_API_KEY}
+      - MAX_PARALLELISM=${HEAD_COLLISIONS_MAX_PARALLELISM}
+      - INTEGRATION_MODULE_INTERVAL=${HEAD_COLLISIONS_INTEGRATION_MODULE_INTERVAL}
+      - MAP_DATA_ORIGIN=${HEAD_COLLISION_MAP_DATA_ORIGIN}
+      - LOCAL_DATA_PATH=${HEAD_COLLISIONS_LOCAL_DATA_PATH}
+    volumes:
+      - ./Volumes/HeadCollisionModule:/volume
+    depends_on:
+      - integration_module
+    logging:
+        driver: "json-file"
+        options:
+          max-size: "300m"
+  
+  chain_collisions:
+    image: jozefjur/traffic-dt-chain-collision-detection
+    environment:
+      - DIGIMAP_HOST=${DIGIMAP_HOST}
+      - DIGIMAP_PORT=${DIGIMAP_PORT}
+    depends_on:
+      - integration_module
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "300m"

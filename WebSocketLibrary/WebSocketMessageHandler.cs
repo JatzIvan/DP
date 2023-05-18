@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoreLibrary;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -14,7 +15,6 @@ namespace WebSocketLibrary
         private string Name;
         private IMessageHandler<T> CollisionDetector;
 
-        // TODO: add calculation templates
         public WebSocketMessageHandler(string name, IMessageHandler<T> collisionDetector)
         {
             if (String.IsNullOrEmpty(name))
@@ -31,7 +31,7 @@ namespace WebSocketLibrary
          */
         public virtual void OnCompleted()
         {
-            throw new NotImplementedException();
+            Logger.GetLogger().WriteLine("Observer stopped calculating");
         }
 
         /**
@@ -39,7 +39,7 @@ namespace WebSocketLibrary
          */
         public virtual void OnError(Exception error)
         {
-            Console.WriteLine("Error occured during data handling");
+            Logger.GetLogger().WriteLine("Error occured during data handling");
         }
 
         public virtual void OnNext(T value)

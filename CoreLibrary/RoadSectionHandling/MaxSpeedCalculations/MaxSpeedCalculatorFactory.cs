@@ -37,7 +37,7 @@ namespace CoreLibrary.RoadSectionHandling.MaxSpeedCalculators
         {
             if (INSTANCE != null)
             {
-                Console.WriteLine("Warning: Rewriting existing Factory instance " + INSTANCE.GetType() + " with " + newInstance.GetType());
+                Logger.GetLogger().WriteLine("Warning: Rewriting existing Factory instance " + INSTANCE.GetType() + " with " + newInstance.GetType());
             }
             INSTANCE = newInstance;
         }
@@ -51,7 +51,7 @@ namespace CoreLibrary.RoadSectionHandling.MaxSpeedCalculators
 
         public override (Type, Func<object>) GetDefaultInstance()
         {
-            return (typeof(SimpleSpeedCalculatorBasedOnCurvature), CreateCreator(typeof(SimpleSpeedCalculatorBasedOnCurvature)));
+            return (typeof(SimpleMaxSpeedCalcBasedOnFriction), CreateCreator(typeof(SimpleMaxSpeedCalcBasedOnFriction)));
         }
     }
 }

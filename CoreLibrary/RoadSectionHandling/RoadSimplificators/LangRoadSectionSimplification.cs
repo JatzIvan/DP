@@ -93,8 +93,8 @@ namespace CoreLibrary.RoadSectionHandling.RoadSimplificators
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                Console.WriteLine("Missing or invalid config value for region size, defaulting 4");
+                //Logger.GetLogger().WriteLine(e);
+                Logger.GetLogger().WriteLine("Missing or invalid config value for region size, defaulting 4");
                 regionSize = 4;
             }
             return new LangConfig(ApplicationConfigurationHandler.DPTolerance, regionSize);

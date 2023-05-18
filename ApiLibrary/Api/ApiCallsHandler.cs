@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Api;
+using CoreLibrary;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,10 @@ namespace ApiLibrary.Api
 
         private HttpClient currentClient = ApiHelper.ApiClient;
 
+        /**
+         * Method makes POST request with <typeparam name="TIn"> Body </typeparam> and maps the result to specified object <typeparam name="T">Template</typeparam>
+         */
+
         public async Task<TOut> PostAsync<TIn, TOut>(string endpoint, TIn body)
         {
             try
@@ -45,10 +50,15 @@ namespace ApiLibrary.Api
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Logger.GetLogger().WriteLine(ex.ToString());
             }
             return default;
         }
+
+        /**
+         * Method makes GET request and maps the result to specified object <typeparam name="T">Template</typeparam>
+         * Wait for fetch to complete
+         */
 
         public T Get<T>(string endpoint)
         {
@@ -59,10 +69,14 @@ namespace ApiLibrary.Api
                 return task.Result;
             }catch(Exception e)
             {
-                Console.WriteLine("Exception Occured during fetch", e);
+                Logger.GetLogger().WriteLine("Exception Occured during fetch : " + e.ToString());
             }
             return default;
         }
+
+        /**
+         * Method makes GET request and maps the result to specified object <typeparam name="T">Template</typeparam>
+         */
 
         public async Task<T> GetAsync<T>(string endpoint)
         {
@@ -71,7 +85,7 @@ namespace ApiLibrary.Api
                 //using (var client = currentClient)
                 //{
 
-                    Console.WriteLine(currentClient.BaseAddress + endpoint);
+                Logger.GetLogger().WriteLine(currentClient.BaseAddress + endpoint);
 
                     using (HttpResponseMessage response = await currentClient.GetAsync(endpoint))
                     {
@@ -84,7 +98,7 @@ namespace ApiLibrary.Api
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Logger.GetLogger().WriteLine(ex.ToString());
             }
 
             return default;

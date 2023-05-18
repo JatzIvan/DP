@@ -16,6 +16,7 @@ using WebSocketLibrary.Models;
 using WebSocketLibrary;
 using System.Runtime.InteropServices;
 using System.Collections;
+using NetTopologySuite.Index.KdTree;
 
 namespace TestingLibrary
 {
@@ -95,26 +96,30 @@ namespace TestingLibrary
         public void ProcessDump() 
         {
 
-            foreach(Timestep step in SumoExport.Timestemps)
-            { 
-                Console.WriteLine("--------------------");
-            //Console.WriteLine("Processing step " + step.Time);
-            VehicleObserverWrapper data = new VehicleObserverWrapper(TransformData(step.Vehicles), 0);
+            for(int i=0; i<5; i++)
+            {
+                foreach(Timestep step in SumoExport.Timestemps)
+                { 
+                    Logger.GetLogger().WriteLine("--------------------");
+                //Logger.GetLogger().WriteLine("Processing step " + step.Time);
+                VehicleObserverWrapper data = new VehicleObserverWrapper(TransformData(step.Vehicles), 0);
 
-                Stopwatch sw = Stopwatch.StartNew();
+                    Stopwatch sw = Stopwatch.StartNew();
 
-                handler.PerformActions(data);
+                    handler.PerformActions(data);
 
-                double time = sw.Elapsed.TotalMilliseconds;
+                    double time = sw.Elapsed.TotalMilliseconds;
 
-                Console.WriteLine("Processed " + data.Data.Vehicles.Count + " in " + time);
-                Console.WriteLine("--------------------");
-                if (!TimeToCalculateBasedOnNumberOfVehicles.ContainsKey(step.Vehicles.Count))
-                {
-                    TimeToCalculateBasedOnNumberOfVehicles.Add(step.Vehicles.Count, new List<double>());
+                    Logger.GetLogger().WriteLine("Processed " + data.Data.Vehicles.Count + " in " + time);
+                    Logger.GetLogger().WriteLine("--------------------");
+                    if (!TimeToCalculateBasedOnNumberOfVehicles.ContainsKey(step.Vehicles.Count))
+                    {
+                        TimeToCalculateBasedOnNumberOfVehicles.Add(step.Vehicles.Count, new List<double>());
+                    }
+                    TimeToCalculateBasedOnNumberOfVehicles[step.Vehicles.Count].Add(time);
                 }
-                TimeToCalculateBasedOnNumberOfVehicles[step.Vehicles.Count].Add(time);
             }
+
 
             String csv = String.Join(
             Environment.NewLine,
@@ -133,7 +138,7 @@ namespace TestingLibrary
 
             public CustomCollisionDataHandler(RoadDataHandler roadHandler) : base(roadHandler.GetParsedRoadData())
             {
-                roadHandler.GatherCurvaturesBetweenVehicles();
+               // roadHandler.GatherCurvaturesBetweenVehicles();
                 this.dataStorage = roadHandler;
             }
 
@@ -159,14 +164,22 @@ namespace TestingLibrary
                 if (vehicles.Count >= 2)
                 {
                     Stopwatch sw = Stopwatch.StartNew();
-                    IEnumerable<IEnumerable<VehicleData>> pairsToCalc = CreateVehiclePairs(vehicles);
-                    Console.WriteLine("Created all pairs in " + sw.ElapsedMilliseconds);
+
+                    List<Tuple<VehicleData, AbstractRoadModel>> mappedVehicles = vehicles
+                    .Select(veh => (veh, MapParserUtils.ConvertGPStoCartsian(new LocationPoint(veh.Position.Lon, veh.Position.Lat))))
+                    .Select(convertedVehicle => new Tuple<VehicleData, AbstractRoadModel>(
+                        convertedVehicle.veh, currectRoadModel.NearestNeighbor(new NetTopologySuite.Geometries.CoordinateZ(convertedVehicle.Item2.Item1, convertedVehicle.Item2.Item2, convertedVehicle.Item2.Item3)).Data
+                    )).ToList();
+
+                    IEnumerable<IEnumerable<Tuple<VehicleData, AbstractRoadModel>>> pairsToCalc = CreateVehiclePairs(mappedVehicles);
+
+                    Logger.GetLogger().WriteLine("Created all pairs in " + sw.ElapsedMilliseconds);
                     // Try threading or something, right now I need to ensure that this concept can work
-                   // foreach(var pair in pairsToCalc)
+                    //foreach(var pair in pairsToCalc)
                     Parallel.ForEach(pairsToCalc, new ParallelOptions
                     {
-                        MaxDegreeOfParallelism = 6
-                    } ,pair =>
+                        MaxDegreeOfParallelism = 8
+                    }, pair =>
                     {
                         ICollisionCalculatorImplementation calcMethod = ResolveCollisionCalculatorBasedOnCurvature(pair.ElementAt(0), pair.ElementAt(1));
                         if (calcMethod != null)
@@ -174,8 +187,16 @@ namespace TestingLibrary
 
                             AbstractRoadModel collisionPoint = calcMethod.PerformCollisionCalculations(pair.ElementAt(0), pair.ElementAt(1), currectRoadModel);
 
+                            if (calcMethod.CollisionOccured())
+                            {
+
+                                NotifyMessage msgVeh1 = calcMethod.CreateNotificationMessage(pair.ElementAt(0).Item1, pair.ElementAt(1).Item1, collisionPoint, dataStorage.SectionRef);
+                                NotifyMessage msgVeh2 = calcMethod.CreateNotificationMessage(pair.ElementAt(1).Item1, pair.ElementAt(0).Item1, collisionPoint, dataStorage.SectionRef);
+
+                            }
                         }
-                    });
+                    }
+                   );
                 }
             }
         }

@@ -21,8 +21,6 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
         public double GetFriction()
         {
 
-            //if(Temperature < 0 && Humidity > )
-
             // Development of an approach to determination of coupling qualities of road covering using weather-climate factor
             if (Temperature <= -10) 
             {
@@ -49,22 +47,6 @@ namespace CoreLibrary.RoadSectionHandling.RoadParameters
             {
                 return 0.7;
             }
-
-            /*return 0.5;*/
-
-/*            switch (Type)
-            {
-                case RoadType.Asphalt:
-                    return 0.75;
-                case RoadType.Gravel:
-                    return 0.65;
-                case RoadType.Unsurfaced:
-                    return 0.55;
-                default:
-                    return 0.75;
-            }*/
-
-
 
         }
 
