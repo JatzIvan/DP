@@ -11,7 +11,7 @@ Autori konfigurácie: Ivan Jatz, Jozef Juraško, Štefan Schindler
 
 ## Docker Images
 ### Head Collisions Detection 
-[traffic-dt-head-collision-handler](https://hub.docker.com/r/ivanjatz/trafic-dt-head-collision-handler)
+[traffic-dt-head-collision-handler](https://hub.docker.com/r/ivanjatz/traffic-dt-head-collision-handler)
 
 ### Chain Collisions Detection 
 [traffic-dt-chain-collision-detection](https://hub.docker.com/r/jozefjur/traffic-dt-chain-collision-detection)
