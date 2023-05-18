@@ -1,13 +1,13 @@
 # Traffic DT - Nasadenie
 
-Adresár obsahuje jemne upravenú konfiguráciu vytvorenú skupinou AIL.
+Adresár obsahuje jemne upravenú konfiguráciu vytvorenú pre Digitálne dvojča cestnej dopravy.
 Originálna konfigurácia je dostupná na spoločnom github repozitári: https://github.com/TrafficDT/traffic-dt-deployment
 
 Autori konfigurácie: Ivan Jatz, Jozef Juraško, Štefan Schindler
 
 ## Kroky na spustenie
 1. Vytvoriť a upraviť .env konfiguráciu. Podkladom je súbor .env.example
-2. Spustiť aplikáciu pomocou príkazu `docker compose up`
+2. Spustiť aplikáciu pomocou príkazu `docker compose --profile vehicle-simulator up -d`
 
 ## Docker Images
 ### Head Collisions Detection 

@@ -97,7 +97,6 @@ services:
 
   head_collisions:
     # you can also use the latest build from dockerhub - ivanjatz/traffic-dt-head-collision-handler
-    # use DIGIMAP_URL only when digimap on http://ail-lab.fiit.stuba.sk:8000 is operational, else use local docker or local dump
     # image: ivanjatz/traffic-dt-head-collision-handler
     build:  
       context: ../.
@@ -107,7 +106,7 @@ services:
       - DATASERVER_PORT=${INTEGRATION_MODULE_PROCESSORS_HOST_PORT}
       - DIGIMAP_HOST=${DIGIMAP_HOST}
       - DIGIMAP_PORT=${DIGIMAP_PORT}
-      # - DIGIMAP_URL=${HEAD_COLLISION_DIGIMAP_URL}
+      - DIGIMAP_URL=${HEAD_COLLISION_DIGIMAP_URL}
       - LINE_SIMPLIFICATION_TOLERANCE=${HEAD_COLLISIONS_LINE_SIMPLIFICATION_TOLERANCE}
       - CURVATURE_TRESHOLD=${HEAD_COLLISIONS_CURVATURE_TRESHOLD}
       - CAR_DISTANCE_SKIP_TRESHOLD=${HEAD_COLLISIONS_CAR_DISTANCE_SKIP_TRESHOLD}

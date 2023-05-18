@@ -120,10 +120,15 @@ namespace CoreLibrary
 
         private static string CreateDigiMapUrl()
         {
-            string mapAddr = LoadVariable("DIGIMAP_URL") ?? ("http://" +
-                (Uri.CheckHostName(DigiMapHost).Equals(UriHostNameType.Dns) ?
-                Dns.GetHostEntry(DigiMapHost).AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork) :
-                IPAddress.Parse(DigiMapHost))
+            /*string mapAddr = LoadVariable("DIGIMAP_URL");*/
+
+            /*            string mapAddr = LoadVariable("DIGIMAP_URL") ?? ("http://" +
+                            (Uri.CheckHostName(DigiMapHost).Equals(UriHostNameType.Dns) ?
+                            Dns.GetHostEntry(DigiMapHost).AddressList.FirstOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork) :
+                            IPAddress.Parse(DigiMapHost))
+                            + ":" + DigiMapPort);*/
+
+            string mapAddr = LoadVariable("DIGIMAP_URL") ?? ("http://" + DigiMapHost
                 + ":" + DigiMapPort);
 
             Logger.GetLogger().WriteLine(mapAddr);
