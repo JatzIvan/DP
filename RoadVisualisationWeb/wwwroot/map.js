@@ -79,6 +79,10 @@ export function zoom(lon, lat) {
     window.overlay.clearLayers();
 }
 
+export function clear_layers() {
+    window.overlay.clearLayers();
+}
+
 export function addLine(lon1, lat1, lon2, lat2, curve, tolerance) {
 
 

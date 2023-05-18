@@ -172,10 +172,10 @@
         {
             RoadDataFetcher.GetInstance().RawFetchedData = outp;
 
-            /*if (module != null)
+            if (module != null)
             {
-                await module.InvokeAsync<string>("zoom", outp[0].Way.Points[0].Longitude, outp[0].Way.Points[0].Latitude);
-            }*/
+                await module.InvokeAsync<string>("clear_layers");
+            }
 
             Dictionary<string, List<RoadPointModel>> groupedByRef = RoadDataFetcher.GetInstance().GetRoadFromAPIGroupedByAttr();
 
